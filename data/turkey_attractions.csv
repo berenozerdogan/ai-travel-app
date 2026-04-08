@@ -1,0 +1,41 @@
+id,name,city,district,category,subcategory,latitude,longitude,rating,price_level,description,tags,image,estimated_visit_time
+"1,Hagia Sophia,Istanbul,Fatih,attraction,historical,41.0086,28.9802,4.8,unknown,Historic mosque and former cathedral,""history|architecture|iconic"",,90"
+"2,Topkapi Palace,Istanbul,Fatih,attraction,museum,41.0115,28.9833,4.7,unknown,Ottoman imperial palace,""history|ottoman|museum"",,120"
+"3,Galata Tower,Istanbul,Beyoglu,attraction,landmark,41.0256,28.9744,4.7,unknown,Famous panoramic tower,""view|landmark|city view"",,45"
+"4,Dolmabahce Palace,Istanbul,Besiktas,attraction,historical,41.0392,29.0007,4.8,unknown,Ottoman palace on Bosphorus,""palace|ottoman|bosphorus"",,90"
+"5,Cappadocia,Nevsehir,Goreme,attraction,nature,38.6431,34.8273,4.9,unknown,Unique fairy chimneys and valleys,""nature|landscape|balloons"",,180"
+"6,Goreme Open Air Museum,Nevsehir,Goreme,attraction,museum,38.6417,34.8453,4.8,unknown,Historic cave churches,""history|church|museum"",,90"
+"7,Pamukkale Travertines,Denizli,Pamukkale,attraction,nature,37.9200,29.1217,4.7,unknown,White travertine terraces,""nature|thermal|landscape"",,60"
+"8,Hierapolis,Denizli,Pamukkale,attraction,historical,37.9250,29.1270,4.7,unknown,Ancient Roman city,""roman|history|ruins"",,90"
+"9,Ephesus,Aydin,Selcuk,attraction,historical,37.9390,27.3410,4.8,unknown,Ancient Greek city,""history|ancient|ruins"",,120"
+"10,Library of Celsus,Aydin,Selcuk,attraction,landmark,37.9397,27.3413,4.8,unknown,Ancient Roman library,""history|roman|architecture"",,45"
+"11,Kaleici,Antalya,Muratpasa,attraction,historical,36.8841,30.7056,4.7,unknown,Old town of Antalya,""old town|history|tourism"",,90"
+"12,Duden Waterfalls,Antalya,Muratpasa,attraction,nature,36.8769,30.7075,4.6,unknown,Famous waterfall in Antalya,""nature|waterfall|park"",,60"
+"13,Uludag,Bursa,Uludag,attraction,nature,40.1010,29.1900,4.7,unknown,Popular mountain and ski resort,""nature|ski|mountain"",,180"
+"14,Sumela Monastery,Trabzon,Macka,attraction,historical,40.6900,39.6580,4.7,unknown,Cliffside monastery,""history|monastery|architecture"",,90"
+"15,Uzungol,Trabzon,Caykara,attraction,nature,40.6180,40.3000,4.6,unknown,Beautiful lake and village,""nature|lake|mountain"",,90"
+"16,Mount Nemrut,Sanliurfa,Nemrut,attraction,landmark,37.9800,38.7400,4.8,unknown,Famous giant statues,""history|monument|unesco"",,120"
+"17,Gaziantep Castle,Gaziantep,Sehitkamil,attraction,historical,37.0662,37.3833,4.6,unknown,Historic castle in Gaziantep,""castle|history|landmark"",,60"
+"18,Mardin Old City,Mardin,Artuklu,attraction,historical,37.3123,40.7420,4.7,unknown,Historic stone architecture,""history|architecture|city"",,120"
+"19,Mevlana Museum,Konya,Selcuklu,attraction,museum,37.8716,32.5047,4.8,unknown,Famous Mevlana museum,""culture|museum|history"",,60"
+"20,Anitkabir,Ankara,Cankaya,attraction,landmark,39.9250,32.8369,4.9,unknown,Mausoleum of Ataturk,""history|monument|turkey"",,60"
+21,Basilica Cistern,Istanbul,Fatih,attraction,historical,41.0084,28.9779,4.7,unknown,Ancient underground cistern,history|architecture|underground,,60
+22,Grand Bazaar,Istanbul,Fatih,attraction,landmark,41.0106,28.9680,4.6,unknown,Historic covered bazaar,shopping|history|market,,90
+23,Blue Mosque,Istanbul,Fatih,attraction,historical,41.0054,28.9768,4.8,unknown,Iconic Ottoman mosque,history|architecture|mosque,,60
+24,Pierre Loti Hill,Istanbul,Eyup,attraction,viewpoint,41.0539,28.9338,4.6,unknown,Famous viewpoint over Golden Horn,view|city|landmark,,45
+25,Maiden Tower,Istanbul,Uskudar,attraction,landmark,41.0211,29.0041,4.6,unknown,Historic tower on islet,bosphorus|history|landmark,,45
+26,Uchisar Castle,Nevsehir,Uchisar,attraction,landmark,38.6307,34.8055,4.7,unknown,Rock castle with panoramic views,view|cappadocia|landmark,,60
+27,Pasabag Valley,Nevsehir,Avanos,attraction,nature,38.6740,34.8534,4.8,unknown,Famous fairy chimneys valley,nature|cappadocia|landscape,,90
+28,Love Valley,Nevsehir,Goreme,attraction,nature,38.6605,34.8307,4.7,unknown,Scenic valley in Cappadocia,nature|view|cappadocia,,90
+29,Konyaalti Beach,Antalya,Konyaalti,attraction,beach,36.8590,30.6360,4.7,unknown,Popular beach in Antalya,beach|sea|nature,,120
+30,Aspendos Theatre,Antalya,Serik,attraction,historical,36.9389,31.1713,4.8,unknown,Ancient Roman theatre,history|roman|theatre,,90
+31,Apollon Temple,Antalya,Side,attraction,historical,36.7665,31.3884,4.7,unknown,Ancient temple by the sea,history|temple|sea,,60
+32,Mount Uludag Ski Center,Bursa,Uludag,attraction,nature,40.1016,29.1286,4.7,unknown,Famous winter tourism center,ski|mountain|nature,,180
+33,Cumalikizik,Bursa,Yildirim,attraction,cultural,40.1824,29.1744,4.6,unknown,Historic Ottoman village,history|village|culture,,90
+34,Ataturk Mansion,Trabzon,Ortahisar,attraction,museum,41.0024,39.6784,4.6,unknown,Historic mansion museum,museum|history|trabzon,,60
+35,Ayder Plateau,Rize,Camlihemsin,attraction,nature,40.9534,41.1047,4.7,unknown,Famous highland in Rize,nature|plateau|rize,,180
+36,Firtina Valley,Rize,Camlihemsin,attraction,nature,41.0205,40.9470,4.7,unknown,Scenic valley in Black Sea region,nature|river|rize,,120
+37,Zeugma Mosaic Museum,Gaziantep,Sehitkamil,attraction,museum,37.0732,37.3687,4.9,unknown,World famous mosaic museum,museum|history|art,,90
+38,Balikli Gol,Sanliurfa,Eyyubiye,attraction,landmark,37.1509,38.7969,4.7,unknown,Sacred pool and heritage site,history|religious|landmark,,60
+39,Gobeklitepe,Sanliurfa,Haliliye,attraction,historical,37.2231,38.9226,4.9,unknown,Ancient archaeological site,history|unesco|archaeology,,120
+40,Deyrulzafaran Monastery,Mardin,Artuklu,attraction,historical,37.3369,40.7812,4.7,unknown,Historic Syriac monastery,history|monastery|mardin,,90

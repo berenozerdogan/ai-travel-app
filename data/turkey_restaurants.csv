@@ -1,0 +1,32 @@
+id,name,city,district,category,subcategory,latitude,longitude,rating,price_level,description,tags,image,estimated_visit_time
+id,name,city,district,category,subcategory,latitude,longitude,rating,price_level,description,tags,image,estimated_visit_time
+1,Ciya Sofrasi,Istanbul,Kadikoy,restaurant,turkish,40.9909,29.0264,4.7,medium,Famous Anatolian cuisine restaurant,food|turkish|anatolian,,90
+2,Pandeli,Istanbul,Fatih,restaurant,ottoman,41.0161,28.9704,4.6,high,Historic restaurant near Spice Bazaar,food|ottoman|historic,,90
+3,Karakoy Lokantasi,Istanbul,Beyoglu,restaurant,turkish,41.0240,28.9775,4.7,high,Popular modern Turkish restaurant,food|restaurant|modern,,90
+4,Nusr-Et,Istanbul,Besiktas,restaurant,steakhouse,41.0435,29.0082,4.5,high,Famous steakhouse restaurant,food|steak|luxury,,90
+5,Hatay Medeniyetler Sofrasi,Istanbul,Sisli,restaurant,hatay,41.0515,28.9872,4.6,medium,Traditional Hatay cuisine,food|hatay|local,,90
+6,Hamdi Restaurant,Istanbul,Fatih,restaurant,kebab,41.0163,28.9709,4.6,high,Famous kebab restaurant with city views,food|kebab|view,,90
+7,Cappadocian Cuisine,Nevsehir,Goreme,restaurant,turkish,38.6438,34.8285,4.5,medium,Traditional Cappadocian food,food|local|cappadocia,,90
+8,Seten Restaurant,Nevsehir,Goreme,restaurant,turkish,38.6428,34.8278,4.6,high,Well known restaurant in Cappadocia,food|local|restaurant,,90
+9,7 Mehmet,Antalya,Muratpasa,restaurant,turkish,36.8845,30.6903,4.7,high,Iconic Antalya restaurant,food|antalya|fine dining,,90
+10,Seraser Fine Dining,Antalya,Muratpasa,restaurant,fine_dining,36.8852,30.7051,4.7,high,Upscale restaurant in Kaleici,food|fine dining|antalya,,90
+11,Kebapci Halil Usta,Gaziantep,Sehitkamil,restaurant,kebab,37.0668,37.3839,4.8,medium,Famous kebab restaurant in Gaziantep,food|gaziantep|kebab,,90
+12,Imam Cagdas,Gaziantep,Sehitkamil,restaurant,dessert,37.0666,37.3825,4.8,medium,Legendary baklava and kebab place,food|baklava|gaziantep,,90
+13,Konyali Lokantasi,Ankara,Cankaya,restaurant,turkish,39.9208,32.8541,4.5,medium,Traditional Turkish restaurant in Ankara,food|turkish|ankara,,90
+14,Zigana Pide,Trabzon,Ortahisar,restaurant,pide,41.0027,39.7168,4.6,medium,Famous Black Sea style pide,food|trabzon|pide,,90
+15,Kofteci Yusuf,Bursa,Nilufer,restaurant,kofte,40.2210,28.9860,4.4,medium,Popular kofte restaurant,food|bursa|kofte,,90
+16,Mikla,Istanbul,Beyoglu,restaurant,fine_dining,41.0319,28.9749,4.7,expensive,Famous rooftop fine dining,food|fine dining|view,,90
+17,Zubeyir Ocakbasi,Istanbul,Beyoglu,restaurant,kebab,41.0365,28.9851,4.7,high,Popular ocakbasi restaurant,food|kebab|istanbul,,90
+18,Balikci Sabahattin,Istanbul,Fatih,restaurant,seafood,41.0069,28.9780,4.7,high,Famous seafood restaurant,food|seafood|historic,,90
+19,Old Cappadocia Cafe,Nevsehir,Goreme,restaurant,cafe,38.6434,34.8279,4.5,medium,Cozy cafe in Goreme,coffee|cafe|cappadocia,,60
+20,Dibek Restaurant,Nevsehir,Goreme,restaurant,turkish,38.6427,34.8283,4.6,medium,Traditional pottery kebab place,food|local|turkish,,90
+21,Vanilla Lounge,Antalya,Muratpasa,restaurant,fine_dining,36.8848,30.7050,4.6,high,Stylish restaurant in Kaleici,food|antalya|modern,,90
+22,Pio Gastro Bar,Bursa,Nilufer,restaurant,cafe,40.2240,28.9910,4.5,medium,Popular cafe and dining spot,cafe|bursa|modern,,60
+23,Cemil Usta Akcaabat Kofte,Trabzon,Ortahisar,restaurant,kofte,41.0054,39.7192,4.7,medium,Famous Akcaabat kofte,food|trabzon|kofte,,90
+24,Liman Lokantasi,Rize,Merkez,restaurant,seafood,41.0256,40.5173,4.5,medium,Black Sea seafood restaurant,food|seafood|rize,,90
+25,Bayazhan Restaurant,Gaziantep,Sahinbey,restaurant,kebab,37.0637,37.3785,4.6,medium,Traditional Gaziantep flavors,food|gaziantep|kebab,,90
+26,Cigerci Aziz Usta,Sanliurfa,Haliliye,restaurant,kebab,37.1591,38.7912,4.6,medium,Famous liver kebab,food|urfa|kebab,,90
+27,Cercis Murat Konagi,Mardin,Artuklu,restaurant,turkish,37.3129,40.7398,4.7,high,Famous Mardin cuisine,food|mardin|local,,90
+28,Etli Ekmekci Memet,Konya,Selcuklu,restaurant,turkish,37.8742,32.4931,4.6,medium,Famous Konya etli ekmek,food|konya|local,,90
+29,Asina Restaurant,Aydin,Selcuk,restaurant,turkish,37.9492,27.3683,4.5,medium,Restaurant near Ephesus,food|selcuk|turkish,,90
+30,Kebabci Iskender,Bursa,Osmangazi,restaurant,kebab,40.1885,29.0610,4.8,medium,Original Iskender kebab place,food|bursa|iskender,,90

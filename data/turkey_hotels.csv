@@ -1,0 +1,11 @@
+id,name,city,district,category,subcategory,latitude,longitude,rating,price_level,description,tags,image,estimated_visit_time
+201,Four Seasons Bosphorus,Istanbul,Besiktas,hotel,luxury,41.0436,29.0152,4.9,expensive,Luxury hotel on Bosphorus,hotel|luxury|bosphorus,,0
+202,Pera Palace Hotel,Istanbul,Beyoglu,hotel,historic,41.0328,28.9768,4.8,expensive,Historic hotel from Ottoman era,hotel|historic|luxury,,0
+203,Swissotel Bosphorus,Istanbul,Besiktas,hotel,luxury,41.0415,29.0112,4.7,expensive,Five star Bosphorus hotel,hotel|luxury|view,,0
+204,Argos in Cappadocia,Nevsehir,Uchisar,hotel,cave,38.6314,34.8065,4.9,expensive,Famous cave hotel,hotel|cappadocia|luxury,,0
+205,Kayakapi Premium Caves,Nevsehir,Urgup,hotel,cave,38.6261,34.9123,4.8,expensive,Cave luxury hotel,hotel|cave|luxury,,0
+206,Ciragan Palace Kempinski,Istanbul,Besiktas,hotel,luxury,41.0439,29.0169,4.9,expensive,Iconic luxury Bosphorus hotel,hotel|luxury|bosphorus,,0
+207,The Marmara Taksim,Istanbul,Beyoglu,hotel,city,41.0362,28.9852,4.6,high,Central hotel with city views,hotel|city|istanbul,,0
+208,Sultan Cave Suites,Nevsehir,Goreme,hotel,cave,38.6445,34.8301,4.8,expensive,Famous cave hotel with balloon views,hotel|cave|view,,0
+209,Museum Hotel Cappadocia,Nevsehir,Uchisar,hotel,luxury,38.6318,34.8048,4.9,expensive,Premium luxury cave hotel,hotel|luxury|cappadocia,,0
+210,Akra Hotel,Antalya,Muratpasa,hotel,city,36.8737,30.7317,4.7,high,Popular seafront Antalya hotel,hotel|antalya|sea,,0

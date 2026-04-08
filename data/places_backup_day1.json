@@ -1,0 +1,422 @@
+[
+  {
+    "id": 1,
+    "name": "Hagia Sophia",
+    "city": "Istanbul",
+    "district": "Fatih",
+    "category": "attraction",
+    "subcategory": "historical",
+    "latitude": 41.0086,
+    "longitude": 28.9802,
+    "rating": 4.8,
+    "price_level": "unknown",
+    "description": "Historic mosque and former cathedral",
+    "tags": [
+      "history",
+      "architecture",
+      "iconic"
+    ],
+    "image": "",
+    "estimated_visit_time": 90,
+    "reviews": []
+  },
+  {
+    "id": 2,
+    "name": "Topkapi Palace",
+    "city": "Istanbul",
+    "district": "Fatih",
+    "category": "attraction",
+    "subcategory": "museum",
+    "latitude": 41.0115,
+    "longitude": 28.9833,
+    "rating": 4.7,
+    "price_level": "unknown",
+    "description": "Ottoman imperial palace",
+    "tags": [
+      "history",
+      "ottoman",
+      "museum"
+    ],
+    "image": "",
+    "estimated_visit_time": 120,
+    "reviews": []
+  },
+  {
+    "id": 3,
+    "name": "Galata Tower",
+    "city": "Istanbul",
+    "district": "Beyoglu",
+    "category": "attraction",
+    "subcategory": "landmark",
+    "latitude": 41.0256,
+    "longitude": 28.9744,
+    "rating": 4.7,
+    "price_level": "unknown",
+    "description": "Famous panoramic tower",
+    "tags": [
+      "view",
+      "landmark",
+      "city view"
+    ],
+    "image": "",
+    "estimated_visit_time": 45,
+    "reviews": []
+  },
+  {
+    "id": 4,
+    "name": "Dolmabahce Palace",
+    "city": "Istanbul",
+    "district": "Besiktas",
+    "category": "attraction",
+    "subcategory": "historical",
+    "latitude": 41.0392,
+    "longitude": 29.0007,
+    "rating": 4.8,
+    "price_level": "unknown",
+    "description": "Ottoman palace on Bosphorus",
+    "tags": [
+      "palace",
+      "ottoman",
+      "bosphorus"
+    ],
+    "image": "",
+    "estimated_visit_time": 90,
+    "reviews": []
+  },
+  {
+    "id": 5,
+    "name": "Cappadocia",
+    "city": "Nevsehir",
+    "district": "Goreme",
+    "category": "attraction",
+    "subcategory": "nature",
+    "latitude": 38.6431,
+    "longitude": 34.8273,
+    "rating": 4.9,
+    "price_level": "unknown",
+    "description": "Unique fairy chimneys and valleys",
+    "tags": [
+      "nature",
+      "landscape",
+      "balloons"
+    ],
+    "image": "",
+    "estimated_visit_time": 180,
+    "reviews": []
+  },
+  {
+    "id": 6,
+    "name": "Goreme Open Air Museum",
+    "city": "Nevsehir",
+    "district": "Goreme",
+    "category": "attraction",
+    "subcategory": "museum",
+    "latitude": 38.6417,
+    "longitude": 34.8453,
+    "rating": 4.8,
+    "price_level": "unknown",
+    "description": "Historic cave churches",
+    "tags": [
+      "history",
+      "church",
+      "museum"
+    ],
+    "image": "",
+    "estimated_visit_time": 90,
+    "reviews": []
+  },
+  {
+    "id": 7,
+    "name": "Pamukkale Travertines",
+    "city": "Denizli",
+    "district": "Pamukkale",
+    "category": "attraction",
+    "subcategory": "nature",
+    "latitude": 37.92,
+    "longitude": 29.1217,
+    "rating": 4.7,
+    "price_level": "unknown",
+    "description": "White travertine terraces",
+    "tags": [
+      "nature",
+      "thermal",
+      "landscape"
+    ],
+    "image": "",
+    "estimated_visit_time": 60,
+    "reviews": []
+  },
+  {
+    "id": 8,
+    "name": "Hierapolis",
+    "city": "Denizli",
+    "district": "Pamukkale",
+    "category": "attraction",
+    "subcategory": "historical",
+    "latitude": 37.925,
+    "longitude": 29.127,
+    "rating": 4.7,
+    "price_level": "unknown",
+    "description": "Ancient Roman city",
+    "tags": [
+      "roman",
+      "history",
+      "ruins"
+    ],
+    "image": "",
+    "estimated_visit_time": 90,
+    "reviews": []
+  },
+  {
+    "id": 9,
+    "name": "Ephesus",
+    "city": "Aydin",
+    "district": "Selcuk",
+    "category": "attraction",
+    "subcategory": "historical",
+    "latitude": 37.939,
+    "longitude": 27.341,
+    "rating": 4.8,
+    "price_level": "unknown",
+    "description": "Ancient Greek city",
+    "tags": [
+      "history",
+      "ancient",
+      "ruins"
+    ],
+    "image": "",
+    "estimated_visit_time": 120,
+    "reviews": []
+  },
+  {
+    "id": 10,
+    "name": "Library of Celsus",
+    "city": "Aydin",
+    "district": "Selcuk",
+    "category": "attraction",
+    "subcategory": "landmark",
+    "latitude": 37.9397,
+    "longitude": 27.3413,
+    "rating": 4.8,
+    "price_level": "unknown",
+    "description": "Ancient Roman library",
+    "tags": [
+      "history",
+      "roman",
+      "architecture"
+    ],
+    "image": "",
+    "estimated_visit_time": 45,
+    "reviews": []
+  },
+  {
+    "id": 11,
+    "name": "Kaleici",
+    "city": "Antalya",
+    "district": "Muratpasa",
+    "category": "attraction",
+    "subcategory": "historical",
+    "latitude": 36.8841,
+    "longitude": 30.7056,
+    "rating": 4.7,
+    "price_level": "unknown",
+    "description": "Old town of Antalya",
+    "tags": [
+      "old town",
+      "history",
+      "tourism"
+    ],
+    "image": "",
+    "estimated_visit_time": 90,
+    "reviews": []
+  },
+  {
+    "id": 12,
+    "name": "Duden Waterfalls",
+    "city": "Antalya",
+    "district": "Muratpasa",
+    "category": "attraction",
+    "subcategory": "nature",
+    "latitude": 36.8769,
+    "longitude": 30.7075,
+    "rating": 4.6,
+    "price_level": "unknown",
+    "description": "Famous waterfall in Antalya",
+    "tags": [
+      "nature",
+      "waterfall",
+      "park"
+    ],
+    "image": "",
+    "estimated_visit_time": 60,
+    "reviews": []
+  },
+  {
+    "id": 13,
+    "name": "Uludag",
+    "city": "Bursa",
+    "district": "Uludag",
+    "category": "attraction",
+    "subcategory": "nature",
+    "latitude": 40.101,
+    "longitude": 29.19,
+    "rating": 4.7,
+    "price_level": "unknown",
+    "description": "Popular mountain and ski resort",
+    "tags": [
+      "nature",
+      "ski",
+      "mountain"
+    ],
+    "image": "",
+    "estimated_visit_time": 180,
+    "reviews": []
+  },
+  {
+    "id": 14,
+    "name": "Sumela Monastery",
+    "city": "Trabzon",
+    "district": "Macka",
+    "category": "attraction",
+    "subcategory": "historical",
+    "latitude": 40.69,
+    "longitude": 39.658,
+    "rating": 4.7,
+    "price_level": "unknown",
+    "description": "Cliffside monastery",
+    "tags": [
+      "history",
+      "monastery",
+      "architecture"
+    ],
+    "image": "",
+    "estimated_visit_time": 90,
+    "reviews": []
+  },
+  {
+    "id": 15,
+    "name": "Uzungol",
+    "city": "Trabzon",
+    "district": "Caykara",
+    "category": "attraction",
+    "subcategory": "nature",
+    "latitude": 40.618,
+    "longitude": 40.3,
+    "rating": 4.6,
+    "price_level": "unknown",
+    "description": "Beautiful lake and village",
+    "tags": [
+      "nature",
+      "lake",
+      "mountain"
+    ],
+    "image": "",
+    "estimated_visit_time": 90,
+    "reviews": []
+  },
+  {
+    "id": 16,
+    "name": "Mount Nemrut",
+    "city": "Sanliurfa",
+    "district": "Nemrut",
+    "category": "attraction",
+    "subcategory": "landmark",
+    "latitude": 37.98,
+    "longitude": 38.74,
+    "rating": 4.8,
+    "price_level": "unknown",
+    "description": "Famous giant statues",
+    "tags": [
+      "history",
+      "monument",
+      "unesco"
+    ],
+    "image": "",
+    "estimated_visit_time": 120,
+    "reviews": []
+  },
+  {
+    "id": 17,
+    "name": "Gaziantep Castle",
+    "city": "Gaziantep",
+    "district": "Sehitkamil",
+    "category": "attraction",
+    "subcategory": "historical",
+    "latitude": 37.0662,
+    "longitude": 37.3833,
+    "rating": 4.6,
+    "price_level": "unknown",
+    "description": "Historic castle in Gaziantep",
+    "tags": [
+      "castle",
+      "history",
+      "landmark"
+    ],
+    "image": "",
+    "estimated_visit_time": 60,
+    "reviews": []
+  },
+  {
+    "id": 18,
+    "name": "Mardin Old City",
+    "city": "Mardin",
+    "district": "Artuklu",
+    "category": "attraction",
+    "subcategory": "historical",
+    "latitude": 37.3123,
+    "longitude": 40.742,
+    "rating": 4.7,
+    "price_level": "unknown",
+    "description": "Historic stone architecture",
+    "tags": [
+      "history",
+      "architecture",
+      "city"
+    ],
+    "image": "",
+    "estimated_visit_time": 120,
+    "reviews": []
+  },
+  {
+    "id": 19,
+    "name": "Mevlana Museum",
+    "city": "Konya",
+    "district": "Selcuklu",
+    "category": "attraction",
+    "subcategory": "museum",
+    "latitude": 37.8716,
+    "longitude": 32.5047,
+    "rating": 4.8,
+    "price_level": "unknown",
+    "description": "Famous Mevlana museum",
+    "tags": [
+      "culture",
+      "museum",
+      "history"
+    ],
+    "image": "",
+    "estimated_visit_time": 60,
+    "reviews": []
+  },
+  {
+    "id": 20,
+    "name": "Anitkabir",
+    "city": "Ankara",
+    "district": "Cankaya",
+    "category": "attraction",
+    "subcategory": "landmark",
+    "latitude": 39.925,
+    "longitude": 32.8369,
+    "rating": 4.9,
+    "price_level": "unknown",
+    "description": "Mausoleum of Ataturk",
+    "tags": [
+      "history",
+      "monument",
+      "turkey"
+    ],
+    "image": "",
+    "estimated_visit_time": 60,
+    "reviews": []
+  }
+]
