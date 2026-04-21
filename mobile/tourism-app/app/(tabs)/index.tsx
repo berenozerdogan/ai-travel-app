@@ -14,63 +14,64 @@ import {
   MaterialCommunityIcons,
   FontAwesome5,
 } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLanguage } from "../../context/LanguageContext";
+
+const categories = [
+  {
+    key: "attractions",
+    title: "Attractions",
+    icon: <Ionicons name="business-outline" size={24} color="#159A63" />,
+    filter: "Attractions",
+  },
+  {
+    key: "hotels",
+    title: "Hotels",
+    icon: <Ionicons name="bed-outline" size={24} color="#159A63" />,
+    filter: "Hotels",
+  },
+  {
+    key: "food",
+    title: "Food",
+    icon: <Ionicons name="restaurant-outline" size={24} color="#159A63" />,
+    filter: "Restaurants",
+  },
+  {
+    key: "nature",
+    title: "Nature",
+    icon: <Ionicons name="leaf-outline" size={24} color="#159A63" />,
+    filter: "Attractions",
+  },
+  {
+    key: "events",
+    title: "Events",
+    icon: (
+      <MaterialCommunityIcons name="drama-masks" size={24} color="#159A63" />
+    ),
+    filter: "All",
+  },
+  {
+    key: "beaches",
+    title: "Beaches",
+    icon: <FontAwesome5 name="umbrella-beach" size={20} color="#159A63" />,
+    filter: "Attractions",
+  },
+  {
+    key: "shopping",
+    title: "Shopping",
+    icon: <Ionicons name="cart-outline" size={24} color="#159A63" />,
+    filter: "All",
+  },
+  {
+    key: "cities",
+    title: "Cities",
+    icon: <Ionicons name="location-outline" size={24} color="#159A63" />,
+    filter: "All",
+  },
+];
 
 export default function Home() {
   const { t } = useLanguage();
-
-  const categories = [
-    {
-      title: t("home.attractions"),
-      icon: <Ionicons name="business" size={28} color="white" />,
-      color: "#2A2E6E",
-      filter: "Attractions",
-    },
-    {
-      title: t("home.hotels"),
-      icon: <Ionicons name="bed" size={28} color="white" />,
-      color: "#2166B5",
-      filter: "Hotels",
-    },
-    {
-      title: t("home.food"),
-      icon: <Ionicons name="restaurant" size={28} color="white" />,
-      color: "#C77719",
-      filter: "Restaurants",
-    },
-    {
-      title: t("home.nature"),
-      icon: <Ionicons name="leaf" size={28} color="white" />,
-      color: "#718B19",
-      filter: "Attractions",
-    },
-    {
-      title: t("home.events"),
-      icon: (
-        <MaterialCommunityIcons name="drama-masks" size={28} color="white" />
-      ),
-      color: "#8A1D56",
-      filter: "All",
-    },
-    {
-      title: t("home.beaches"),
-      icon: <FontAwesome5 name="umbrella-beach" size={24} color="white" />,
-      color: "#C79A1D",
-      filter: "Attractions",
-    },
-    {
-      title: t("home.shopping"),
-      icon: <Ionicons name="cart" size={28} color="white" />,
-      color: "#3E94A5",
-      filter: "All",
-    },
-    {
-      title: t("home.cities"),
-      icon: <Ionicons name="location" size={28} color="white" />,
-      color: "#6B57B8",
-      filter: "All",
-    },
-  ];
 
   const [places, setPlaces] = useState<any[]>([]);
   const [query, setQuery] = useState("");
@@ -117,7 +118,7 @@ export default function Home() {
   );
 
   const handleCategoryPress = (item: (typeof categories)[0]) => {
-    if (item.title === t("home.events")) {
+    if (item.key === "events") {
       router.push("/events");
       return;
     }
@@ -132,28 +133,38 @@ export default function Home() {
         style={styles.hero}
         imageStyle={styles.heroImage}
       >
-        <View style={styles.heroOverlay}>
-          <Text style={styles.heroTitle}>{t("home.title")} 🇹🇷</Text>
+        <LinearGradient
+          colors={[
+            "rgba(255,255,255,0.04)",
+            "rgba(255,255,255,0.16)",
+            "rgba(247,250,248,0.88)",
+            "rgba(247,250,248,1)",
+          ]}
+          style={styles.heroOverlay}
+        >
+          
+
+          <Text style={styles.heroTitle}>{t("home.title")}</Text>
           <Text style={styles.heroSubtitle}>{t("home.subtitle")}</Text>
 
           <View style={styles.searchBar}>
-            <Ionicons name="search" size={22} color="#999" />
+            <Ionicons name="search" size={22} color="#7B8B82" />
             <TextInput
               placeholder={t("home.searchPlaceholder")}
-              placeholderTextColor="#999"
+              placeholderTextColor="#7B8B82"
               style={styles.searchInput}
               value={query}
               onChangeText={setQuery}
             />
-            <Ionicons name="mic" size={20} color="#999" />
+            <Ionicons name="mic-outline" size={20} color="#7B8B82" />
           </View>
-        </View>
+        </LinearGradient>
       </ImageBackground>
 
       <View style={styles.content}>
         {query.trim() ? (
           <View style={styles.searchSection}>
-            <Text style={styles.sectionTitle}>{t("home.searchResults")}</Text>
+            <Text style={styles.sectionTitle}>Search Results</Text>
 
             {searchResults.length > 0 ? (
               searchResults.map((item) => (
@@ -169,21 +180,23 @@ export default function Home() {
                 </TouchableOpacity>
               ))
             ) : (
-              <Text style={styles.noResultText}>{t("home.noResults")}</Text>
+              <Text style={styles.noResultText}>No results found.</Text>
             )}
           </View>
         ) : (
           <>
-            <Text style={styles.sectionTitle}>{t("home.categories")}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t("home.categories")}</Text>
+            </View>
 
             <View style={styles.categoryGrid}>
               {categories.map((item, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={[styles.categoryCard, { backgroundColor: item.color }]}
+                  style={styles.categoryCard}
                   onPress={() => handleCategoryPress(item)}
                 >
-                  <View style={styles.categoryIcon}>{item.icon}</View>
+                  <View style={styles.categoryIconWrap}>{item.icon}</View>
                   <Text style={styles.categoryText}>{item.title}</Text>
                 </TouchableOpacity>
               ))}
@@ -210,63 +223,91 @@ export default function Home() {
                     style={styles.featuredImage}
                     imageStyle={styles.featuredImageStyle}
                   >
-                    <View style={styles.featuredOverlay}>
+                    <LinearGradient
+                      colors={[
+                        "rgba(0,0,0,0.06)",
+                        "rgba(0,0,0,0.15)",
+                        "rgba(0,0,0,0.48)",
+                      ]}
+                      style={styles.featuredOverlay}
+                    >
                       <Text style={styles.featuredTitle}>{item.name}</Text>
                       <Text style={styles.featuredSubtitle}>
                         {item.city} • {item.subcategory}
                       </Text>
-                    </View>
+                    </LinearGradient>
                   </ImageBackground>
                 </TouchableOpacity>
               ))}
             </ScrollView>
 
-            <Text style={styles.sectionTitle}>{t("home.topHotels")}</Text>
+            <Text style={styles.sectionTitle}>Top Hotels</Text>
             {featuredHotels.map((hotel, index) => (
               <TouchableOpacity
                 key={index}
                 style={styles.infoCard}
                 onPress={() => router.push(`/place?name=${hotel.name}`)}
               >
-                <Text style={styles.infoCardTitle}>{hotel.name}</Text>
-                <Text style={styles.infoCardText}>
-                  {hotel.city} • {hotel.subcategory} • ⭐ {hotel.rating}
-                </Text>
+                <View style={styles.infoIconBox}>
+                  <Ionicons name="bed-outline" size={20} color="#159A63" />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.infoCardTitle}>{hotel.name}</Text>
+                  <Text style={styles.infoCardText}>
+                    {hotel.city} • {hotel.subcategory} • ⭐ {hotel.rating}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
 
-            <Text style={styles.sectionTitle}>{t("home.topFood")}</Text>
+            <Text style={styles.sectionTitle}>Top Food Picks</Text>
             {featuredRestaurants.map((restaurant, index) => (
               <TouchableOpacity
                 key={index}
                 style={styles.infoCard}
                 onPress={() => router.push(`/place?name=${restaurant.name}`)}
               >
-                <Text style={styles.infoCardTitle}>{restaurant.name}</Text>
-                <Text style={styles.infoCardText}>
-                  {restaurant.city} • {restaurant.subcategory} • ⭐{" "}
-                  {restaurant.rating}
-                </Text>
+                <View style={styles.infoIconBox}>
+                  <Ionicons
+                    name="restaurant-outline"
+                    size={20}
+                    color="#159A63"
+                  />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.infoCardTitle}>{restaurant.name}</Text>
+                  <Text style={styles.infoCardText}>
+                    {restaurant.city} • {restaurant.subcategory} • ⭐{" "}
+                    {restaurant.rating}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
 
-            <Text style={styles.sectionTitle}>{t("home.aiAssistant")}</Text>
+            <Text style={styles.sectionTitle}>AI Travel Assistant</Text>
 
             <TouchableOpacity
               style={styles.aiCard}
               onPress={() => router.push("/(tabs)/chat")}
             >
-              <Text style={styles.aiTitle}>{t("home.aiPlanTitle")}</Text>
-              <Text style={styles.aiText}>{t("home.aiPlanText")}</Text>
-            </TouchableOpacity>
+              <View style={styles.aiIcon}>
+                <Ionicons
+                  name="chatbubble-ellipses-outline"
+                  size={24}
+                  color="#159A63"
+                />
+              </View>
 
-            <TouchableOpacity
-              style={styles.tripPlannerButton}
-              onPress={() => router.push("/trip-planner")}
-            >
-              <Text style={styles.tripPlannerButtonText}>
-                {t("home.aiTripPlanner")}
-              </Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.aiTitle}>Plan your trip with AI</Text>
+                <Text style={styles.aiText}>
+                  Ask for routes, hotels, restaurants and city recommendations.
+                </Text>
+              </View>
+
+              <Ionicons name="arrow-forward" size={20} color="#98A2B3" />
             </TouchableOpacity>
           </>
         )}
@@ -280,17 +321,17 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#070707",
+    backgroundColor: "#F7FAF8",
   },
 
   hero: {
-    height: 470,
+    height: 480,
     justifyContent: "flex-end",
   },
 
   heroImage: {
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
 
   heroOverlay: {
@@ -298,20 +339,37 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     paddingHorizontal: 22,
     paddingBottom: 28,
-    backgroundColor: "rgba(0,0,0,0.30)",
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+  badge: {
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(255,255,255,0.86)",
+    borderWidth: 1,
+    borderColor: "#E3ECE7",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    marginBottom: 16,
+  },
+
+  badgeText: {
+    color: "#159A63",
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0.4,
   },
 
   heroTitle: {
-    color: "white",
+    color: "#111827",
     fontSize: 34,
     fontWeight: "800",
     marginBottom: 8,
   },
 
   heroSubtitle: {
-    color: "#E6E6E6",
+    color: "#5E6B64",
     fontSize: 17,
     marginBottom: 18,
   },
@@ -319,15 +377,22 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(20,20,20,0.75)",
+    backgroundColor: "rgba(255,255,255,0.92)",
     borderRadius: 22,
     paddingHorizontal: 16,
     height: 56,
+    borderWidth: 1,
+    borderColor: "#E4ECE7",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
   },
 
   searchInput: {
     flex: 1,
-    color: "white",
+    color: "#111827",
     marginLeft: 10,
     marginRight: 10,
     fontSize: 16,
@@ -338,8 +403,14 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
 
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
   sectionTitle: {
-    color: "white",
+    color: "#111827",
     fontSize: 22,
     fontWeight: "800",
     marginBottom: 16,
@@ -350,28 +421,28 @@ const styles = StyleSheet.create({
   },
 
   searchCard: {
-    backgroundColor: "#151515",
-    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "#E6ECE8",
   },
 
   searchCardTitle: {
-    color: "white",
+    color: "#111827",
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 6,
   },
 
   searchCardMeta: {
-    color: "#BDBDBD",
+    color: "#667085",
     fontSize: 14,
   },
 
   noResultText: {
-    color: "#999",
+    color: "#8A948F",
     fontSize: 15,
   },
 
@@ -385,37 +456,45 @@ const styles = StyleSheet.create({
   categoryCard: {
     width: "23%",
     aspectRatio: 1,
-    borderRadius: 18,
+    borderRadius: 22,
     padding: 10,
     justifyContent: "space-between",
     marginBottom: 12,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E6ECE8",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1,
   },
 
-  categoryIcon: {
-    marginTop: 4,
+  categoryIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: "#E8F6EE",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-start",
   },
 
   categoryText: {
-    color: "white",
-    fontSize: 14,
+    color: "#111827",
+    fontSize: 13,
     fontWeight: "700",
   },
 
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
   seeAll: {
-    color: "#9BE000",
+    color: "#159A63",
     fontSize: 16,
     fontWeight: "700",
   },
 
   featuredCard: {
-    width: 280,
-    height: 180,
+    width: 290,
+    height: 190,
     marginRight: 14,
     marginBottom: 26,
   },
@@ -426,81 +505,91 @@ const styles = StyleSheet.create({
   },
 
   featuredImageStyle: {
-    borderRadius: 22,
+    borderRadius: 24,
   },
 
   featuredOverlay: {
-    backgroundColor: "rgba(0,0,0,0.30)",
+    flex: 1,
+    justifyContent: "flex-end",
     padding: 16,
-    borderRadius: 22,
+    borderRadius: 24,
   },
 
   featuredTitle: {
-    color: "white",
+    color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "800",
     marginBottom: 6,
   },
 
   featuredSubtitle: {
-    color: "#E9E9E9",
+    color: "#F3F4F6",
     fontSize: 15,
   },
 
   infoCard: {
-    backgroundColor: "#151515",
-    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "#E6ECE8",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  infoIconBox: {
+    width: 46,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: "#E8F6EE",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
   },
 
   infoCardTitle: {
-    color: "white",
+    color: "#111827",
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 6,
   },
 
   infoCardText: {
-    color: "#BDBDBD",
+    color: "#667085",
     fontSize: 14,
   },
 
   aiCard: {
-    backgroundColor: "#121212",
+    backgroundColor: "#FFFFFF",
     borderRadius: 22,
-    padding: 20,
+    padding: 18,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "#E6ECE8",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  aiIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    backgroundColor: "#E8F6EE",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
   },
 
   aiTitle: {
-    color: "white",
+    color: "#111827",
     fontSize: 20,
     fontWeight: "800",
-    marginBottom: 8,
+    marginBottom: 6,
   },
 
   aiText: {
-    color: "#CFCFCF",
+    color: "#667085",
     fontSize: 15,
     lineHeight: 22,
-  },
-
-  tripPlannerButton: {
-    backgroundColor: "#9BE000",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 14,
-    marginTop: 20,
-    alignSelf: "flex-start",
-  },
-
-  tripPlannerButtonText: {
-    fontWeight: "700",
-    fontSize: 16,
-    color: "#111",
   },
 });

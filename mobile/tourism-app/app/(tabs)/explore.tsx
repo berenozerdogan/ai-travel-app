@@ -10,6 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function Explore() {
@@ -28,17 +29,19 @@ export default function Explore() {
   const [citySearch, setCitySearch] = useState("");
 
   useEffect(() => {
+    setSelectedFilter(
+      typeof params.filter === "string" ? params.filter : t("explore.all")
+    );
+    setSelectedCity(t("common.allCities"));
+    setSelectedDistrict(t("common.allDistricts"));
+  }, [t, params.filter]);
+
+  useEffect(() => {
     fetch("http://192.168.1.101:8000/places")
       .then((res) => res.json())
       .then((data) => setPlaces(data))
       .catch((err) => console.log(err));
   }, []);
-
-  useEffect(() => {
-    if (typeof params.filter === "string") {
-      setSelectedFilter(params.filter);
-    }
-  }, [params.filter]);
 
   const cleanCity = (city?: string) => {
     if (!city) return "";
@@ -64,28 +67,24 @@ export default function Explore() {
   };
 
   const cityOptions = useMemo(() => {
-    const allCitiesLabel = t("common.allCities");
     const cities = [...new Set(places.map((p) => cleanCity(p.city)).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b));
 
     if (!citySearch.trim()) {
-      return [allCitiesLabel, ...cities];
+      return [t("common.allCities"), ...cities];
     }
 
     const filtered = cities.filter((city) =>
       city.toLowerCase().includes(citySearch.trim().toLowerCase())
     );
 
-    return [allCitiesLabel, ...filtered];
+    return [t("common.allCities"), ...filtered];
   }, [places, citySearch, t]);
 
   const districtOptions = useMemo(() => {
-    const allCitiesLabel = t("common.allCities");
-    const allDistrictsLabel = t("common.allDistricts");
-
     let filtered = places;
 
-    if (selectedCity !== allCitiesLabel) {
+    if (selectedCity !== t("common.allCities")) {
       filtered = filtered.filter((p) => cleanCity(p.city) === selectedCity);
     }
 
@@ -93,49 +92,29 @@ export default function Explore() {
       ...new Set(filtered.map((p) => cleanDistrict(p.district)).filter(Boolean)),
     ].sort((a, b) => a.localeCompare(b));
 
-    return [allDistrictsLabel, ...districts];
+    return [t("common.allDistricts"), ...districts];
   }, [places, selectedCity, t]);
 
   useEffect(() => {
     setSelectedDistrict(t("common.allDistricts"));
   }, [selectedCity, t]);
 
-  useEffect(() => {
-    if (
-      selectedFilter !== t("explore.all") &&
-      selectedFilter !== t("explore.attractions") &&
-      selectedFilter !== t("explore.restaurants") &&
-      selectedFilter !== t("explore.hotels")
-    ) {
-      setSelectedFilter(t("explore.all"));
-    }
-  }, [t, selectedFilter]);
-
   const filteredPlaces = useMemo(() => {
-    const allLabel = t("explore.all");
-    const attractionsLabel = t("explore.attractions");
-    const restaurantsLabel = t("explore.restaurants");
-    const hotelsLabel = t("explore.hotels");
-    const allCitiesLabel = t("common.allCities");
-    const allDistrictsLabel = t("common.allDistricts");
-
     let filtered = places;
 
-    if (selectedFilter === attractionsLabel) {
+    if (selectedFilter === t("explore.attractions")) {
       filtered = filtered.filter((item) => item.category === "attraction");
-    } else if (selectedFilter === restaurantsLabel) {
+    } else if (selectedFilter === t("explore.restaurants")) {
       filtered = filtered.filter((item) => item.category === "restaurant");
-    } else if (selectedFilter === hotelsLabel) {
+    } else if (selectedFilter === t("explore.hotels")) {
       filtered = filtered.filter((item) => item.category === "hotel");
-    } else if (selectedFilter !== allLabel) {
-      filtered = places;
     }
 
-    if (selectedCity !== allCitiesLabel) {
+    if (selectedCity !== t("common.allCities")) {
       filtered = filtered.filter((item) => cleanCity(item.city) === selectedCity);
     }
 
-    if (selectedDistrict !== allDistrictsLabel) {
+    if (selectedDistrict !== t("common.allDistricts")) {
       filtered = filtered.filter(
         (item) => cleanDistrict(item.district) === selectedDistrict
       );
@@ -169,6 +148,7 @@ export default function Explore() {
         {filterButtons.map((filter) => (
           <TouchableOpacity
             key={filter}
+            activeOpacity={0.8}
             style={[
               styles.filterButton,
               selectedFilter === filter && styles.activeFilterButton,
@@ -188,13 +168,16 @@ export default function Explore() {
       </View>
 
       <Text style={styles.sectionLabel}>{t("explore.city")}</Text>
-      <TextInput
-        style={styles.searchInput}
-        placeholder={t("explore.searchCity")}
-        placeholderTextColor="#777"
-        value={citySearch}
-        onChangeText={setCitySearch}
-      />
+      <View style={styles.searchWrapper}>
+        <Ionicons name="search" size={18} color="#7B8B82" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder={t("explore.searchCity")}
+          placeholderTextColor="#7B8B82"
+          value={citySearch}
+          onChangeText={setCitySearch}
+        />
+      </View>
 
       <ScrollView
         horizontal
@@ -204,6 +187,7 @@ export default function Explore() {
         {cityOptions.slice(0, 12).map((city) => (
           <TouchableOpacity
             key={city}
+            activeOpacity={0.8}
             style={[
               styles.optionButton,
               selectedCity === city && styles.activeOptionButton,
@@ -235,6 +219,7 @@ export default function Explore() {
         {districtOptions.slice(0, 12).map((district) => (
           <TouchableOpacity
             key={district}
+            activeOpacity={0.8}
             style={[
               styles.optionButton,
               selectedDistrict === district && styles.activeOptionButton,
@@ -267,6 +252,7 @@ export default function Explore() {
         contentContainerStyle={{ paddingBottom: 30 }}
         renderItem={({ item }) => (
           <TouchableOpacity
+            activeOpacity={0.88}
             style={styles.card}
             onPress={() => router.push(`/place?name=${item.name}`)}
           >
@@ -282,14 +268,14 @@ export default function Explore() {
               <Text style={styles.name}>{item.name}</Text>
               <Text style={styles.rating}>⭐ {item.rating}</Text>
               <Text style={styles.meta}>
-                {cleanCity(item.city)} • {cleanDistrict(item.district) || "Unknown"} •{" "}
-                {item.subcategory}
+                {cleanCity(item.city)} •{" "}
+                {cleanDistrict(item.district) || "Unknown"} • {item.subcategory}
               </Text>
 
               {item.category === "hotel" && (
                 <View style={styles.hotelBadge}>
                   <Text style={styles.hotelBadgeText}>
-                    💎 {(item.price_level || "unknown").toUpperCase()}
+                    {(item.price_level || "unknown").toUpperCase()}
                   </Text>
                 </View>
               )}
@@ -307,19 +293,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 18,
-    backgroundColor: "#0B0B0B",
+    backgroundColor: "#F7FAF8",
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
+    fontSize: 30,
+    fontWeight: "800",
+    color: "#111827",
     marginTop: 10,
     marginBottom: 18,
   },
 
   sectionLabel: {
-    color: "#9BE000",
+    color: "#159A63",
     fontSize: 14,
     fontWeight: "800",
     marginBottom: 8,
@@ -336,38 +322,45 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 20,
-    backgroundColor: "#1A1A1A",
+    backgroundColor: "#FFFFFF",
     marginRight: 10,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "#2A2A2A",
+    borderColor: "#E6ECE8",
   },
 
   activeFilterButton: {
-    backgroundColor: "#9BE000",
-    borderColor: "#9BE000",
+    backgroundColor: "#159A63",
+    borderColor: "#159A63",
   },
 
   filterText: {
-    color: "#CCCCCC",
+    color: "#374151",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 
   activeFilterText: {
-    color: "#111",
+    color: "#FFFFFF",
+  },
+
+  searchWrapper: {
+    height: 48,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E6ECE8",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
   },
 
   searchInput: {
-    height: 46,
-    backgroundColor: "#171717",
-    borderWidth: 1,
-    borderColor: "#2A2A2A",
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    color: "white",
+    flex: 1,
+    color: "#111827",
     fontSize: 14,
-    marginBottom: 10,
+    marginLeft: 10,
   },
 
   optionRow: {
@@ -380,47 +373,52 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 14,
-    backgroundColor: "#171717",
+    backgroundColor: "#FFFFFF",
     marginRight: 10,
     borderWidth: 1,
-    borderColor: "#2A2A2A",
+    borderColor: "#E6ECE8",
   },
 
   activeOptionButton: {
-    backgroundColor: "#9BE000",
-    borderColor: "#9BE000",
+    backgroundColor: "#E8F6EE",
+    borderColor: "#159A63",
   },
 
   optionText: {
-    color: "white",
+    color: "#111827",
     fontSize: 14,
     fontWeight: "700",
     textAlign: "center",
   },
 
   activeOptionText: {
-    color: "#111",
+    color: "#159A63",
   },
 
   selectedText: {
-    color: "#A8A8A8",
+    color: "#667085",
     fontSize: 13,
     marginBottom: 10,
   },
 
   resultsText: {
-    color: "#A8A8A8",
+    color: "#667085",
     fontSize: 13,
     marginBottom: 14,
   },
 
   card: {
-    backgroundColor: "#181818",
-    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 22,
     marginBottom: 16,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "#E6ECE8",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   image: {
@@ -431,13 +429,13 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: "100%",
     height: 200,
-    backgroundColor: "#2A2A2A",
+    backgroundColor: "#EEF3F0",
     justifyContent: "center",
     alignItems: "center",
   },
 
   placeholderText: {
-    color: "#888",
+    color: "#7B8B82",
     fontSize: 16,
   },
 
@@ -447,26 +445,27 @@ const styles = StyleSheet.create({
 
   name: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
+    fontWeight: "800",
+    color: "#111827",
     marginBottom: 6,
   },
 
   rating: {
     fontSize: 15,
-    color: "#F6C445",
+    color: "#159A63",
     marginBottom: 5,
+    fontWeight: "700",
   },
 
   meta: {
     fontSize: 14,
-    color: "#B0B0B0",
+    color: "#667085",
     marginBottom: 8,
   },
 
   hotelBadge: {
     alignSelf: "flex-start",
-    backgroundColor: "#1E1B0F",
+    backgroundColor: "#E8F6EE",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 14,
@@ -474,20 +473,20 @@ const styles = StyleSheet.create({
   },
 
   hotelBadgeText: {
-    color: "#FFD700",
+    color: "#159A63",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 
   category: {
     alignSelf: "flex-start",
-    backgroundColor: "#222",
-    color: "#9BE000",
+    backgroundColor: "#F3F7F4",
+    color: "#159A63",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 14,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "800",
     overflow: "hidden",
   },
 });

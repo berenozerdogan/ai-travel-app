@@ -1,7 +1,6 @@
-import React from "react";
 import { Tabs } from "expo-router";
-import { Ionicons, Feather } from "@expo/vector-icons";
 import { useLanguage } from "../../context/LanguageContext";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Layout() {
   const { t } = useLanguage();
@@ -10,19 +9,18 @@ export default function Layout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#9BE000",
-        tabBarInactiveTintColor: "#8A8A8A",
+        tabBarActiveTintColor: "#159A63",
+        tabBarInactiveTintColor: "#8B938F",
         tabBarStyle: {
-          backgroundColor: "#111",
-          borderTopColor: "#222",
-          height: 82,
+          backgroundColor: "#FFFFFF",
+          borderTopColor: "#E6ECE8",
+          height: 66,
           paddingTop: 8,
-          paddingBottom: 12,
+          paddingBottom: 8,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: "600",
-          marginTop: 4,
+          fontWeight: "700",
         },
       }}
     >
@@ -31,31 +29,28 @@ export default function Layout() {
         options={{
           title: t("tabs.home"),
           tabBarIcon: ({ color, size }) => (
-            <Feather name="compass" size={size} color={color} />
+            <Ionicons name="compass-outline" size={size} color={color} />
           ),
         }}
       />
-
       <Tabs.Screen
         name="explore"
         options={{
           title: t("tabs.explore"),
           tabBarIcon: ({ color, size }) => (
-            <Feather name="search" size={size} color={color} />
+            <Ionicons name="search-outline" size={size} color={color} />
           ),
         }}
       />
-
       <Tabs.Screen
         name="map"
         options={{
           title: t("tabs.map"),
           tabBarIcon: ({ color, size }) => (
-            <Feather name="map-pin" size={size} color={color} />
+            <Ionicons name="map-outline" size={size} color={color} />
           ),
         }}
       />
-
       <Tabs.Screen
         name="saved"
         options={{
@@ -65,7 +60,6 @@ export default function Layout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="chat"
         options={{
@@ -79,7 +73,6 @@ export default function Layout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="profile"
         options={{

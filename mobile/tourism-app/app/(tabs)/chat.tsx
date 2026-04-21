@@ -1,3 +1,5 @@
+
+
 import React, { useRef, useState, useEffect } from "react";
 import {
   View,
@@ -16,7 +18,7 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth, db } from "../../lib/firebase";
-import { signOut } from "firebase/auth";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import {
   collection,
   addDoc,
@@ -26,18 +28,11 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { useLanguage } from "../../context/LanguageContext";
+import { useChat, ChatMessage } from "../../context/ChatContext";
 
 type DayPlan = {
   day: number;
   places: string[];
-};
-
-type Message = {
-  id: string;
-  text: string;
-  sender: "user" | "ai";
-  places?: string[];
-  days?: DayPlan[];
 };
 
 type LocalUser = {
@@ -57,15 +52,18 @@ export default function Chat() {
   const params = useLocalSearchParams();
   const { t, language } = useLanguage();
 
-  const welcomeMessage: Message = {
-    id: "welcome",
-    text: t("chat.welcome"),
-    sender: "ai",
-    places: [],
-    days: [],
-  };
+  const {
+    chats,
+    activeChat,
+    activeChatId,
+    createNewChat,
+    appendMessageToChat,
+    loadChatSession,
+    resetChats,
+  } = useChat();
 
-  const [messages, setMessages] = useState<Message[]>([welcomeMessage]);
+  const messages = activeChat?.messages ?? [];
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasAutoSent, setHasAutoSent] = useState(false);
@@ -83,34 +81,41 @@ export default function Chat() {
   ];
 
   useEffect(() => {
-    setMessages([welcomeMessage]);
-  }, [language]);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      const stored = await AsyncStorage.getItem("logged_user");
-      if (stored) {
-        setUser(JSON.parse(stored));
-      } else {
-        setUser(null);
-      }
-    };
-
-    loadUser();
-  }, []);
-
-  useEffect(() => {
-    if (!user?.uid) {
-      setSavedChats([]);
-      return;
+    if (!activeChatId) {
+      createNewChat(t("chat.welcome"));
     }
+  }, [activeChatId, t, createNewChat]);
 
-    const q = query(
-      collection(db, "users", user.uid, "chats"),
-      orderBy("createdAt", "desc")
-    );
+  useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      setUser({
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+      });
+    } else {
+      setUser(null);
+      setSavedChats([]);
+    }
+  });
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+  return unsubscribe;
+}, []);
+
+  useEffect(() => {
+  if (!auth.currentUser?.uid) {
+    setSavedChats([]);
+    return;
+  }
+
+  const q = query(
+    collection(db, "users", auth.currentUser.uid, "chats"),
+    orderBy("createdAt", "desc")
+  );
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
       const items: SavedChat[] = snapshot.docs.map((doc) => {
         const data = doc.data();
         return {
@@ -123,10 +128,14 @@ export default function Chat() {
       });
 
       setSavedChats(items);
-    });
+    },
+    (error) => {
+      console.log("FIRESTORE ERROR:", error);
+    }
+  );
 
-    return unsubscribe;
-  }, [user?.uid]);
+  return unsubscribe;
+}, [user]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -135,15 +144,7 @@ export default function Chat() {
   };
 
   const newChat = () => {
-    const newWelcome: Message = {
-      id: "welcome_" + Date.now(),
-      text: t("chat.welcome"),
-      sender: "ai",
-      places: [],
-      days: [],
-    };
-
-    setMessages([newWelcome]);
+    createNewChat(t("chat.welcome"));
     setInput("");
     setLoading(false);
     setHasAutoSent(false);
@@ -152,9 +153,9 @@ export default function Chat() {
   };
 
   const openSavedChat = (chat: SavedChat) => {
-    const loadedMessages: Message[] = [
+    const loadedMessages: ChatMessage[] = [
       {
-        id: "welcome_loaded",
+        id: `welcome_${chat.id}`,
         text: t("chat.welcome"),
         sender: "ai",
         places: [],
@@ -174,8 +175,27 @@ export default function Chat() {
       },
     ];
 
-    setMessages(loadedMessages);
+    loadChatSession({
+      id: chat.id,
+      title: chat.message || t("chat.untitledChat"),
+      createdAt: Date.now(),
+      messages: loadedMessages,
+    });
+
     setMenuVisible(false);
+
+    setTimeout(() => {
+      listRef.current?.scrollToEnd({ animated: false });
+    }, 100);
+  };
+
+  const openLocalChat = (chatId: string) => {
+    const chat = chats.find((item) => item.id === chatId);
+    if (!chat) return;
+
+    loadChatSession(chat);
+    setMenuVisible(false);
+
     setTimeout(() => {
       listRef.current?.scrollToEnd({ animated: false });
     }, 100);
@@ -187,15 +207,7 @@ export default function Chat() {
       await AsyncStorage.removeItem("logged_user");
       setUser(null);
       setSavedChats([]);
-      setMessages([
-        {
-          id: "welcome_logout",
-          text: t("chat.welcome"),
-          sender: "ai",
-          places: [],
-          days: [],
-        },
-      ]);
+      resetChats();
       setMenuVisible(false);
       router.replace("/(tabs)/chat");
     } catch (error) {
@@ -230,15 +242,17 @@ export default function Chat() {
 
   const sendMessage = async (customText?: string) => {
     const finalText = (customText ?? input).trim();
-    if (!finalText || loading) return;
+    if (!finalText || loading || !activeChatId) return;
 
-    const userMessage: Message = {
+    const currentChatId = activeChatId;
+
+    const userMessage: ChatMessage = {
       id: Date.now().toString(),
       text: finalText,
       sender: "user",
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    appendMessageToChat(currentChatId, userMessage);
     setInput("");
     setLoading(true);
     scrollToBottom();
@@ -257,18 +271,18 @@ export default function Chat() {
 
       const data = await res.json();
 
-      if (user?.uid) {
-        await addDoc(collection(db, "users", user.uid, "chats"), {
-          message: finalText,
-          reply: data.reply || "",
-          places: data.places || [],
-          days: data.days || [],
-          language,
-          createdAt: serverTimestamp(),
-        });
-      }
+      if (auth.currentUser?.uid) {
+  await addDoc(collection(db, "users", auth.currentUser.uid, "chats"), {
+    message: finalText,
+    reply: data.reply || "",
+    places: data.places || [],
+    days: data.days || [],
+    language,
+    createdAt: serverTimestamp(),
+  });
+}
 
-      const aiMessage: Message = {
+      const aiMessage: ChatMessage = {
         id: Date.now().toString() + "_ai",
         text: data.reply || t("chat.somethingWrong"),
         sender: "ai",
@@ -276,20 +290,17 @@ export default function Chat() {
         days: data.days || [],
       };
 
-      setMessages((prev) => [...prev, aiMessage]);
+      appendMessageToChat(currentChatId, aiMessage);
     } catch (err) {
       console.log(err);
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString() + "_error",
-          text: t("chat.serverError"),
-          sender: "ai",
-          places: [],
-          days: [],
-        },
-      ]);
+      appendMessageToChat(currentChatId, {
+        id: Date.now().toString() + "_error",
+        text: t("chat.serverError"),
+        sender: "ai",
+        places: [],
+        days: [],
+      });
     } finally {
       setLoading(false);
       scrollToBottom();
@@ -300,14 +311,15 @@ export default function Chat() {
     if (
       typeof params.prompt === "string" &&
       params.prompt.trim() &&
-      !hasAutoSent
+      !hasAutoSent &&
+      activeChatId
     ) {
       setHasAutoSent(true);
       sendMessage(params.prompt);
     }
-  }, [params.prompt, hasAutoSent]);
+  }, [params.prompt, hasAutoSent, activeChatId]);
 
-  const renderMessage = ({ item }: { item: Message }) => {
+  const renderMessage = ({ item }: { item: ChatMessage }) => {
     const hasDays = item.sender === "ai" && item.days && item.days.length > 0;
     const hasFlatPlaces =
       item.sender === "ai" &&
@@ -424,20 +436,40 @@ export default function Chat() {
             </TouchableOpacity>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              {savedChats.length === 0 ? (
+              {chats.length > 0 && (
+                <>
+                  {chats.map((chat) => (
+                    <TouchableOpacity
+                      key={chat.id}
+                      style={styles.historyItem}
+                      onPress={() => openLocalChat(chat.id)}
+                    >
+                      <Text style={styles.historyItemText} numberOfLines={2}>
+                        {chat.title || t("chat.untitledChat")}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </>
+              )}
+
+              {savedChats.length > 0 && (
+                <>
+                  {savedChats.map((chat) => (
+                    <TouchableOpacity
+                      key={chat.id}
+                      style={styles.historyItem}
+                      onPress={() => openSavedChat(chat)}
+                    >
+                      <Text style={styles.historyItemText} numberOfLines={2}>
+                        {chat.message || t("chat.untitledChat")}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </>
+              )}
+
+              {chats.length === 0 && savedChats.length === 0 && (
                 <Text style={styles.emptyHistory}>{t("chat.noSavedChats")}</Text>
-              ) : (
-                savedChats.map((chat) => (
-                  <TouchableOpacity
-                    key={chat.id}
-                    style={styles.historyItem}
-                    onPress={() => openSavedChat(chat)}
-                  >
-                    <Text style={styles.historyItemText} numberOfLines={2}>
-                      {chat.message || t("chat.untitledChat")}
-                    </Text>
-                  </TouchableOpacity>
-                ))
               )}
             </ScrollView>
           </View>
@@ -480,7 +512,9 @@ export default function Chat() {
                   style={styles.registerButton}
                   onPress={() => router.push("/register" as any)}
                 >
-                  <Text style={styles.registerButtonText}>{t("chat.register")}</Text>
+                  <Text style={styles.registerButtonText}>
+                    {t("chat.register")}
+                  </Text>
                 </TouchableOpacity>
               </>
             ) : (
