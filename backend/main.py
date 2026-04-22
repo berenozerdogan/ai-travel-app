@@ -801,3 +801,92 @@ def hidden_gems(city: str):
             "places": [],
             "error": str(e),
         }
+@app.get("/nearby")
+def get_nearby(
+    lat: float,
+    lng: float,
+    radius: float = 20,
+    category: str = ""
+):
+    try:
+        with open(PLACES_PATH, "r", encoding="utf-8") as f:
+            places = json.load(f)
+
+        results = []
+
+        for place in places:
+            p_lat = place.get("latitude")
+            p_lng = place.get("longitude")
+
+            if p_lat is None or p_lng is None:
+                continue
+
+            # km cinsinden mesafe (haversine basitleştirilmiş)
+            dist = math.sqrt((lat - p_lat) ** 2 + (lng - p_lng) ** 2) * 111
+
+            if dist <= radius:
+                if category and place.get("category") != category:
+                    continue
+
+                place["distance_km"] = round(dist, 2)
+                results.append(place)
+
+        results.sort(key=lambda x: x["distance_km"])
+
+        return {
+            "count": len(results),
+            "places": results[:30]
+        }
+
+    except Exception as e:
+        return {
+            "count": 0,
+            "places": [],
+            "error": str(e)
+        }
+@app.get("/nearby")
+def get_nearby(
+    lat: float,
+    lng: float,
+    radius: float = 80,
+    category: str = ""
+):
+    try:
+        with open(PLACES_PATH, "r", encoding="utf-8") as f:
+            places = json.load(f)
+
+        results = []
+
+        for place in places:
+            p_lat = place.get("latitude")
+            p_lng = place.get("longitude")
+
+            if p_lat is None or p_lng is None:
+                continue
+
+            dist = math.sqrt((lat - p_lat) ** 2 + (lng - p_lng) ** 2) * 111
+
+            if dist <= radius:
+                if category and place.get("category") != category:
+                    continue
+
+                enriched_place = dict(place)
+                enriched_place["image"] = build_image_url(
+                    enriched_place.get("image", "")
+                )
+                enriched_place["distance_km"] = round(dist, 2)
+                results.append(enriched_place)
+
+        results.sort(key=lambda x: x["distance_km"])
+
+        return {
+            "count": len(results),
+            "places": results[:30]
+        }
+
+    except Exception as e:
+        return {
+            "count": 0,
+            "places": [],
+            "error": str(e)
+        }

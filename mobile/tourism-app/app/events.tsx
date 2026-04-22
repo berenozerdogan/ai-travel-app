@@ -6,7 +6,10 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 type EventItem = {
   title: string;
@@ -16,6 +19,19 @@ type EventItem = {
   category: string;
   city: string;
   source: string;
+};
+
+const COLORS = {
+  bg: "#D9D2C3",
+  surface: "#F6F1E7",
+  surfaceSoft: "#EFE7D8",
+  border: "#E8E0D1",
+  text: "#1E2418",
+  textSoft: "#5F6656",
+  accent: "#B8CC2A",
+  accentDark: "#28310F",
+  white: "#FFFFFF",
+  shadow: "#9E9688",
 };
 
 export default function EventsScreen() {
@@ -29,7 +45,7 @@ export default function EventsScreen() {
 
     try {
       const res = await fetch(
-        `http://192.168.1.101:8000/events?city=${encodeURIComponent(finalCity)}`
+        `http://192.168.1.102:8000/events?city=${encodeURIComponent(finalCity)}`
       );
       const data = await res.json();
       setEvents(data.events || []);
@@ -46,120 +62,272 @@ export default function EventsScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Live Events</Text>
+    <View style={styles.screen}>
+      <StatusBar barStyle="dark-content" />
 
-      <View style={styles.searchRow}>
-        <TextInput
-          style={styles.input}
-          value={city}
-          onChangeText={setCity}
-          placeholder="City"
-          placeholderTextColor="#777"
-        />
+      <LinearGradient
+        colors={["#E7DFD0", "#DDD5C5", "#D9D2C3"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
+        <Text style={styles.title}>Live Events</Text>
+        <Text style={styles.subtitle}>
+          Discover concerts, festivals and local events by city.
+        </Text>
 
-        <TouchableOpacity style={styles.button} onPress={() => loadEvents()}>
-          <Text style={styles.buttonText}>Search</Text>
-        </TouchableOpacity>
+        <View style={styles.searchRow}>
+          <View style={styles.inputWrap}>
+            <Ionicons
+              name="location-outline"
+              size={18}
+              color="#7D806F"
+            />
+            <TextInput
+              style={styles.input}
+              value={city}
+              onChangeText={setCity}
+              placeholder="City"
+              placeholderTextColor="#7D806F"
+            />
+          </View>
+
+          <TouchableOpacity style={styles.button} onPress={() => loadEvents()}>
+            <Text style={styles.buttonText}>Search</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.content}>
+        {loading ? (
+          <View style={styles.infoBox}>
+            <Text style={styles.info}>Loading events...</Text>
+          </View>
+        ) : events.length === 0 ? (
+          <View style={styles.infoBox}>
+            <Text style={styles.info}>
+              No live events found for this city yet.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={events}
+            keyExtractor={(item, index) =>
+              `${item.title}-${item.date}-${index}`
+            }
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 110 }}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <View style={styles.topMetaRow}>
+                  <View style={styles.categoryPill}>
+                    <Text style={styles.categoryPillText}>{item.category}</Text>
+                  </View>
+
+                  <View style={styles.cityPill}>
+                    <Text style={styles.cityPillText}>{item.city}</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.eventTitle}>{item.title}</Text>
+
+                <View style={styles.metaRow}>
+                  <Ionicons
+                    name="location-outline"
+                    size={16}
+                    color={COLORS.textSoft}
+                  />
+                  <Text style={styles.meta}>{item.venue}</Text>
+                </View>
+
+                <View style={styles.metaRow}>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={16}
+                    color={COLORS.textSoft}
+                  />
+                  <Text style={styles.meta}>{item.date}</Text>
+                </View>
+
+                <View style={styles.metaRow}>
+                  <Ionicons
+                    name="time-outline"
+                    size={16}
+                    color={COLORS.textSoft}
+                  />
+                  <Text style={styles.meta}>{item.time}</Text>
+                </View>
+
+                <Text style={styles.source}>Source: {item.source}</Text>
+              </View>
+            )}
+          />
+        )}
       </View>
-
-      {loading ? (
-        <Text style={styles.info}>Loading events...</Text>
-      ) : events.length === 0 ? (
-        <Text style={styles.info}>No live events found for this city yet.</Text>
-      ) : (
-        <FlatList
-          data={events}
-          keyExtractor={(item, index) =>
-            `${item.title}-${item.date}-${index}`
-          }
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.eventTitle}>{item.title}</Text>
-              <Text style={styles.meta}>📍 {item.venue}</Text>
-              <Text style={styles.meta}>📅 {item.date}</Text>
-              <Text style={styles.meta}>🕒 {item.time}</Text>
-              <Text style={styles.meta}>🎭 {item.category}</Text>
-              <Text style={styles.source}>Source: {item.source}</Text>
-            </View>
-          )}
-        />
-      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: "#0B0B0B",
-    padding: 16,
+    backgroundColor: COLORS.bg,
+  },
+
+  hero: {
+    paddingTop: 56,
+    paddingHorizontal: 18,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
 
   title: {
-    color: "white",
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800",
-    marginBottom: 16,
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+
+  subtitle: {
+    color: COLORS.textSoft,
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 18,
   },
 
   searchRow: {
     flexDirection: "row",
-    marginBottom: 16,
+    alignItems: "center",
+  },
+
+  inputWrap: {
+    flex: 1,
+    height: 52,
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginRight: 10,
   },
 
   input: {
     flex: 1,
-    backgroundColor: "#171717",
-    color: "white",
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginRight: 10,
+    color: COLORS.text,
+    marginLeft: 10,
+    fontSize: 14,
   },
 
   button: {
-    backgroundColor: "#9BE000",
-    borderRadius: 14,
+    height: 52,
+    backgroundColor: COLORS.accent,
+    borderRadius: 18,
     paddingHorizontal: 18,
     justifyContent: "center",
     alignItems: "center",
   },
 
   buttonText: {
-    color: "#111",
+    color: COLORS.accentDark,
     fontWeight: "800",
+    fontSize: 14,
+  },
+
+  content: {
+    flex: 1,
+    paddingHorizontal: 18,
+    paddingTop: 22,
+  },
+
+  infoBox: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   info: {
-    color: "#AAA",
-    marginTop: 20,
+    color: COLORS.textSoft,
     fontSize: 15,
+    lineHeight: 22,
   },
 
   card: {
-    backgroundColor: "#171717",
-    borderRadius: 16,
-    padding: 14,
+    backgroundColor: COLORS.surface,
+    borderRadius: 22,
+    padding: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
+
+  topMetaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 12,
   },
 
-  eventTitle: {
-    color: "white",
-    fontSize: 17,
+  categoryPill: {
+    alignSelf: "flex-start",
+    backgroundColor: COLORS.accent,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+
+  categoryPillText: {
+    color: COLORS.accentDark,
+    fontSize: 12,
     fontWeight: "800",
+  },
+
+  cityPill: {
+    alignSelf: "flex-start",
+    backgroundColor: COLORS.surfaceSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+
+  cityPillText: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
+  eventTitle: {
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: "800",
+    marginBottom: 12,
+    lineHeight: 24,
+  },
+
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
 
   meta: {
-    color: "#D6D6D6",
+    color: COLORS.textSoft,
     fontSize: 14,
-    marginBottom: 4,
+    marginLeft: 8,
+    flex: 1,
   },
 
   source: {
-    color: "#8E8E8E",
+    color: COLORS.textSoft,
     fontSize: 12,
-    marginTop: 8,
+    marginTop: 10,
   },
 });

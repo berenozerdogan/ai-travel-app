@@ -1,109 +1,218 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  StatusBar,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "../../context/LanguageContext";
+
+const COLORS = {
+  bg: "#D9D2C3",
+  surface: "#F6F1E7",
+  surfaceSoft: "#EFE7D8",
+  border: "#E8E0D1",
+  text: "#1E2418",
+  textSoft: "#5F6656",
+  accent: "#B8CC2A",
+  accentDark: "#28310F",
+  shadow: "#9E9688",
+};
 
 export default function Profile() {
   const { language, setLanguage, t } = useLanguage();
 
+  const languages = [
+    { key: "tr", label: "🇹🇷 Türkçe" },
+    { key: "en", label: "🇬🇧 English" },
+    { key: "de", label: "🇩🇪 Deutsch" },
+    { key: "ru", label: "🇷🇺 Русский" },
+  ];
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t("settings.title")}</Text>
+    <View style={styles.screen}>
+      <StatusBar barStyle="dark-content" />
 
-      <Text style={styles.section}>{t("settings.language")}</Text>
+      <LinearGradient
+        colors={["#E7DFD0", "#DDD5C5", "#D9D2C3"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
+        <Text style={styles.title}>{t("settings.title")}</Text>
+        <Text style={styles.subtitle}>
+          Choose your preferred app language.
+        </Text>
+      </LinearGradient>
 
-      <View style={styles.row}>
-        <TouchableOpacity
-          style={[styles.button, language === "tr" && styles.active]}
-          onPress={() => setLanguage("tr")}
-        >
-          <Text style={[styles.text, language === "tr" && styles.activeText]}>
-            🇹🇷 Türkçe
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.content}>
+        <View style={styles.sectionCard}>
+          <Text style={styles.section}>{t("settings.language")}</Text>
 
-        <TouchableOpacity
-          style={[styles.button, language === "en" && styles.active]}
-          onPress={() => setLanguage("en")}
-        >
-          <Text style={[styles.text, language === "en" && styles.activeText]}>
-            🇬🇧 English
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.grid}>
+            {languages.map((item) => {
+              const isActive = language === item.key;
 
-      <View style={styles.row}>
-        <TouchableOpacity
-          style={[styles.button, language === "de" && styles.active]}
-          onPress={() => setLanguage("de")}
-        >
-          <Text style={[styles.text, language === "de" && styles.activeText]}>
-            🇩🇪 Deutsch
-          </Text>
-        </TouchableOpacity>
+              return (
+                <TouchableOpacity
+                  key={item.key}
+                  style={[styles.button, isActive && styles.active]}
+                  onPress={() => setLanguage(item.key as any)}
+                  activeOpacity={0.9}
+                >
+                  <View style={styles.buttonTop}>
+                    <Text style={[styles.text, isActive && styles.activeText]}>
+                      {item.label}
+                    </Text>
 
-        <TouchableOpacity
-          style={[styles.button, language === "ru" && styles.active]}
-          onPress={() => setLanguage("ru")}
-        >
-          <Text style={[styles.text, language === "ru" && styles.activeText]}>
-            🇷🇺 Русский
-          </Text>
-        </TouchableOpacity>
+                    {isActive && (
+                      <View style={styles.checkWrap}>
+                        <Ionicons
+                          name="checkmark"
+                          size={16}
+                          color={COLORS.accentDark}
+                        />
+                      </View>
+                    )}
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.helperText,
+                      isActive && styles.activeHelperText,
+                    ]}
+                  >
+                    {isActive ? "Selected" : "Tap to switch"}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        <Text style={styles.footerText}>
+          Your language choice updates the app experience and AI responses.
+        </Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: "#0B0B0B",
-    padding: 20,
+    backgroundColor: COLORS.bg,
+  },
+
+  hero: {
     paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 30,
+    fontSize: 32,
+    fontWeight: "800",
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+
+  subtitle: {
+    color: COLORS.textSoft,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+
+  content: {
+    paddingHorizontal: 18,
+    paddingTop: 24,
+  },
+
+  sectionCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
 
   section: {
-    color: "#9BE000",
-    fontSize: 16,
+    color: COLORS.text,
+    fontSize: 15,
     fontWeight: "800",
-    marginBottom: 12,
+    marginBottom: 14,
+    letterSpacing: 0.3,
   },
 
-  row: {
-    flexDirection: "row",
-    marginBottom: 12,
+  grid: {
+    gap: 12,
   },
 
   button: {
-    flex: 1,
-    backgroundColor: "#171717",
-    paddingVertical: 14,
-    borderRadius: 16,
-    marginRight: 10,
-    alignItems: "center",
+    backgroundColor: COLORS.surfaceSoft,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#2A2A2A",
+    borderColor: COLORS.border,
   },
 
   active: {
-    backgroundColor: "#9BE000",
-    borderColor: "#9BE000",
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+
+  buttonTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  checkWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.28)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   text: {
-    color: "white",
-    fontSize: 15,
+    color: COLORS.text,
+    fontSize: 16,
     fontWeight: "700",
   },
 
   activeText: {
-    color: "#111",
+    color: COLORS.accentDark,
+  },
+
+  helperText: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    marginTop: 8,
+  },
+
+  activeHelperText: {
+    color: "#4C5626",
+  },
+
+  footerText: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: "center",
+    marginTop: 18,
+    paddingHorizontal: 12,
   },
 });

@@ -1,5 +1,3 @@
-
-
 import React, { useRef, useState, useEffect } from "react";
 import {
   View,
@@ -14,6 +12,7 @@ import {
   Modal,
   Pressable,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,6 +26,8 @@ import {
   orderBy,
   onSnapshot,
 } from "firebase/firestore";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLanguage } from "../../context/LanguageContext";
 import { useChat, ChatMessage } from "../../context/ChatContext";
 
@@ -46,6 +47,20 @@ type SavedChat = {
   reply: string;
   places?: string[];
   days?: DayPlan[];
+};
+
+const COLORS = {
+  bg: "#D9D2C3",
+  surface: "#F6F1E7",
+  surfaceSoft: "#EFE7D8",
+  surfaceMuted: "#E9E1D2",
+  text: "#1E2418",
+  textSoft: "#5F6656",
+  accent: "#B8CC2A",
+  accentDark: "#28310F",
+  white: "#FFFFFF",
+  shadow: "#9E9688",
+  overlay: "rgba(30,36,24,0.28)",
 };
 
 export default function Chat() {
@@ -87,55 +102,55 @@ export default function Chat() {
   }, [activeChatId, t, createNewChat]);
 
   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-    if (firebaseUser) {
-      setUser({
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-      });
-    } else {
-      setUser(null);
-      setSavedChats([]);
-    }
-  });
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+        });
+      } else {
+        setUser(null);
+        setSavedChats([]);
+      }
+    });
 
-  return unsubscribe;
-}, []);
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
-  if (!auth.currentUser?.uid) {
-    setSavedChats([]);
-    return;
-  }
-
-  const q = query(
-    collection(db, "users", auth.currentUser.uid, "chats"),
-    orderBy("createdAt", "desc")
-  );
-
-  const unsubscribe = onSnapshot(
-    q,
-    (snapshot) => {
-      const items: SavedChat[] = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          message: data.message || "",
-          reply: data.reply || "",
-          places: data.places || [],
-          days: data.days || [],
-        };
-      });
-
-      setSavedChats(items);
-    },
-    (error) => {
-      console.log("FIRESTORE ERROR:", error);
+    if (!auth.currentUser?.uid) {
+      setSavedChats([]);
+      return;
     }
-  );
 
-  return unsubscribe;
-}, [user]);
+    const q = query(
+      collection(db, "users", auth.currentUser.uid, "chats"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const items: SavedChat[] = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            message: data.message || "",
+            reply: data.reply || "",
+            places: data.places || [],
+            days: data.days || [],
+          };
+        });
+
+        setSavedChats(items);
+      },
+      (error) => {
+        console.log("FIRESTORE ERROR:", error);
+      }
+    );
+
+    return unsubscribe;
+  }, [user]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -219,7 +234,7 @@ export default function Chat() {
     try {
       if (!places || places.length === 0) return;
 
-      const res = await fetch("http://192.168.1.101:8000/route", {
+      const res = await fetch("http://192.168.1.102:8000/route", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -258,7 +273,7 @@ export default function Chat() {
     scrollToBottom();
 
     try {
-      const res = await fetch("http://192.168.1.101:8000/ai-chat", {
+      const res = await fetch("http://192.168.1.102:8000/ai-chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -272,15 +287,15 @@ export default function Chat() {
       const data = await res.json();
 
       if (auth.currentUser?.uid) {
-  await addDoc(collection(db, "users", auth.currentUser.uid, "chats"), {
-    message: finalText,
-    reply: data.reply || "",
-    places: data.places || [],
-    days: data.days || [],
-    language,
-    createdAt: serverTimestamp(),
-  });
-}
+        await addDoc(collection(db, "users", auth.currentUser.uid, "chats"), {
+          message: finalText,
+          reply: data.reply || "",
+          places: data.places || [],
+          days: data.days || [],
+          language,
+          createdAt: serverTimestamp(),
+        });
+      }
 
       const aiMessage: ChatMessage = {
         id: Date.now().toString() + "_ai",
@@ -416,6 +431,8 @@ export default function Chat() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="dark-content" />
+
       <Modal
         visible={menuVisible}
         transparent
@@ -432,41 +449,46 @@ export default function Chat() {
             <Text style={styles.sideMenuTitle}>{t("chat.chats")}</Text>
 
             <TouchableOpacity style={styles.sideNewChat} onPress={newChat}>
+              <Ionicons name="add-outline" size={18} color={COLORS.text} />
               <Text style={styles.sideNewChatText}>{t("chat.newChat")}</Text>
             </TouchableOpacity>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              {chats.length > 0 && (
-                <>
-                  {chats.map((chat) => (
-                    <TouchableOpacity
-                      key={chat.id}
-                      style={styles.historyItem}
-                      onPress={() => openLocalChat(chat.id)}
-                    >
-                      <Text style={styles.historyItemText} numberOfLines={2}>
-                        {chat.title || t("chat.untitledChat")}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </>
-              )}
+              {chats.length > 0 &&
+                chats.map((chat) => (
+                  <TouchableOpacity
+                    key={chat.id}
+                    style={styles.historyItem}
+                    onPress={() => openLocalChat(chat.id)}
+                  >
+                    <Ionicons
+                      name="chatbubble-ellipses-outline"
+                      size={16}
+                      color={COLORS.accentDark}
+                    />
+                    <Text style={styles.historyItemText} numberOfLines={2}>
+                      {chat.title || t("chat.untitledChat")}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
 
-              {savedChats.length > 0 && (
-                <>
-                  {savedChats.map((chat) => (
-                    <TouchableOpacity
-                      key={chat.id}
-                      style={styles.historyItem}
-                      onPress={() => openSavedChat(chat)}
-                    >
-                      <Text style={styles.historyItemText} numberOfLines={2}>
-                        {chat.message || t("chat.untitledChat")}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </>
-              )}
+              {savedChats.length > 0 &&
+                savedChats.map((chat) => (
+                  <TouchableOpacity
+                    key={chat.id}
+                    style={styles.historyItem}
+                    onPress={() => openSavedChat(chat)}
+                  >
+                    <Ionicons
+                      name="time-outline"
+                      size={16}
+                      color={COLORS.accentDark}
+                    />
+                    <Text style={styles.historyItemText} numberOfLines={2}>
+                      {chat.message || t("chat.untitledChat")}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
 
               {chats.length === 0 && savedChats.length === 0 && (
                 <Text style={styles.emptyHistory}>{t("chat.noSavedChats")}</Text>
@@ -481,16 +503,26 @@ export default function Chat() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={8}
       >
-        <View style={styles.header}>
+        <LinearGradient
+          colors={["#E7DFD0", "#DDD5C5", "#D9D2C3"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <View style={styles.topRow}>
             <TouchableOpacity
               style={styles.menuButton}
               onPress={() => setMenuVisible(true)}
             >
-              <Text style={styles.menuButtonText}>☰</Text>
+              <Ionicons name="menu-outline" size={24} color={COLORS.text} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.newChatButton} onPress={newChat}>
+              <Ionicons
+                name="add-outline"
+                size={16}
+                color={COLORS.accentDark}
+              />
               <Text style={styles.newChatButtonText}>{t("chat.newChat")}</Text>
             </TouchableOpacity>
           </View>
@@ -532,7 +564,7 @@ export default function Chat() {
               ? `${t("chat.loggedIn")}: ${user.email}`
               : t("chat.notLoggedIn")}
           </Text>
-        </View>
+        </LinearGradient>
 
         <View style={styles.quickRow}>
           {quickPrompts.map((prompt, index) => (
@@ -566,7 +598,7 @@ export default function Chat() {
           <TextInput
             style={styles.input}
             placeholder={t("chat.askPlaceholder")}
-            placeholderTextColor="#7D7D7D"
+            placeholderTextColor="#7D806F"
             value={input}
             onChangeText={setInput}
             multiline
@@ -578,9 +610,7 @@ export default function Chat() {
             onPress={() => sendMessage()}
             disabled={loading}
           >
-            <Text style={styles.sendButtonText}>
-              {loading ? "..." : t("chat.send")}
-            </Text>
+            <Ionicons name="arrow-up" size={20} color={COLORS.text} />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -589,13 +619,20 @@ export default function Chat() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#0B0B0B" },
-  wrapper: { flex: 1, backgroundColor: "#0B0B0B" },
+  safe: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
+
+  wrapper: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
 
   menuOverlay: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: COLORS.overlay,
   },
 
   menuBackdrop: {
@@ -604,61 +641,69 @@ const styles = StyleSheet.create({
 
   sideMenu: {
     width: 300,
-    backgroundColor: "#111111",
+    backgroundColor: COLORS.surface,
     paddingTop: 60,
     paddingHorizontal: 16,
-    borderRightWidth: 1,
-    borderRightColor: "#222",
+    borderLeftWidth: 1,
+    borderLeftColor: "#EEE7D8",
   },
 
   sideMenuTitle: {
-    color: "white",
+    color: COLORS.text,
     fontSize: 24,
     fontWeight: "800",
     marginBottom: 16,
   },
 
   sideNewChat: {
-    backgroundColor: "#9BE000",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.accent,
     paddingVertical: 12,
     paddingHorizontal: 14,
-    borderRadius: 14,
+    borderRadius: 16,
     marginBottom: 16,
+    gap: 6,
   },
 
   sideNewChatText: {
-    color: "#111",
+    color: COLORS.text,
     fontWeight: "800",
     fontSize: 15,
   },
 
   emptyHistory: {
-    color: "#888",
+    color: COLORS.textSoft,
     fontSize: 14,
     marginTop: 10,
   },
 
   historyItem: {
-    backgroundColor: "#171717",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: COLORS.surfaceSoft,
     borderWidth: 1,
-    borderColor: "#262626",
-    borderRadius: 14,
+    borderColor: "#ECE4D5",
+    borderRadius: 16,
     padding: 12,
     marginBottom: 10,
   },
 
   historyItemText: {
-    color: "white",
+    color: COLORS.text,
     fontSize: 14,
     lineHeight: 20,
+    flex: 1,
   },
 
   header: {
     paddingHorizontal: 18,
     paddingTop: 10,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#1E1E1E",
+    paddingBottom: 16,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
 
   topRow: {
@@ -668,101 +713,96 @@ const styles = StyleSheet.create({
   },
 
   menuButton: {
-    backgroundColor: "#171717",
-    borderWidth: 1,
-    borderColor: "#2A2A2A",
     width: 46,
     height: 46,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(246,241,231,0.88)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.42)",
   },
 
-  menuButtonText: {
-    color: "white",
-    fontSize: 22,
-    fontWeight: "700",
+  newChatButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: COLORS.accent,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+  },
+
+  newChatButtonText: {
+    color: COLORS.accentDark,
+    fontSize: 13,
+    fontWeight: "800",
   },
 
   title: {
-    color: "white",
-    fontSize: 28,
+    color: COLORS.text,
+    fontSize: 30,
     fontWeight: "800",
     marginBottom: 4,
   },
 
   subtitle: {
-    color: "#A8A8A8",
+    color: COLORS.textSoft,
     fontSize: 14,
     lineHeight: 20,
   },
 
-  newChatButton: {
-    backgroundColor: "#171717",
-    borderWidth: 1,
-    borderColor: "#2A2A2A",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-  },
-
-  newChatButtonText: {
-    color: "#9BE000",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-
   authButtonsRow: {
     flexDirection: "row",
-    marginTop: 12,
+    marginTop: 14,
   },
 
   loginButton: {
-    backgroundColor: "#9BE000",
-    paddingVertical: 8,
+    backgroundColor: COLORS.accent,
+    paddingVertical: 9,
     paddingHorizontal: 14,
     borderRadius: 12,
     marginRight: 10,
   },
 
   loginButtonText: {
-    color: "#111",
-    fontWeight: "700",
+    color: COLORS.accentDark,
+    fontWeight: "800",
     fontSize: 14,
   },
 
   registerButton: {
-    backgroundColor: "#171717",
-    paddingVertical: 8,
+    backgroundColor: COLORS.surface,
+    paddingVertical: 9,
     paddingHorizontal: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "#E9E0D1",
   },
 
   registerButtonText: {
-    color: "white",
+    color: COLORS.text,
     fontWeight: "700",
     fontSize: 14,
   },
 
   logoutButton: {
-    backgroundColor: "#171717",
+    backgroundColor: COLORS.surface,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "#E9E0D1",
   },
 
   logoutButtonText: {
-    color: "#FF5A5A",
+    color: COLORS.text,
     fontWeight: "700",
     fontSize: 14,
   },
 
   userStatus: {
-    color: "#A8A8A8",
+    color: COLORS.textSoft,
     marginTop: 10,
     fontSize: 13,
   },
@@ -771,15 +811,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 4,
+    paddingTop: 14,
+    paddingBottom: 6,
+    backgroundColor: COLORS.bg,
   },
 
   quickChip: {
-    backgroundColor: "#171717",
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: "#262626",
-    paddingVertical: 8,
+    borderColor: "#EBE3D4",
+    paddingVertical: 9,
     paddingHorizontal: 12,
     borderRadius: 18,
     marginRight: 8,
@@ -787,7 +828,7 @@ const styles = StyleSheet.create({
   },
 
   quickChipText: {
-    color: "#D8D8D8",
+    color: COLORS.text,
     fontSize: 13,
     fontWeight: "600",
   },
@@ -795,7 +836,7 @@ const styles = StyleSheet.create({
   messagesContainer: {
     paddingHorizontal: 14,
     paddingTop: 10,
-    paddingBottom: 14,
+    paddingBottom: 28,
   },
 
   messageBlock: {
@@ -811,14 +852,16 @@ const styles = StyleSheet.create({
 
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#9BE000",
+    backgroundColor: COLORS.accent,
     borderBottomRightRadius: 6,
   },
 
   aiBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#1E1E1E",
+    backgroundColor: COLORS.surface,
     borderBottomLeftRadius: 6,
+    borderWidth: 1,
+    borderColor: "#E9E0D1",
   },
 
   messageText: {
@@ -827,12 +870,12 @@ const styles = StyleSheet.create({
   },
 
   userText: {
-    color: "#111",
-    fontWeight: "600",
+    color: COLORS.text,
+    fontWeight: "700",
   },
 
   aiText: {
-    color: "#F4F4F4",
+    color: COLORS.text,
   },
 
   dayPlansContainer: {
@@ -840,16 +883,16 @@ const styles = StyleSheet.create({
   },
 
   dayCard: {
-    backgroundColor: "#151515",
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: "#262626",
+    borderColor: "#E9E0D1",
     borderRadius: 18,
     padding: 12,
     marginBottom: 10,
   },
 
   dayTitle: {
-    color: "white",
+    color: COLORS.text,
     fontSize: 16,
     fontWeight: "800",
     marginBottom: 8,
@@ -862,9 +905,7 @@ const styles = StyleSheet.create({
   },
 
   placeChip: {
-    backgroundColor: "#1F1F1F",
-    borderWidth: 1,
-    borderColor: "#2A2A2A",
+    backgroundColor: COLORS.surfaceSoft,
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 18,
@@ -873,7 +914,7 @@ const styles = StyleSheet.create({
   },
 
   placeChipText: {
-    color: "#9BE000",
+    color: COLORS.accentDark,
     fontSize: 14,
     fontWeight: "700",
   },
@@ -881,30 +922,32 @@ const styles = StyleSheet.create({
   routeButton: {
     alignSelf: "flex-start",
     marginTop: 4,
-    backgroundColor: "#9BE000",
+    backgroundColor: COLORS.accent,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 16,
   },
 
   routeButtonText: {
-    color: "#111",
+    color: COLORS.text,
     fontSize: 14,
     fontWeight: "800",
   },
 
   loadingBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#1E1E1E",
+    backgroundColor: COLORS.surface,
     borderBottomLeftRadius: 6,
     borderRadius: 20,
     paddingVertical: 12,
     paddingHorizontal: 14,
     marginTop: 4,
+    borderWidth: 1,
+    borderColor: "#E9E0D1",
   },
 
   loadingText: {
-    color: "#BDBDBD",
+    color: COLORS.textSoft,
     fontSize: 14,
   },
 
@@ -914,30 +957,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 10,
     paddingBottom: 14,
+    marginBottom:50,
     borderTopWidth: 1,
-    borderTopColor: "#1E1E1E",
-    backgroundColor: "#0B0B0B",
+    borderTopColor: "#E7DECF",
+    backgroundColor: COLORS.bg,
   },
 
   input: {
     flex: 1,
     minHeight: 58,
     maxHeight: 120,
-    backgroundColor: "#171717",
+    backgroundColor: COLORS.surface,
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 14,
-    color: "white",
+    color: COLORS.text,
     fontSize: 16,
     marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#E9E0D1",
   },
 
   sendButton: {
-    minHeight: 58,
-    paddingHorizontal: 22,
+    width: 58,
+    height: 58,
     borderRadius: 18,
-    backgroundColor: "#9BE000",
+    backgroundColor: COLORS.accent,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -947,7 +993,7 @@ const styles = StyleSheet.create({
   },
 
   sendButtonText: {
-    color: "#111",
+    color: COLORS.text,
     fontSize: 16,
     fontWeight: "800",
   },

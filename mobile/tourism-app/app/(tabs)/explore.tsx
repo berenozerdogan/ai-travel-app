@@ -8,10 +8,25 @@ import {
   Image,
   ScrollView,
   TextInput,
+  StatusBar,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLanguage } from "../../context/LanguageContext";
+
+const COLORS = {
+  bg: "#D9D2C3",
+  surface: "#F6F1E7",
+  surfaceSoft: "#EFE7D8",
+  border: "#E8E0D1",
+  text: "#1E2418",
+  textSoft: "#5F6656",
+  accent: "#B8CC2A",
+  accentDark: "#28310F",
+  white: "#FFFFFF",
+  shadow: "#9E9688",
+};
 
 export default function Explore() {
   const params = useLocalSearchParams();
@@ -37,10 +52,10 @@ export default function Explore() {
   }, [t, params.filter]);
 
   useEffect(() => {
-    fetch("http://192.168.1.101:8000/places")
+    fetch("http://192.168.1.102:8000/places")
       .then((res) => res.json())
       .then((data) => setPlaces(data))
-      .catch((err) => console.log(err));
+      .catch((err) => console.log("Places fetch error:", err));
   }, []);
 
   const cleanCity = (city?: string) => {
@@ -67,8 +82,9 @@ export default function Explore() {
   };
 
   const cityOptions = useMemo(() => {
-    const cities = [...new Set(places.map((p) => cleanCity(p.city)).filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b));
+    const cities = [
+      ...new Set(places.map((p) => cleanCity(p.city)).filter(Boolean)),
+    ].sort((a, b) => a.localeCompare(b));
 
     if (!citySearch.trim()) {
       return [t("common.allCities"), ...cities];
@@ -139,148 +155,253 @@ export default function Explore() {
     return category;
   };
 
+  const getFallbackImage = (index: number) => {
+    const images = [
+      "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1570213489059-0aac6626cade?q=80&w=1200&auto=format&fit=crop",
+    ];
+
+    return images[index % images.length];
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t("explore.title")}</Text>
-
-      <Text style={styles.sectionLabel}>{t("explore.category")}</Text>
-      <View style={styles.filterRow}>
-        {filterButtons.map((filter) => (
-          <TouchableOpacity
-            key={filter}
-            activeOpacity={0.8}
-            style={[
-              styles.filterButton,
-              selectedFilter === filter && styles.activeFilterButton,
-            ]}
-            onPress={() => setSelectedFilter(filter)}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                selectedFilter === filter && styles.activeFilterText,
-              ]}
-            >
-              {filter}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={styles.sectionLabel}>{t("explore.city")}</Text>
-      <View style={styles.searchWrapper}>
-        <Ionicons name="search" size={18} color="#7B8B82" />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t("explore.searchCity")}
-          placeholderTextColor="#7B8B82"
-          value={citySearch}
-          onChangeText={setCitySearch}
-        />
-      </View>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.optionRow}
-      >
-        {cityOptions.slice(0, 12).map((city) => (
-          <TouchableOpacity
-            key={city}
-            activeOpacity={0.8}
-            style={[
-              styles.optionButton,
-              selectedCity === city && styles.activeOptionButton,
-            ]}
-            onPress={() => setSelectedCity(city)}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                selectedCity === city && styles.activeOptionText,
-              ]}
-            >
-              {city}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <Text style={styles.selectedText}>
-        {t("explore.selectedCity")}: {selectedCity}
-      </Text>
-
-      <Text style={styles.sectionLabel}>{t("explore.district")}</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.optionRow}
-      >
-        {districtOptions.slice(0, 12).map((district) => (
-          <TouchableOpacity
-            key={district}
-            activeOpacity={0.8}
-            style={[
-              styles.optionButton,
-              selectedDistrict === district && styles.activeOptionButton,
-            ]}
-            onPress={() => setSelectedDistrict(district)}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                selectedDistrict === district && styles.activeOptionText,
-              ]}
-            >
-              {district}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <Text style={styles.selectedText}>
-        {t("explore.selectedDistrict")}: {selectedDistrict}
-      </Text>
-
-      <Text style={styles.resultsText}>
-        {filteredPlaces.length} {t("common.placesFound")}
-      </Text>
+    <View style={styles.screen}>
+      <StatusBar barStyle="dark-content" />
 
       <FlatList
         data={filteredPlaces}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingBottom: 30 }}
-        renderItem={({ item }) => (
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <>
+            <LinearGradient
+              colors={["#E7DFD0", "#DDD5C5", "#D9D2C3"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.hero}
+            >
+              <View style={styles.heroTopRow}>
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={() => router.back()}
+                >
+                  <Ionicons
+                    name="chevron-back"
+                    size={22}
+                    color={COLORS.text}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.title}>{t("explore.title")}</Text>
+              <Text style={styles.heroSubtitle}>
+                Find places by category, city and district.
+              </Text>
+
+              <View style={styles.searchWrapper}>
+                <Ionicons
+                  name="search-outline"
+                  size={18}
+                  color="#7D806F"
+                />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder={t("explore.searchCity")}
+                  placeholderTextColor="#7D806F"
+                  value={citySearch}
+                  onChangeText={setCitySearch}
+                />
+              </View>
+            </LinearGradient>
+
+            <View style={styles.content}>
+              <View style={styles.filtersCard}>
+                <View style={styles.filtersHeader}>
+                  <View>
+                    <Text style={styles.filtersTitle}>Filters</Text>
+                    <Text style={styles.filtersSubtitle}>
+                      Discover places by type and location
+                    </Text>
+                  </View>
+
+                  <View style={styles.filtersBadge}>
+                    <Text style={styles.filtersBadgeText}>
+                      {filteredPlaces.length}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.sectionLabel}>{t("explore.category")}</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.filterRow}
+                >
+                  {filterButtons.map((filter) => (
+                    <TouchableOpacity
+                      key={filter}
+                      activeOpacity={0.9}
+                      style={[
+                        styles.filterButton,
+                        selectedFilter === filter && styles.activeFilterButton,
+                      ]}
+                      onPress={() => setSelectedFilter(filter)}
+                    >
+                      <Text
+                        style={[
+                          styles.filterText,
+                          selectedFilter === filter && styles.activeFilterText,
+                        ]}
+                      >
+                        {filter}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                <Text style={styles.sectionLabel}>{t("explore.city")}</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.optionRow}
+                >
+                  {cityOptions.slice(0, 12).map((city) => (
+                    <TouchableOpacity
+                      key={city}
+                      activeOpacity={0.9}
+                      style={[
+                        styles.optionButton,
+                        selectedCity === city && styles.activeOptionButton,
+                      ]}
+                      onPress={() => setSelectedCity(city)}
+                    >
+                      <Text
+                        style={[
+                          styles.optionText,
+                          selectedCity === city && styles.activeOptionText,
+                        ]}
+                      >
+                        {city}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                {selectedCity !== t("common.allCities") && (
+                  <>
+                    <Text style={styles.sectionLabel}>
+                      {t("explore.district")}
+                    </Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.optionRow}
+                    >
+                      {districtOptions.slice(0, 12).map((district) => (
+                        <TouchableOpacity
+                          key={district}
+                          activeOpacity={0.9}
+                          style={[
+                            styles.optionButton,
+                            selectedDistrict === district &&
+                              styles.activeOptionButton,
+                          ]}
+                          onPress={() => setSelectedDistrict(district)}
+                        >
+                          <Text
+                            style={[
+                              styles.optionText,
+                              selectedDistrict === district &&
+                                styles.activeOptionText,
+                            ]}
+                          >
+                            {district}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </>
+                )}
+              </View>
+
+              <View style={styles.resultsRow}>
+                <Text style={styles.resultsText}>
+                  {filteredPlaces.length} {t("common.placesFound")}
+                </Text>
+              </View>
+            </View>
+          </>
+        }
+        renderItem={({ item, index }) => (
           <TouchableOpacity
-            activeOpacity={0.88}
+            activeOpacity={0.92}
             style={styles.card}
             onPress={() => router.push(`/place?name=${item.name}`)}
           >
-            {item.image ? (
-              <Image source={{ uri: item.image }} style={styles.image} />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.placeholderText}>{t("common.noImage")}</Text>
-              </View>
-            )}
-
-            <View style={styles.info}>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.rating}>⭐ {item.rating}</Text>
-              <Text style={styles.meta}>
-                {cleanCity(item.city)} •{" "}
-                {cleanDistrict(item.district) || "Unknown"} • {item.subcategory}
-              </Text>
-
-              {item.category === "hotel" && (
-                <View style={styles.hotelBadge}>
-                  <Text style={styles.hotelBadgeText}>
-                    {(item.price_level || "unknown").toUpperCase()}
-                  </Text>
-                </View>
+            <View style={styles.cardImageWrap}>
+              {item.image ? (
+                <Image source={{ uri: item.image }} style={styles.image} />
+              ) : (
+                <Image
+                  source={{ uri: getFallbackImage(index) }}
+                  style={styles.image}
+                />
               )}
 
-              <Text style={styles.category}>{categoryLabel(item.category)}</Text>
+              <LinearGradient
+                colors={[
+                  "rgba(24,25,18,0.04)",
+                  "rgba(24,25,18,0.18)",
+                  "rgba(24,25,18,0.68)",
+                ]}
+                style={styles.imageOverlay}
+              />
+
+              <TouchableOpacity style={styles.favoriteButton}>
+                <Ionicons name="heart-outline" size={18} color="#FFFFFF" />
+              </TouchableOpacity>
+
+              <View style={styles.imageInfo}>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.metaLight}>
+                  {cleanCity(item.city)} •{" "}
+                  {cleanDistrict(item.district) || "Unknown"}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.info}>
+              <View style={styles.infoTop}>
+                <View style={styles.ratingPill}>
+                  <Text style={styles.rating}>⭐ {item.rating || 0}</Text>
+                </View>
+
+                {item.category === "hotel" && (
+                  <View style={styles.hotelBadge}>
+                    <Text style={styles.hotelBadgeText}>
+                      {(item.price_level || "unknown").toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <Text style={styles.meta}>
+                {item.subcategory || categoryLabel(item.category)}
+              </Text>
+
+              <View style={styles.bottomRow}>
+                <Text style={styles.category}>
+                  {categoryLabel(item.category)}
+                </Text>
+                <Ionicons
+                  name="arrow-forward"
+                  size={18}
+                  color={COLORS.accentDark}
+                />
+              </View>
             </View>
           </TouchableOpacity>
         )}
@@ -290,201 +411,344 @@ export default function Explore() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    padding: 18,
-    backgroundColor: "#F7FAF8",
+    backgroundColor: COLORS.bg,
   },
 
-  title: {
-    fontSize: 30,
-    fontWeight: "800",
-    color: "#111827",
-    marginTop: 10,
+  listContent: {
+    paddingBottom: 110,
+    backgroundColor: COLORS.bg,
+  },
+
+  hero: {
+    paddingTop: 56,
+    paddingHorizontal: 18,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 18,
   },
 
-  sectionLabel: {
-    color: "#159A63",
-    fontSize: 14,
-    fontWeight: "800",
-    marginBottom: 8,
-    marginTop: 4,
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.surfaceSoft,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
-  filterRow: {
+  title: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+
+  heroSubtitle: {
+    color: COLORS.textSoft,
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 18,
+  },
+
+  content: {
+    paddingHorizontal: 18,
+    paddingTop: 22,
+  },
+
+  filtersCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 28,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 18,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
+
+  filtersHeader: {
     flexDirection: "row",
-    flexWrap: "wrap",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 14,
   },
 
-  filterButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: "#FFFFFF",
-    marginRight: 10,
+  filtersTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+
+  filtersSubtitle: {
+    fontSize: 13,
+    color: COLORS.textSoft,
+  },
+
+  filtersBadge: {
+    minWidth: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+  },
+
+  filtersBadgeText: {
+    color: COLORS.accentDark,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+
+  sectionLabel: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    fontWeight: "800",
     marginBottom: 10,
+    marginTop: 4,
+    letterSpacing: 0.3,
+  },
+
+  filterRow: {
+    paddingBottom: 10,
+    paddingRight: 10,
+  },
+
+  filterButton: {
+    height: 48,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+    backgroundColor: COLORS.surfaceSoft,
+    marginRight: 10,
     borderWidth: 1,
-    borderColor: "#E6ECE8",
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   activeFilterButton: {
-    backgroundColor: "#159A63",
-    borderColor: "#159A63",
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   filterText: {
-    color: "#374151",
+    color: COLORS.text,
     fontSize: 14,
     fontWeight: "700",
   },
 
   activeFilterText: {
-    color: "#FFFFFF",
+    color: COLORS.accentDark,
   },
 
   searchWrapper: {
-    height: 48,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E6ECE8",
-    borderRadius: 16,
+    height: 52,
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
     paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   searchInput: {
     flex: 1,
-    color: "#111827",
+    color: COLORS.text,
     fontSize: 14,
     marginLeft: 10,
   },
 
   optionRow: {
-    paddingBottom: 8,
+    paddingBottom: 10,
     paddingRight: 10,
   },
 
   optionButton: {
-    minWidth: 130,
-    paddingVertical: 12,
+    minWidth: 150,
+    height: 48,
     paddingHorizontal: 16,
-    borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    backgroundColor: COLORS.surfaceSoft,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: "#E6ECE8",
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   activeOptionButton: {
-    backgroundColor: "#E8F6EE",
-    borderColor: "#159A63",
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   optionText: {
-    color: "#111827",
+    color: COLORS.text,
     fontSize: 14,
     fontWeight: "700",
     textAlign: "center",
   },
 
   activeOptionText: {
-    color: "#159A63",
+    color: COLORS.accentDark,
   },
 
-  selectedText: {
-    color: "#667085",
-    fontSize: 13,
-    marginBottom: 10,
+  resultsRow: {
+    marginTop: 0,
+    marginBottom: 14,
+    paddingHorizontal: 4,
   },
 
   resultsText: {
-    color: "#667085",
+    color: COLORS.textSoft,
     fontSize: 13,
-    marginBottom: 14,
+    fontWeight: "700",
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 22,
-    marginBottom: 16,
+    marginHorizontal: 18,
+    marginBottom: 18,
+    borderRadius: 26,
     overflow: "hidden",
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: "#E6ECE8",
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
+  },
+
+  cardImageWrap: {
+    position: "relative",
+    width: "100%",
+    height: 220,
   },
 
   image: {
     width: "100%",
-    height: 200,
+    height: "100%",
   },
 
-  imagePlaceholder: {
-    width: "100%",
-    height: 200,
-    backgroundColor: "#EEF3F0",
-    justifyContent: "center",
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  favoriteButton: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.16)",
     alignItems: "center",
+    justifyContent: "center",
   },
 
-  placeholderText: {
-    color: "#7B8B82",
-    fontSize: 16,
-  },
-
-  info: {
-    padding: 15,
+  imageInfo: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    bottom: 16,
   },
 
   name: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: "800",
-    color: "#111827",
-    marginBottom: 6,
+    color: "#FFFFFF",
+    marginBottom: 4,
+  },
+
+  metaLight: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.88)",
+    fontWeight: "500",
+  },
+
+  info: {
+    padding: 16,
+  },
+
+  infoTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  ratingPill: {
+    alignSelf: "flex-start",
+    backgroundColor: COLORS.accent,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
   },
 
   rating: {
-    fontSize: 15,
-    color: "#159A63",
-    marginBottom: 5,
-    fontWeight: "700",
+    fontSize: 13,
+    color: COLORS.accentDark,
+    fontWeight: "800",
   },
 
   meta: {
     fontSize: 14,
-    color: "#667085",
-    marginBottom: 8,
+    color: COLORS.textSoft,
+    marginBottom: 12,
   },
 
   hotelBadge: {
     alignSelf: "flex-start",
-    backgroundColor: "#E8F6EE",
+    backgroundColor: COLORS.surfaceSoft,
     paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
-    marginBottom: 8,
+    paddingVertical: 7,
+    borderRadius: 999,
   },
 
   hotelBadgeText: {
-    color: "#159A63",
+    color: COLORS.text,
     fontSize: 12,
     fontWeight: "800",
   },
 
+  bottomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
   category: {
     alignSelf: "flex-start",
-    backgroundColor: "#F3F7F4",
-    color: "#159A63",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
+    backgroundColor: COLORS.surfaceSoft,
+    color: COLORS.text,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
     fontSize: 12,
     fontWeight: "800",
     overflow: "hidden",
