@@ -224,17 +224,7 @@ export default function Place() {
           </Text>
         </View>
 
-        <View style={styles.floatingActions}>
-          <TouchableOpacity style={styles.saveButton} onPress={savePlace}>
-            <Ionicons name="heart-outline" size={18} color={COLORS.accentDark} />
-            <Text style={styles.saveButtonText}>{t("common.save")}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.mapButton} onPress={showOnMap}>
-            <Ionicons name="map-outline" size={18} color={COLORS.text} />
-            <Text style={styles.mapButtonText}>{t("common.showOnMap")}</Text>
-          </TouchableOpacity>
-        </View>
+        
       </View>
 
       <View style={styles.content}>
