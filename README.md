@@ -4,9 +4,9 @@ AI destekli seyahat planlama mobil uygulaması.
 
 ## Proje Hakkında
 
-Bu proje, kullanıcıların seyahat planlama sürecini kolaylaştırmak amacıyla geliştirilmiş yapay zekâ destekli bir mobil uygulamadır. Kullanıcılar şehir, ilgi alanı veya tercihleri doğrultusunda öneriler alabilir, gezilecek yerleri keşfedebilir ve rota oluşturabilir.
+Bu proje, kullanıcıların seyahat planlama sürecini kolaylaştırmak amacıyla geliştirilmiş yapay zekâ destekli bir mobil uygulamadır. Kullanıcılar şehir, ilgi alanı veya tercihlerine göre öneriler alabilir, gezilecek yerleri keşfedebilir ve rota oluşturabilir.
 
-Uygulama, mobil istemci, backend servisi ve harici API’lerden oluşan bir mimariye sahiptir. Kullanıcıdan gelen istekler backend üzerinden işlenmekte ve yapay zekâ destekli öneriler üretilmektedir.
+Sistem, mobil istemci, backend servisi ve harici API’lerden oluşan çok katmanlı bir mimariye sahiptir. Kullanıcıdan alınan veriler backend üzerinden işlenmekte ve yapay zekâ destekli öneriler üretilmektedir.
 
 ## Özellikler
 
@@ -30,14 +30,15 @@ Uygulama, mobil istemci, backend servisi ve harici API’lerden oluşan bir mima
 
 ## Sistem Mimarisi
 
-Sistem, istemci-sunucu (client-server) mimarisi üzerine kurulmuştur. Mobil uygulama, kullanıcı arayüzünü sağlarken backend servisi veri işleme ve iş mantığını yürütmektedir. Yapay zekâ tabanlı öneriler OpenAI API üzerinden sağlanmakta, mekan ve konum verileri Google Places API aracılığıyla elde edilmektedir.
+Sistem, istemci-sunucu (client-server) mimarisi üzerine kurulmuştur. Mobil uygulama kullanıcı arayüzünü sağlarken backend servisi iş mantığını yürütmektedir. Yapay zekâ tabanlı öneriler OpenAI API üzerinden sağlanmakta, mekan ve konum verileri Google Places API aracılığıyla elde edilmektedir.
 
-## Ekran Görüntüleri
+## Proje Yapısı
 
+Proje aşağıdaki ana bileşenlerden oluşmaktadır:
 
-Tüm ekran görüntülerine aşağıdaki klasör üzerinden erişilebilir:
-
-https://github.com/berenozerdogan/ai-travel-app/tree/main/screenshots
+- **mobile/**: React Native (Expo) ile geliştirilen mobil uygulama  
+- **backend/**: FastAPI ile geliştirilen sunucu tarafı  
+- **data/**: Yer ve mekan verilerinin bulunduğu veri seti  
 
 ## Kurulum
 
@@ -47,3 +48,10 @@ https://github.com/berenozerdogan/ai-travel-app/tree/main/screenshots
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
+
+## Ekran Görüntüleri
+
+
+Tüm ekran görüntülerine aşağıdaki klasör üzerinden erişilebilir:
+
+https://github.com/berenozerdogan/ai-travel-app/tree/main/screenshots
