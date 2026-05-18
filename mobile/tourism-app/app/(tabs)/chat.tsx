@@ -49,18 +49,19 @@ type SavedChat = {
   days?: DayPlan[];
 };
 
+// 🌉 BOĞAZIN KIZILI & SİSLİ GECE CHAT RENKLERİ
 const COLORS = {
-  bg: "#D9D2C3",
-  surface: "#F6F1E7",
-  surfaceSoft: "#EFE7D8",
-  surfaceMuted: "#E9E1D2",
-  text: "#1E2418",
-  textSoft: "#5F6656",
-  accent: "#B8CC2A",
-  accentDark: "#28310F",
+  bg: "#131622",          // Derin, puslu gece denizi rengi
+  surface: "#1C1F30",     // Gece mavisi-gri asil kart ve yan menü yüzeyi
+  surfaceSoft: "#272B42", // İkinci katman kartlar, inaktif çipler ve input içi
+  surfaceMuted: "#181A28",// Çok hafif koyu fonlar için geçiş rengi
+  border: "rgba(255, 255, 255, 0.03)",
+  text: "#F1F3F9",        // Kirli beyaz metinler
+  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
+  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (User balonları ve ana aksiyonlar)
   white: "#FFFFFF",
-  shadow: "#9E9688",
-  overlay: "rgba(30,36,24,0.28)",
+  shadow: "#090A10",
+  overlay: "rgba(9, 10, 16, 0.65)", // Karartılmış asil arka plan katmanı
 };
 
 export default function Chat() {
@@ -234,7 +235,7 @@ export default function Chat() {
     try {
       if (!places || places.length === 0) return;
 
-      const res = await fetch("http://192.168.1.102:8000/route", {
+      const res = await fetch("http://10.0.2.2:8000/route", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -273,7 +274,7 @@ export default function Chat() {
     scrollToBottom();
 
     try {
-      const res = await fetch("http://192.168.1.102:8000/ai-chat", {
+      const res = await fetch("http://10.0.2.2:8000/ai-chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -431,7 +432,7 @@ export default function Chat() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
       <Modal
         visible={menuVisible}
@@ -449,7 +450,7 @@ export default function Chat() {
             <Text style={styles.sideMenuTitle}>{t("chat.chats")}</Text>
 
             <TouchableOpacity style={styles.sideNewChat} onPress={newChat}>
-              <Ionicons name="add-outline" size={18} color={COLORS.text} />
+              <Ionicons name="add-outline" size={18} color={COLORS.white} />
               <Text style={styles.sideNewChatText}>{t("chat.newChat")}</Text>
             </TouchableOpacity>
 
@@ -464,7 +465,7 @@ export default function Chat() {
                     <Ionicons
                       name="chatbubble-ellipses-outline"
                       size={16}
-                      color={COLORS.accentDark}
+                      color={COLORS.accent}
                     />
                     <Text style={styles.historyItemText} numberOfLines={2}>
                       {chat.title || t("chat.untitledChat")}
@@ -482,7 +483,7 @@ export default function Chat() {
                     <Ionicons
                       name="time-outline"
                       size={16}
-                      color={COLORS.accentDark}
+                      color={COLORS.accent}
                     />
                     <Text style={styles.historyItemText} numberOfLines={2}>
                       {chat.message || t("chat.untitledChat")}
@@ -504,7 +505,7 @@ export default function Chat() {
         keyboardVerticalOffset={8}
       >
         <LinearGradient
-          colors={["#E7DFD0", "#DDD5C5", "#D9D2C3"]}
+          colors={["#1C1F30", "#161826", "#131622"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.header}
@@ -521,7 +522,7 @@ export default function Chat() {
               <Ionicons
                 name="add-outline"
                 size={16}
-                color={COLORS.accentDark}
+                color={COLORS.white}
               />
               <Text style={styles.newChatButtonText}>{t("chat.newChat")}</Text>
             </TouchableOpacity>
@@ -598,7 +599,7 @@ export default function Chat() {
           <TextInput
             style={styles.input}
             placeholder={t("chat.askPlaceholder")}
-            placeholderTextColor="#7D806F"
+            placeholderTextColor="#5C627D"
             value={input}
             onChangeText={setInput}
             multiline
@@ -610,7 +611,7 @@ export default function Chat() {
             onPress={() => sendMessage()}
             disabled={loading}
           >
-            <Ionicons name="arrow-up" size={20} color={COLORS.text} />
+            <Ionicons name="arrow-up" size={20} color={COLORS.white} />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -645,14 +646,15 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 16,
     borderLeftWidth: 1,
-    borderLeftColor: "#EEE7D8",
+    borderLeftColor: "rgba(255, 255, 255, 0.02)",
   },
 
   sideMenuTitle: {
     color: COLORS.text,
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 16,
+    letterSpacing: -0.4,
   },
 
   sideNewChat: {
@@ -668,8 +670,8 @@ const styles = StyleSheet.create({
   },
 
   sideNewChatText: {
-    color: COLORS.text,
-    fontWeight: "800",
+    color: COLORS.white,
+    fontWeight: "700",
     fontSize: 15,
   },
 
@@ -685,7 +687,7 @@ const styles = StyleSheet.create({
     gap: 10,
     backgroundColor: COLORS.surfaceSoft,
     borderWidth: 1,
-    borderColor: "#ECE4D5",
+    borderColor: COLORS.border,
     borderRadius: 16,
     padding: 12,
     marginBottom: 10,
@@ -718,9 +720,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(246,241,231,0.88)",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.42)",
+    borderColor: "rgba(255, 255, 255, 0.14)",
   },
 
   newChatButton: {
@@ -734,20 +736,21 @@ const styles = StyleSheet.create({
   },
 
   newChatButtonText: {
-    color: COLORS.accentDark,
+    color: COLORS.white,
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   title: {
-    color: COLORS.text,
+    color: COLORS.white,
     fontSize: 30,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 4,
+    letterSpacing: -0.5,
   },
 
   subtitle: {
-    color: COLORS.textSoft,
+    color: "rgba(255, 255, 255, 0.75)",
     fontSize: 14,
     lineHeight: 20,
   },
@@ -766,8 +769,8 @@ const styles = StyleSheet.create({
   },
 
   loginButtonText: {
-    color: COLORS.accentDark,
-    fontWeight: "800",
+    color: COLORS.white,
+    fontWeight: "700",
     fontSize: 14,
   },
 
@@ -777,12 +780,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E9E0D1",
+    borderColor: COLORS.border,
   },
 
   registerButtonText: {
     color: COLORS.text,
-    fontWeight: "700",
+    fontWeight: "600",
     fontSize: 14,
   },
 
@@ -792,12 +795,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E9E0D1",
+    borderColor: COLORS.border,
   },
 
   logoutButtonText: {
     color: COLORS.text,
-    fontWeight: "700",
+    fontWeight: "600",
     fontSize: 14,
   },
 
@@ -819,7 +822,7 @@ const styles = StyleSheet.create({
   quickChip: {
     backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: "#EBE3D4",
+    borderColor: COLORS.border,
     paddingVertical: 9,
     paddingHorizontal: 12,
     borderRadius: 18,
@@ -861,7 +864,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderBottomLeftRadius: 6,
     borderWidth: 1,
-    borderColor: "#E9E0D1",
+    borderColor: COLORS.border,
   },
 
   messageText: {
@@ -870,8 +873,8 @@ const styles = StyleSheet.create({
   },
 
   userText: {
-    color: COLORS.text,
-    fontWeight: "700",
+    color: COLORS.white,
+    fontWeight: "600",
   },
 
   aiText: {
@@ -885,7 +888,7 @@ const styles = StyleSheet.create({
   dayCard: {
     backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: "#E9E0D1",
+    borderColor: COLORS.border,
     borderRadius: 18,
     padding: 12,
     marginBottom: 10,
@@ -894,7 +897,7 @@ const styles = StyleSheet.create({
   dayTitle: {
     color: COLORS.text,
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 8,
   },
 
@@ -911,10 +914,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     marginRight: 8,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   placeChipText: {
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     fontSize: 14,
     fontWeight: "700",
   },
@@ -929,9 +934,9 @@ const styles = StyleSheet.create({
   },
 
   routeButtonText: {
-    color: COLORS.text,
+    color: COLORS.white,
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   loadingBubble: {
@@ -943,7 +948,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     marginTop: 4,
     borderWidth: 1,
-    borderColor: "#E9E0D1",
+    borderColor: COLORS.border,
   },
 
   loadingText: {
@@ -957,9 +962,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 10,
     paddingBottom: 14,
-    marginBottom:50,
+    marginBottom: 50,
     borderTopWidth: 1,
-    borderTopColor: "#E7DECF",
+    borderTopColor: "rgba(255, 255, 255, 0.02)",
     backgroundColor: COLORS.bg,
   },
 
@@ -976,7 +981,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: "#E9E0D1",
+    borderColor: COLORS.border,
   },
 
   sendButton: {
@@ -989,12 +994,12 @@ const styles = StyleSheet.create({
   },
 
   sendDisabled: {
-    opacity: 0.7,
+    opacity: 0.5,
   },
 
   sendButtonText: {
-    color: COLORS.text,
+    color: COLORS.white,
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 });

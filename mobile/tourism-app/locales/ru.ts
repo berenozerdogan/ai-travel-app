@@ -118,37 +118,112 @@ const ru = {
     system: "Системная",
   },
 
-home: {
-  title: "Откройте Турцию",
-  subtitle: "AI помощник для путешествий",
-  searchPlaceholder: "Поиск мест...",
-  categories: "Категории",
-  featured: "Популярные места",
-  seeAll: "Смотреть все",
-  attractions: "Достопримечательности",
-  hotels: "Отели",
+  home: {
+    title: "Откройте Турцию",
+    subtitle: "AI помощник для путешествий",
+
+    greeting: "Доброе утро",
+    whereNext: "Куда дальше?",
+
+    searchPlaceholder: "Поиск мест...",
+
+    categories: "Категории",
+
+    featured: "Популярные места",
+    featuredDestinations: "Популярные места",
+
+    seeAll: "Смотреть все",
+    viewAll: "Смотреть все",
+
+    attractions: "Достопримечательности",
+    hotels: "Отели",
+    food: "Еда",
+    nature: "Природа",
+    events: "События",
+    beaches: "Пляжи",
+    shopping: "Шопинг",
+    cities: "Города",
+
+    searchResults: "Результаты поиска",
+    noResults: "Ничего не найдено.",
+
+    topHotels: "Лучшие отели",
+    topFood: "Лучшие рестораны",
+    topFoodPicks: "Лучшие рестораны",
+
+    aiAssistant: "AI помощник для путешествий",
+    aiTravelCompanion: "AI помощник для путешествий",
+
+    aiPlanTitle: "Планируйте поездку с AI",
+
+    aiPlanText:
+      "Спросите о маршрутах, отелях, ресторанах и рекомендациях по городам.",
+
+    aiTripPlanner: "AI планировщик поездок",
+
+    aiPowered: "НА БАЗЕ ИИ",
+
+    planPerfectTrip: "Спланируйте идеальное путешествие",
+
+    planPerfectTripText:
+      "Создайте персональный маршрут на основе города, количества дней и интересов.",
+
+    planMyTrip: "Спланировать поездку",
+
+    aiForYou: "Для вас",
+
+    hiddenGemsPicked: "Скрытые жемчужины, подобранные специально для вас",
+
+    aiPick: "AI Рекомендация",
+
+    aiTravelText:
+      "Спросите про отели, маршруты, события и скрытые места.",
+
+    startChat: "Начать чат",
+  },
+ map: {
+  all: "Все",
+  attractions: "Места",
   food: "Еда",
-  nature: "Природа",
-  events: "События",
-  beaches: "Пляжи",
-  shopping: "Шопинг",
-  cities: "Города",
-  searchResults: "Результаты поиска",
-  noResults: "Ничего не найдено.",
-  topHotels: "Лучшие отели",
-  topFood: "Лучшие рестораны",
-  aiAssistant: "AI помощник для путешествий",
-  aiPlanTitle: "Планируйте поездку с AI",
-  aiPlanText: "Спросите о маршрутах, отелях, ресторанах и рекомендациях по городам.",
-  aiTripPlanner: "AI планировщик поездок",
+  hotels: "Отели",
+  saved: "Сохранённые",
+
+  tripMap: "Карта поездки",
+  stopsSelected: "остановок выбрано",
+
+  share: "Поделиться",
+  clear: "Очистить",
+
+  nearbyPlaces: "Места рядом",
+  found: "найдено",
+  openList: "Открыть список",
+  exit: "Выход",
+
+  details: "Детали",
+  navigate: "Маршрут",
+
+  yourRoute: "Ваш маршрут",
+  placesInPlan: "мест в плане",
+  refit: "Центрировать",
+
+  detailsButton: "Подробнее",
+
+  distance: "Расстояние",
+  rating: "Рейтинг",
+
+  noNearbyPlaces: "Поблизости ничего не найдено.",
+
+  kmAway: "км отсюда",
+
+  youAreHere: "Вы здесь",
 },
-saved: {
-  title: "Сохранённые места",
-  empty: "Пока нет сохранённых мест.",
-  remove: "Удалить",
-  removeErrorTitle: "Ошибка",
-  removeErrorText: "Не удалось удалить сохранённое место.",
-},
+  saved: {
+    title: "Сохранённые места",
+    empty: "Пока нет сохранённых мест.",
+    remove: "Удалить",
+    removeErrorTitle: "Ошибка",
+    removeErrorText: "Не удалось удалить сохранённое место.",
+  },
 };
 
 export default ru;

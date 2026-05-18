@@ -10,16 +10,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "../../context/LanguageContext";
 
+// 🌉 BOĞAZIN KIZILI & SİSLİ GECE PROFILE/SETTINGS RENKLERİ
 const COLORS = {
-  bg: "#D9D2C3",
-  surface: "#F6F1E7",
-  surfaceSoft: "#EFE7D8",
-  border: "#E8E0D1",
-  text: "#1E2418",
-  textSoft: "#5F6656",
-  accent: "#B8CC2A",
-  accentDark: "#28310F",
-  shadow: "#9E9688",
+  bg: "#131622",          // Derin, puslu gece denizi rengi
+  surface: "#1C1F30",     // Gece mavisi-gri asil kart yüzeyi
+  surfaceSoft: "#272B42", // Dil butonlarının inaktif zemin teli
+  border: "rgba(255, 255, 255, 0.03)",
+  text: "#F1F3F9",        // Kirli beyaz metinler
+  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
+  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (Muted Crimson)
+  white: "#FFFFFF",
+  shadow: "#090A10",
 };
 
 export default function Profile() {
@@ -34,10 +35,11 @@ export default function Profile() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
+      {/* 🌅 TÜM SEKELERLE UYUMLU ASİL KOYU GRADYAN BAŞLIK ALANI */}
       <LinearGradient
-        colors={["#E7DFD0", "#DDD5C5", "#D9D2C3"]}
+        colors={["#1C1F30", "#161826", "#131622"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.hero}
@@ -61,7 +63,7 @@ export default function Profile() {
                   key={item.key}
                   style={[styles.button, isActive && styles.active]}
                   onPress={() => setLanguage(item.key as any)}
-                  activeOpacity={0.9}
+                  activeOpacity={0.85}
                 >
                   <View style={styles.buttonTop}>
                     <Text style={[styles.text, isActive && styles.activeText]}>
@@ -73,7 +75,7 @@ export default function Profile() {
                         <Ionicons
                           name="checkmark"
                           size={16}
-                          color={COLORS.accentDark}
+                          color={COLORS.white}
                         />
                       </View>
                     )}
@@ -117,13 +119,14 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 32,
-    fontWeight: "800",
-    color: COLORS.text,
+    fontWeight: "700",
+    color: COLORS.white,
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
 
   subtitle: {
-    color: COLORS.textSoft,
+    color: "rgba(255,255,255,0.75)",
     fontSize: 15,
     lineHeight: 22,
   },
@@ -140,8 +143,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 6 },
     elevation: 3,
   },
@@ -149,7 +152,7 @@ const styles = StyleSheet.create({
   section: {
     color: COLORS.text,
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 14,
     letterSpacing: 0.3,
   },
@@ -179,10 +182,10 @@ const styles = StyleSheet.create({
   },
 
   checkWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.28)",
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -190,11 +193,12 @@ const styles = StyleSheet.create({
   text: {
     color: COLORS.text,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "600",
   },
 
   activeText: {
-    color: COLORS.accentDark,
+    color: COLORS.white,
+    fontWeight: "700",
   },
 
   helperText: {
@@ -204,7 +208,7 @@ const styles = StyleSheet.create({
   },
 
   activeHelperText: {
-    color: "#4C5626",
+    color: "rgba(255,255,255,0.8)",
   },
 
   footerText: {

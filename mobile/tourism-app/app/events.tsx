@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { router } from "expo-router";
 import {
   View,
   Text,
@@ -21,17 +22,17 @@ type EventItem = {
   source: string;
 };
 
+// 🌉 BOĞAZIN KIZILI & SİSLİ GECE EVENTS RENKLERİ
 const COLORS = {
-  bg: "#D9D2C3",
-  surface: "#F6F1E7",
-  surfaceSoft: "#EFE7D8",
-  border: "#E8E0D1",
-  text: "#1E2418",
-  textSoft: "#5F6656",
-  accent: "#B8CC2A",
-  accentDark: "#28310F",
+  bg: "#131622",          // Derin, puslu gece denizi rengi
+  surface: "#1C1F30",     // Gece mavisi-gri asil kart yüzeyi
+  surfaceSoft: "#272B42", // Input içi, ikon zeminleri ve yan haplar için kontrast ton
+  border: "rgba(255, 255, 255, 0.03)",
+  text: "#F1F3F9",        // Göz yormayan kirli beyaz başlıklar
+  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
+  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (Muted Crimson)
   white: "#FFFFFF",
-  shadow: "#9E9688",
+  shadow: "#090A10",
 };
 
 export default function EventsScreen() {
@@ -45,7 +46,7 @@ export default function EventsScreen() {
 
     try {
       const res = await fetch(
-        `http://192.168.1.102:8000/events?city=${encodeURIComponent(finalCity)}`
+        `http://10.0.2.2:8000/events?city=${encodeURIComponent(finalCity)}`
       );
       const data = await res.json();
       setEvents(data.events || []);
@@ -63,14 +64,22 @@ export default function EventsScreen() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="dark-content" />
-
+      <StatusBar barStyle="light-content" />
+      
+      {/* 🌅 HOME VE EXPLORE EKRAANLARIYLA SENKRONİZE KOYU GRADYAN BAŞLIK ALANI */}
       <LinearGradient
-        colors={["#E7DFD0", "#DDD5C5", "#D9D2C3"]}
+        colors={["#1C1F30", "#161826", "#131622"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.hero}
       >
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={22} color={COLORS.text} />
+        </TouchableOpacity>
+        
         <Text style={styles.title}>Live Events</Text>
         <Text style={styles.subtitle}>
           Discover concerts, festivals and local events by city.
@@ -81,14 +90,14 @@ export default function EventsScreen() {
             <Ionicons
               name="location-outline"
               size={18}
-              color="#7D806F"
+              color={COLORS.textSoft}
             />
             <TextInput
               style={styles.input}
               value={city}
               onChangeText={setCity}
               placeholder="City"
-              placeholderTextColor="#7D806F"
+              placeholderTextColor="#5C627D"
             />
           </View>
 
@@ -184,13 +193,14 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 32,
-    fontWeight: "800",
-    color: COLORS.text,
+    fontWeight: "700",
+    color: COLORS.white,
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
 
   subtitle: {
-    color: COLORS.textSoft,
+    color: "rgba(255,255,255,0.75)",
     fontSize: 15,
     lineHeight: 22,
     marginBottom: 18,
@@ -204,7 +214,7 @@ const styles = StyleSheet.create({
   inputWrap: {
     flex: 1,
     height: 52,
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.surfaceSoft,
     borderRadius: 18,
     paddingHorizontal: 14,
     flexDirection: "row",
@@ -225,14 +235,14 @@ const styles = StyleSheet.create({
     height: 52,
     backgroundColor: COLORS.accent,
     borderRadius: 18,
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     justifyContent: "center",
     alignItems: "center",
   },
 
   buttonText: {
-    color: COLORS.accentDark,
-    fontWeight: "800",
+    color: COLORS.white,
+    fontWeight: "700",
     fontSize: 14,
   },
 
@@ -264,7 +274,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.25,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 3,
@@ -273,43 +283,47 @@ const styles = StyleSheet.create({
   topMetaRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
 
   categoryPill: {
     alignSelf: "flex-start",
     backgroundColor: COLORS.accent,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
   },
 
   categoryPillText: {
-    color: COLORS.accentDark,
+    color: COLORS.white,
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   cityPill: {
     alignSelf: "flex-start",
     backgroundColor: COLORS.surfaceSoft,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   cityPillText: {
     color: COLORS.text,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
   },
 
   eventTitle: {
     color: COLORS.text,
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 12,
     lineHeight: 24,
+    letterSpacing: -0.3,
   },
 
   metaRow: {
@@ -329,5 +343,17 @@ const styles = StyleSheet.create({
     color: COLORS.textSoft,
     fontSize: 12,
     marginTop: 10,
+  },
+
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
   },
 });

@@ -117,37 +117,113 @@ const en = {
     dark: "Dark",
     system: "System",
   },
-home: {
-  title: "Explore Turkey",
-  subtitle: "AI Travel Companion",
-  searchPlaceholder: "Search destinations...",
-  categories: "Categories",
-  featured: "Featured Destinations",
-  seeAll: "See all",
+
+  home: {
+    title: "Explore Turkey",
+    subtitle: "AI Travel Companion",
+
+    greeting: "Good morning",
+    whereNext: "Where to next?",
+
+    searchPlaceholder: "Search destinations...",
+
+    categories: "Categories",
+
+    featured: "Featured Destinations",
+    featuredDestinations: "Featured Destinations",
+
+    seeAll: "See all",
+    viewAll: "View all",
+
+    attractions: "Attractions",
+    hotels: "Hotels",
+    food: "Food",
+    nature: "Nature",
+    events: "Events",
+    beaches: "Beaches",
+    shopping: "Shopping",
+    cities: "Cities",
+
+    searchResults: "Search Results",
+    noResults: "No results found.",
+
+    topHotels: "Top Hotels",
+    topFood: "Top Food Picks",
+    topFoodPicks: "Top Food Picks",
+
+    aiAssistant: "AI Travel Assistant",
+    aiTravelCompanion: "AI Travel Companion",
+
+    aiPlanTitle: "Plan your trip with AI",
+
+    aiPlanText:
+      "Ask for routes, hotels, restaurants and city recommendations.",
+
+    aiTripPlanner: "AI Trip Planner",
+
+    aiPowered: "AI POWERED",
+
+    planPerfectTrip: "Plan your perfect trip",
+
+    planPerfectTripText:
+      "Create a personalized itinerary based on your city, days and interests.",
+
+    planMyTrip: "Plan My Trip",
+
+    aiForYou: "AI For You",
+
+    hiddenGemsPicked: "Hidden gems picked just for you",
+
+    aiPick: "AI Pick",
+
+    aiTravelText:
+      "Ask for hotels, routes, events and hidden gems.",
+
+    startChat: "Start Chat",
+  },
+  map: {
+  all: "All",
   attractions: "Attractions",
-  hotels: "Hotels",
   food: "Food",
-  nature: "Nature",
-  events: "Events",
-  beaches: "Beaches",
-  shopping: "Shopping",
-  cities: "Cities",
-  searchResults: "Search Results",
-  noResults: "No results found.",
-  topHotels: "Top Hotels",
-  topFood: "Top Food Picks",
-  aiAssistant: "AI Travel Assistant",
-  aiPlanTitle: "Plan your trip with AI",
-  aiPlanText: "Ask for routes, hotels, restaurants and city recommendations.",
-  aiTripPlanner: "AI Trip Planner",
+  hotels: "Hotels",
+  saved: "Saved",
+
+  tripMap: "Trip Map",
+  stopsSelected: "stops selected",
+
+  share: "Share",
+  clear: "Clear",
+
+  nearbyPlaces: "Nearby Places",
+  found: "found",
+  openList: "Open List",
+  exit: "Exit",
+
+  details: "Details",
+  navigate: "Navigate",
+
+  yourRoute: "Your Route",
+  placesInPlan: "places in this plan",
+  refit: "Refit",
+
+  detailsButton: "View Details",
+
+  distance: "Distance",
+  rating: "Rating",
+
+  noNearbyPlaces: "No nearby places found.",
+
+  kmAway: "km away",
+
+  youAreHere: "You are here",
 },
-saved: {
-  title: "Saved Places",
-  empty: "No saved places yet.",
-  remove: "Remove",
-  removeErrorTitle: "Error",
-  removeErrorText: "Could not remove saved place.",
-},
+  saved: {
+    title: "Saved Places",
+    empty: "No saved places yet.",
+    remove: "Remove",
+    removeErrorTitle: "Error",
+    removeErrorText: "Could not remove saved place.",
+  },
 };
 
 export default en;

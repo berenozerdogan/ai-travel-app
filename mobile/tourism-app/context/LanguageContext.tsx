@@ -34,7 +34,7 @@ export const LanguageProvider = ({ children }: any) => {
     setLanguageState(lang);
   };
 
-  // 🔥 EN KRİTİK KISIM
+  
   const t = (key: string) => {
     const keys = key.split(".");
     let value: any = translations[language];

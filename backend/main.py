@@ -62,7 +62,58 @@ app = FastAPI()
 DATA_DIR = os.path.join(BASE_DIR, "..", "data")
 PLACES_PATH = os.path.join(DATA_DIR, "places.json")
 
+REVIEW_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "review_translation_cache.json")
 
+
+def load_review_cache():
+    if not os.path.exists(REVIEW_CACHE_PATH):
+        return {}
+
+    try:
+        with open(REVIEW_CACHE_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_review_cache(cache):
+    with open(REVIEW_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2)
+
+
+def translate_review_text(text: str, target_lang: str):
+    if not text or not text.strip():
+        return ""
+
+    cache = load_review_cache()
+    cache_key = f"{target_lang}:{text}"
+
+    if cache_key in cache:
+        return cache[cache_key]
+
+    language_names = {
+        "tr": "Turkish",
+        "en": "English",
+        "de": "German",
+        "ru": "Russian",
+    }
+
+    target_language = language_names.get(target_lang, "English")
+
+    try:
+        response = client.responses.create(
+            model="gpt-4.1-mini",
+            input=f"Translate this travel review into {target_language}. Keep the meaning natural and concise. Return only the translated text:\n\n{text}",
+        )
+
+        translated = response.output_text.strip()
+
+        cache[cache_key] = translated
+        save_review_cache(cache)
+
+        return translated
+    except Exception:
+        return text
 @app.get("/")
 def home():
     return {"message": "AI Tourism Backend Running"}
@@ -126,6 +177,7 @@ def analyze_place(place_name: str):
 @app.get("/reviews")
 def reviews(place: str, language: str = Query("en")):
     lang = get_lang(language)
+
     try:
         data = get_place_reviews(place)
 
@@ -144,7 +196,27 @@ def reviews(place: str, language: str = Query("en")):
                 }),
             }
 
+        translated_reviews = []
+
+        for review in data.get("reviews", [])[:5]:
+            original_text = review.get("text", "") or ""
+
+            translated_text = translate_review_text(original_text, lang)
+
+            translated_reviews.append({
+                "author": review.get("author", "Google user"),
+                "rating": review.get("rating"),
+                "text": translated_text,
+                "original_text": original_text,
+                "publish_time": review.get("publish_time"),
+                "translated": translated_text != original_text,
+            })
+
+        data["reviews"] = translated_reviews
+        data["language"] = lang
+
         return data
+
     except Exception as e:
         return {
             "found": False,
@@ -685,7 +757,6 @@ def place_insight(place: str, city: str = "", language: str = Query("en")):
             "error": str(e),
         }
 
-
 @app.get("/hidden-gems")
 def hidden_gems(city: str):
     try:
@@ -701,72 +772,39 @@ def hidden_gems(city: str):
         ]
 
         scored = []
-
-        major_landmarks = [
-            "hagia sophia",
-            "blue mosque",
-            "topkapi palace",
-            "galata tower",
-            "dolmabahce palace",
-            "basilica cistern",
-        ]
+        major_landmarks = ["hagia sophia", "blue mosque", "topkapi palace", "galata tower", "dolmabahce palace", "basilica cistern"]
 
         for place in city_places:
-            place_name = place.get("name", "")
-            place_name_lower = normalize_text(place_name)
-
             base_rating = float(place.get("rating", 0) or 0)
+            place_name_lower = normalize_text(place.get("name", ""))
 
-            review_count = 0
-            google_rating = 0
-
-            try:
-                reviews_data = get_place_reviews(
-                    f"{place.get('name', '')} {place.get('city', '')}"
-                )
-                review_count = int(reviews_data.get("review_count", 0) or 0)
-                google_rating = float(reviews_data.get("rating", 0) or 0)
-            except Exception:
-                review_count = 0
-                google_rating = 0
+            # 🛑 ESKİ CANLI GOOGLE İSTEKLERİNİ KALDIRDIK!
+            #places.json içindeki mevcut reviews dizisinin uzunluğunu kullanıyoruz (Sıfır network gecikmesi!)
+            review_count = len(place.get("reviews", []))
+            google_rating = base_rating # Eğer harici bir google_rating yoksa base_rating'i eşitle
 
             score = 0.0
             score += base_rating * 0.45
             score += google_rating * 0.35
 
+            # İnceleme sayısına göre filtreleme (Lokal mekanları öne çıkarma)
             if review_count == 0:
-                score += 0.2
-            elif review_count < 500:
+                score += 1.5  # Hiç yorum yoksa gizlidir, puanı artır
+            elif review_count < 5:
                 score += 1.2
-            elif review_count < 1500:
-                score += 0.9
-            elif review_count < 4000:
-                score += 0.5
-            elif review_count < 10000:
-                score += 0.2
-
-            if review_count > 100000:
-                score -= 2.2
-            elif review_count > 50000:
-                score -= 1.4
-            elif review_count > 20000:
-                score -= 0.9
-            elif review_count > 10000:
-                score -= 0.4
+            elif review_count < 20:
+                score += 0.8
+            else:
+                score -= 1.0  # Çok yorum varsa popülerdir, puanı kır
 
             if any(normalize_text(x) in place_name_lower for x in major_landmarks):
                 score -= 2.5
 
-            subcategory = normalize_text(place.get("subcategory", "") or "")
             category = normalize_text(place.get("category", "") or "")
-
             if category in ["restaurant", "hotel", "cafe"]:
                 score += 0.4
 
-            if any(word in subcategory for word in ["boutique", "local", "fine_dining", "historic", "view", "cave"]):
-                score += 0.3
-
-            if base_rating < 4.2 and google_rating < 4.2:
+            if base_rating < 4.0:
                 continue
 
             final_score = round(score, 2)
@@ -801,49 +839,7 @@ def hidden_gems(city: str):
             "places": [],
             "error": str(e),
         }
-@app.get("/nearby")
-def get_nearby(
-    lat: float,
-    lng: float,
-    radius: float = 20,
-    category: str = ""
-):
-    try:
-        with open(PLACES_PATH, "r", encoding="utf-8") as f:
-            places = json.load(f)
 
-        results = []
-
-        for place in places:
-            p_lat = place.get("latitude")
-            p_lng = place.get("longitude")
-
-            if p_lat is None or p_lng is None:
-                continue
-
-            # km cinsinden mesafe (haversine basitleştirilmiş)
-            dist = math.sqrt((lat - p_lat) ** 2 + (lng - p_lng) ** 2) * 111
-
-            if dist <= radius:
-                if category and place.get("category") != category:
-                    continue
-
-                place["distance_km"] = round(dist, 2)
-                results.append(place)
-
-        results.sort(key=lambda x: x["distance_km"])
-
-        return {
-            "count": len(results),
-            "places": results[:30]
-        }
-
-    except Exception as e:
-        return {
-            "count": 0,
-            "places": [],
-            "error": str(e)
-        }
 @app.get("/nearby")
 def get_nearby(
     lat: float,
@@ -890,3 +886,139 @@ def get_nearby(
             "places": [],
             "error": str(e)
         }
+@app.post("/trip-plan")
+def trip_plan(payload: dict = Body(...)):
+    city = payload.get("city", "").strip()
+    days = int(payload.get("days", 1) or 1)
+    interests = payload.get("interests", "").strip()
+    lang = get_lang(payload)
+
+    if days < 1:
+        days = 1
+    if days > 7:
+        days = 7
+
+    with open(PLACES_PATH, "r", encoding="utf-8") as f:
+        places = json.load(f)
+
+    normalized_city = normalize_text(city)
+    allowed_cities = get_city_aliases(normalized_city)
+
+    city_places = [
+        p for p in places
+        if normalize_text(p.get("city", "")) in allowed_cities
+    ]
+
+    if not city_places:
+        return {
+            "reply": f"{city} için veri bulunamadı.",
+            "days": [],
+            "places": []
+        }
+
+    places_text = "\n".join([
+        f"{p.get('name','')} | category={p.get('category','')} | "
+        f"subcategory={p.get('subcategory','')} | rating={p.get('rating','')} | "
+        f"description={p.get('description','')}"
+        for p in city_places[:250]
+    ])
+
+    language_rule_map = {
+        "tr": "Respond in Turkish.",
+        "en": "Respond in English.",
+        "de": "Respond in German.",
+        "ru": "Respond in Russian.",
+    }
+
+    language_rule = language_rule_map.get(lang, "Respond in English.")
+
+    prompt = f"""
+You are an AI travel planner for Turkey.
+
+Use ONLY the places from the dataset below.
+Do not invent places outside the dataset.
+
+{language_rule}
+
+Create a {days}-day trip plan for {city}.
+User interests: {interests or "general travel, food, culture, nature"}.
+
+Return ONLY valid JSON with this exact structure:
+
+{{
+  "reply": "short introduction",
+  "days": [
+    {{
+      "day": 1,
+      "title": "short day title",
+      "places": ["Place 1", "Place 2", "Place 3"],
+      "note": "short daily note"
+    }}
+  ]
+}}
+
+Rules:
+- Use 3 or 4 places per day.
+- Use place names exactly as written in the dataset.
+- Prefer highly rated places.
+- Balance attractions, restaurants/cafes and nature/historical places if possible.
+- Do not use markdown.
+- Output only JSON.
+
+Dataset:
+{places_text}
+"""
+
+    response = client.responses.create(
+        model="gpt-4.1-mini",
+        input=prompt,
+    )
+
+    raw_text = response.output_text.strip()
+
+    if raw_text.startswith("```json"):
+        raw_text = raw_text.replace("```json", "", 1).strip()
+    if raw_text.startswith("```"):
+        raw_text = raw_text.replace("```", "", 1).strip()
+    if raw_text.endswith("```"):
+        raw_text = raw_text[:-3].strip()
+
+    try:
+        parsed = json.loads(raw_text)
+    except Exception:
+        return {
+            "reply": raw_text,
+            "days": [],
+            "places": []
+        }
+
+    all_place_names = {p.get("name"): p for p in city_places}
+    enriched_days = []
+    flat_places = []
+
+    for day_item in parsed.get("days", []):
+        enriched_places = []
+
+        for place_name in day_item.get("places", []):
+            place = all_place_names.get(place_name)
+
+            if place:
+                enriched = dict(place)
+                enriched["image"] = build_image_url(enriched.get("image", ""))
+                enriched_places.append(enriched)
+
+                if place_name not in flat_places:
+                    flat_places.append(place_name)
+
+        enriched_days.append({
+            "day": day_item.get("day"),
+            "title": day_item.get("title", ""),
+            "note": day_item.get("note", ""),
+            "places": enriched_places,
+        })
+
+    return {
+        "reply": parsed.get("reply", ""),
+        "days": enriched_days,
+        "places": flat_places
+    }

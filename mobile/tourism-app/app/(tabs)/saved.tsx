@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,17 +14,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLanguage } from "../../context/LanguageContext";
 
+// 🌉 BOĞAZIN KIZILI & SİSLİ GECE SAVED RENKLERİ
 const COLORS = {
-  bg: "#D9D2C3",
-  surface: "#F6F1E7",
-  surfaceSoft: "#EFE7D8",
-  border: "#E8E0D1",
-  text: "#1E2418",
-  textSoft: "#5F6656",
-  accent: "#B8CC2A",
-  accentDark: "#28310F",
+  bg: "#131622",          // Derin, puslu gece denizi rengi
+  surface: "#1C1F30",     // Gece mavisi-gri asil kart yüzeyi
+  surfaceSoft: "#272B42", // İkon kutuları ve buton zeminleri için soft kontrast ton
+  border: "rgba(255, 255, 255, 0.03)",
+  text: "#F1F3F9",        // Göz yormayan, net kirli beyaz başlıklar
+  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
+  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (Muted Crimson)
   white: "#FFFFFF",
-  shadow: "#9E9688",
+  shadow: "#090A10",
 };
 
 export default function Saved() {
@@ -60,10 +60,11 @@ export default function Saved() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
+      {/* 🌅 HOME VE EXPLORE İLE SENKRONİZE KOYU KAHRAMAN ALANI */}
       <LinearGradient
-        colors={["#E7DFD0", "#DDD5C5", "#D9D2C3"]}
+        colors={["#1C1F30", "#161826", "#131622"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.hero}
@@ -94,7 +95,7 @@ export default function Saved() {
               <Ionicons
                 name="heart-outline"
                 size={34}
-                color={COLORS.accentDark}
+                color={COLORS.accent}
               />
             </View>
             <Text style={styles.emptyTitle}>No saved places yet</Text>
@@ -110,11 +111,11 @@ export default function Saved() {
               <View style={styles.card}>
                 <TouchableOpacity
                   activeOpacity={0.88}
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, paddingRight: 8 }}
                   onPress={() => router.push(`/place?name=${item.name}`)}
                 >
-                  <Text style={styles.name}>{item.name}</Text>
-                  <Text style={styles.meta}>
+                  <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+                  <Text style={styles.meta} numberOfLines={1}>
                     {item.city} • {item.category} • ⭐ {item.rating}
                   </Text>
                 </TouchableOpacity>
@@ -126,8 +127,8 @@ export default function Saved() {
                 >
                   <Ionicons
                     name="heart"
-                    size={18}
-                    color={COLORS.accentDark}
+                    size={16}
+                    color={COLORS.white}
                   />
                   <Text style={styles.remove}>Remove</Text>
                 </TouchableOpacity>
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: COLORS.surfaceSoft,
+    backgroundColor: COLORS.surface,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -173,13 +174,14 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 32,
-    fontWeight: "800",
-    color: COLORS.text,
+    fontWeight: "700",
+    color: COLORS.white,
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
 
   subtitle: {
-    color: COLORS.textSoft,
+    color: "rgba(255,255,255,0.75)",
     fontSize: 15,
     lineHeight: 22,
   },
@@ -201,7 +203,7 @@ const styles = StyleSheet.create({
     paddingVertical: 36,
     paddingHorizontal: 20,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 3,
@@ -220,7 +222,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     color: COLORS.text,
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 8,
   },
 
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
     elevation: 4,
@@ -250,8 +252,9 @@ const styles = StyleSheet.create({
   name: {
     color: COLORS.text,
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 6,
+    letterSpacing: -0.3,
   },
 
   meta: {
@@ -267,13 +270,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 14,
-    marginLeft: 12,
+    marginLeft: 6,
   },
 
   remove: {
-    color: COLORS.accentDark,
-    fontWeight: "800",
-    marginLeft: 6,
+    color: COLORS.white,
+    fontWeight: "700",
+    marginLeft: 5,
     fontSize: 13,
   },
 });

@@ -102,7 +102,8 @@ const de = {
     thinking: "AI denkt nach...",
     askPlaceholder: "Frage den Reiseassistenten...",
     send: "Senden",
-    serverError: "Entschuldigung, ich konnte keine Verbindung zum Server herstellen.",
+    serverError:
+      "Entschuldigung, ich konnte keine Verbindung zum Server herstellen.",
     somethingWrong: "Etwas ist schiefgelaufen.",
     day: "Tag",
     showDayRoute: "Tagesroute anzeigen",
@@ -119,36 +120,111 @@ const de = {
   },
 
   home: {
-  title: "Entdecke die Türkei",
-  subtitle: "AI Reisebegleiter",
-  searchPlaceholder: "Reiseziele suchen...",
-  categories: "Kategorien",
-  featured: "Empfohlene Orte",
-  seeAll: "Alle ansehen",
+    title: "Entdecke die Türkei",
+    subtitle: "AI Reisebegleiter",
+
+    greeting: "Guten Morgen",
+    whereNext: "Wohin als Nächstes?",
+
+    searchPlaceholder: "Reiseziele suchen...",
+
+    categories: "Kategorien",
+
+    featured: "Empfohlene Orte",
+    featuredDestinations: "Empfohlene Orte",
+
+    seeAll: "Alle ansehen",
+    viewAll: "Alle ansehen",
+
+    attractions: "Sehenswürdigkeiten",
+    hotels: "Hotels",
+    food: "Essen",
+    nature: "Natur",
+    events: "Events",
+    beaches: "Strände",
+    shopping: "Shopping",
+    cities: "Städte",
+
+    searchResults: "Suchergebnisse",
+    noResults: "Keine Ergebnisse gefunden.",
+
+    topHotels: "Top Hotels",
+    topFood: "Top Restaurants",
+    topFoodPicks: "Top Restaurants",
+
+    aiAssistant: "AI Reiseassistent",
+    aiTravelCompanion: "AI Reisebegleiter",
+
+    aiPlanTitle: "Plane deine Reise mit AI",
+
+    aiPlanText:
+      "Frage nach Routen, Hotels, Restaurants und Stadtempfehlungen.",
+
+    aiTripPlanner: "AI Reiseplaner",
+
+    aiPowered: "KI GESTÜTZT",
+
+    planPerfectTrip: "Plane deine perfekte Reise",
+
+    planPerfectTripText:
+      "Erstelle eine persönliche Reiseroute basierend auf Stadt, Tagen und Interessen.",
+
+    planMyTrip: "Meine Reise planen",
+
+    aiForYou: "Für Dich",
+
+    hiddenGemsPicked: "Versteckte Orte nur für dich ausgewählt",
+
+    aiPick: "AI Empfehlung",
+
+    aiTravelText:
+      "Frage nach Hotels, Routen, Events und versteckten Orten.",
+
+    startChat: "Chat starten",
+  },
+  map: {
+  all: "Alle",
   attractions: "Sehenswürdigkeiten",
-  hotels: "Hotels",
   food: "Essen",
-  nature: "Natur",
-  events: "Events",
-  beaches: "Strände",
-  shopping: "Shopping",
-  cities: "Städte",
-  searchResults: "Suchergebnisse",
-  noResults: "Keine Ergebnisse gefunden.",
-  topHotels: "Top Hotels",
-  topFood: "Top Restaurants",
-  aiAssistant: "AI Reiseassistent",
-  aiPlanTitle: "Plane deine Reise mit AI",
-  aiPlanText: "Frage nach Routen, Hotels, Restaurants und Stadtempfehlungen.",
-  aiTripPlanner: "AI Reiseplaner",
+  hotels: "Hotels",
+  saved: "Gespeichert",
+
+  tripMap: "Reisekarte",
+  stopsSelected: "Stopps ausgewählt",
+
+  share: "Teilen",
+  clear: "Löschen",
+
+  nearbyPlaces: "Orte in der Nähe",
+  found: "gefunden",
+  openList: "Liste öffnen",
+  exit: "Beenden",
+
+  details: "Details",
+  navigate: "Navigation",
+
+  yourRoute: "Deine Route",
+  placesInPlan: "Orte in diesem Plan",
+  refit: "Neu zentrieren",
+
+  detailsButton: "Details ansehen",
+
+  distance: "Entfernung",
+  rating: "Bewertung",
+
+  noNearbyPlaces: "Keine Orte in der Nähe gefunden.",
+
+  kmAway: "km entfernt",
+
+  youAreHere: "Du bist hier",
 },
-saved: {
-  title: "Gespeicherte Orte",
-  empty: "Noch keine gespeicherten Orte.",
-  remove: "Entfernen",
-  removeErrorTitle: "Fehler",
-  removeErrorText: "Gespeicherter Ort konnte nicht entfernt werden.",
-},
+  saved: {
+    title: "Gespeicherte Orte",
+    empty: "Noch keine gespeicherten Orte.",
+    remove: "Entfernen",
+    removeErrorTitle: "Fehler",
+    removeErrorText: "Gespeicherter Ort konnte nicht entfernt werden.",
+  },
 };
 
 export default de;

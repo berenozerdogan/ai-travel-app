@@ -117,37 +117,110 @@ const tr = {
     dark: "Koyu",
     system: "Sistem",
   },
-home: {
-  title: "Türkiye'yi Keşfet",
-  subtitle: "AI Seyahat Asistanı",
-  searchPlaceholder: "Destinasyon ara...",
-  categories: "Kategoriler",
-  featured: "Öne Çıkan Yerler",
-  seeAll: "Tümünü Gör",
-  attractions: "Gezilecek Yerler",
-  hotels: "Oteller",
+
+  home: {
+    title: "Türkiye'yi Keşfet",
+    subtitle: "AI Seyahat Asistanı",
+    greeting: "Günaydın",
+    whereNext: "Sıradaki rota neresi?",
+
+    searchPlaceholder: "Destinasyon ara...",
+
+    categories: "Kategoriler",
+    featured: "Öne Çıkan Yerler",
+    featuredDestinations: "Öne Çıkan Yerler",
+
+    seeAll: "Tümünü Gör",
+    viewAll: "Tümünü Gör",
+
+    attractions: "Gezilecek Yerler",
+    hotels: "Oteller",
+    food: "Yemek",
+    nature: "Doğa",
+    events: "Etkinlikler",
+    beaches: "Plajlar",
+    shopping: "Alışveriş",
+    cities: "Şehirler",
+
+    searchResults: "Arama Sonuçları",
+    noResults: "Sonuç bulunamadı.",
+
+    topHotels: "Öne Çıkan Oteller",
+    topFood: "Öne Çıkan Lezzetler",
+    topFoodPicks: "En İyi Lezzetler",
+
+    aiAssistant: "AI Seyahat Asistanı",
+    aiTravelCompanion: "AI Seyahat Asistanı",
+
+    aiPlanTitle: "Gezini AI ile planla",
+    aiPlanText:
+      "Rotalar, oteller, restoranlar ve şehir önerileri için sor.",
+
+    aiTripPlanner: "AI Gezi Planlayıcı",
+
+    aiPowered: "YAPAY ZEKA DESTEKLİ",
+
+    planPerfectTrip: "Mükemmel seyahatini planla",
+
+    planPerfectTripText:
+      "Şehir, gün ve ilgi alanlarına göre kişisel rota oluştur.",
+
+    planMyTrip: "Seyahatimi Planla",
+
+    aiForYou: "Senin İçin",
+
+    hiddenGemsPicked: "Senin için seçilmiş gizli yerler",
+
+    aiPick: "AI Önerisi",
+
+    aiTravelText:
+      "Oteller, rotalar, etkinlikler ve gizli yerleri sor.",
+
+    startChat: "Sohbet Başlat",
+  },
+map: {
+  all: "Tümü",
+  attractions: "Gezilecek",
   food: "Yemek",
-  nature: "Doğa",
-  events: "Etkinlikler",
-  beaches: "Plajlar",
-  shopping: "Alışveriş",
-  cities: "Şehirler",
-  searchResults: "Arama Sonuçları",
-  noResults: "Sonuç bulunamadı.",
-  topHotels: "Öne Çıkan Oteller",
-  topFood: "Öne Çıkan Lezzetler",
-  aiAssistant: "AI Seyahat Asistanı",
-  aiPlanTitle: "Gezini AI ile planla",
-  aiPlanText: "Rotalar, oteller, restoranlar ve şehir önerileri için sor.",
-  aiTripPlanner: "AI Gezi Planlayıcı",
+  hotels: "Oteller",
+  saved: "Kaydedilenler",
+
+  tripMap: "Gezi Haritası",
+  stopsSelected: "durak seçildi",
+
+  share: "Paylaş",
+  clear: "Temizle",
+
+  nearbyPlaces: "Yakındaki Yerler",
+  found: "bulundu",
+  openList: "Listeyi Aç",
+  exit: "Çık",
+
+  details: "Detaylar",
+  navigate: "Yol Tarifi",
+
+  yourRoute: "Rotan",
+  placesInPlan: "yer içeriyor",
+  refit: "Ortala",
+
+  detailsButton: "Detayları Gör",
+
+  distance: "Mesafe",
+  rating: "Puan",
+
+  noNearbyPlaces: "Yakında yer bulunamadı.",
+
+  kmAway: "km uzaklıkta",
+
+  youAreHere: "Konumun",
 },
-saved: {
-  title: "Kaydedilen Yerler",
-  empty: "Henüz kaydedilen yer yok.",
-  remove: "Kaldır",
-  removeErrorTitle: "Hata",
-  removeErrorText: "Kaydedilen yer kaldırılamadı.",
-},
+  saved: {
+    title: "Kaydedilen Yerler",
+    empty: "Henüz kaydedilen yer yok.",
+    remove: "Kaldır",
+    removeErrorTitle: "Hata",
+    removeErrorText: "Kaydedilen yer kaldırılamadı.",
+  },
 };
 
 export default tr;

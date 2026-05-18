@@ -16,17 +16,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "../context/LanguageContext";
 
+// 🌉 BOĞAZIN KIZILI & SİSLİ GECE PLACE DETAILS RENKLERİ
 const COLORS = {
-  bg: "#D9D2C3",
-  surface: "#F6F1E7",
-  surfaceSoft: "#EFE7D8",
-  border: "#E8E0D1",
-  text: "#1E2418",
-  textSoft: "#5F6656",
-  accent: "#B8CC2A",
-  accentDark: "#28310F",
+  bg: "#131622",          // Derin, puslu gece denizi rengi
+  surface: "#1C1F30",     // Gece mavisi-gri asil kart yüzeyi
+  surfaceSoft: "#272B42", // Bilgi kartları, etiket çipleri ve avatar zeminleri
+  border: "rgba(255, 255, 255, 0.03)",
+  text: "#F1F3F9",        // Göz yormayan kirli beyaz ana başlıklar
+  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
+  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (Muted Crimson)
   white: "#FFFFFF",
-  shadow: "#9E9688",
+  shadow: "#090A10",
 };
 
 export default function Place() {
@@ -46,18 +46,18 @@ export default function Place() {
 
     const encodedName = encodeURIComponent(String(name));
 
-    fetch(`http://192.168.1.102:8000/places/${encodedName}`)
+    fetch(`http://10.0.2.2:8000/places/${encodedName}`)
       .then((res) => res.json())
       .then((data) => setPlace(data))
       .catch((err) => console.log(err));
 
-    fetch(`http://192.168.1.102:8000/analyze/${encodedName}`)
+    fetch(`http://10.0.2.2:8000/analyze/${encodedName}`)
       .then((res) => res.json())
       .then((data) => setAnalysis(data))
       .catch((err) => console.log(err));
 
     fetch(
-      `http://192.168.1.102:8000/summary/${encodedName}?language=${encodeURIComponent(
+      `http://10.0.2.2:8000/summary/${encodedName}?language=${encodeURIComponent(
         language
       )}`
     )
@@ -73,7 +73,7 @@ export default function Place() {
     setLoadingInsight(true);
 
     fetch(
-      `http://192.168.1.102:8000/reviews?place=${encodeURIComponent(
+      `http://10.0.2.2:8000/reviews?place=${encodeURIComponent(
         `${place.name} ${place.city || ""}`
       )}&language=${encodeURIComponent(language)}`
     )
@@ -88,7 +88,7 @@ export default function Place() {
       });
 
     fetch(
-      `http://192.168.1.102:8000/place-insight?place=${encodeURIComponent(
+      `http://10.0.2.2:8000/place-insight?place=${encodeURIComponent(
         place.name
       )}&city=${encodeURIComponent(place.city || "")}&language=${encodeURIComponent(
         language
@@ -159,10 +159,57 @@ export default function Place() {
     }
   };
 
+  const cleanDistrict = (district?: string) => {
+    if (!district) return "";
+    let value = String(district).trim();
+    value = value.replace(/^\d{5}\s*/, "").trim();
+
+    if (value.includes("/")) {
+      value = value.split("/")[0].trim();
+    }
+    if (value.includes(",")) {
+      value = value.split(",")[0].trim();
+    }
+    return value;
+  };
+
+  const categoryLabel = (category?: string) => {
+    if (!category) return "";
+    if (category === "attraction") return t("categories.attraction");
+    if (category === "restaurant") return t("categories.restaurant");
+    if (category === "hotel") return t("categories.hotel");
+    if (category === "cafe") return t("categories.cafe");
+    if (category === "museum") return t("categories.museum");
+    if (category === "shopping") return t("home.shopping");
+    return category;
+  };
+
+  const subcategoryLabel = (subcategory?: string) => {
+    if (!subcategory) return "";
+    const key = String(subcategory).toLowerCase();
+    const map: any = {
+      beach: "🏖️ Beach",
+      nature: "🌿 Nature",
+      shopping: "🛍️ Shopping",
+      historical: "🏛️ Historical",
+      museum: t("categories.museum"),
+      cafe: t("categories.cafe"),
+      hotel: t("categories.hotel"),
+      restaurant: t("categories.restaurant"),
+      attraction: t("categories.attraction"),
+    };
+    return map[key] || subcategory;
+  };
+
+  const shouldShowPrice =
+    place?.price_level &&
+    place.price_level !== "unknown" &&
+    place.price_level !== "UNKNOWN";
+
   if (!place) {
     return (
       <View style={styles.loadingContainer}>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar barStyle="light-content" />
         <Text style={styles.loadingText}>{t("common.loading")}</Text>
       </View>
     );
@@ -171,11 +218,8 @@ export default function Place() {
   const hasWebMentions = !!(
     insightData?.web_mentions && insightData.web_mentions.length > 0
   );
-
   const hasLocalReviews = !!(place.reviews && place.reviews.length > 0);
-
   const hasAiAnalysis = !!(analysis?.keywords && analysis.keywords.length > 0);
-
   const hasAiSummary = !!(
     summary?.summary &&
     typeof summary.summary === "string" &&
@@ -183,7 +227,6 @@ export default function Place() {
     !summary.summary.toLowerCase().includes("no reviews") &&
     !summary.summary.toLowerCase().includes("yorum bulunamadı")
   );
-
   const hasGoogleReviews = !!(
     reviewsData &&
     reviewsData.found &&
@@ -193,7 +236,7 @@ export default function Place() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
       <View style={styles.heroWrap}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -208,11 +251,12 @@ export default function Place() {
           </View>
         )}
 
+        {/* Maske geçişi yeni koyu temaya kusursuzca entegre edildi */}
         <LinearGradient
           colors={[
-            "rgba(24,25,18,0.04)",
-            "rgba(24,25,18,0.18)",
-            "rgba(24,25,18,0.70)",
+            "rgba(19,22,34,0.05)",
+            "rgba(19,22,34,0.25)",
+            "rgba(19,22,34,0.85)",
           ]}
           style={styles.imageOverlay}
         />
@@ -220,11 +264,33 @@ export default function Place() {
         <View style={styles.heroInfo}>
           <Text style={styles.title}>{place.name}</Text>
           <Text style={styles.heroMeta}>
-            {place.city} • {place.subcategory || place.category}
+            {place.city} • {subcategoryLabel(place.subcategory) || categoryLabel(place.category)}
           </Text>
         </View>
 
-        
+        <View style={styles.floatingActions}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={styles.saveButton}
+            onPress={savePlace}
+          >
+            <Ionicons name="heart-outline" size={18} color={COLORS.white} />
+            <Text style={styles.saveButtonText}>
+              {t("common.save") || "Kaydet"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={styles.mapButton}
+            onPress={showOnMap}
+          >
+            <Ionicons name="map-outline" size={18} color={COLORS.text} />
+            <Text style={styles.mapButtonText}>
+              {t("common.showOnMap")}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -307,23 +373,29 @@ export default function Place() {
 
           <View style={styles.infoCard}>
             <Text style={styles.infoLabel}>{t("place.district")}</Text>
-            <Text style={styles.infoValue}>{place.district}</Text>
+            <Text style={styles.infoValue}>
+              {cleanDistrict(place.district) || "-"}
+            </Text>
           </View>
 
           <View style={styles.infoCard}>
             <Text style={styles.infoLabel}>{t("place.category")}</Text>
-            <Text style={styles.infoValue}>{place.category}</Text>
+            <Text style={styles.infoValue}>{categoryLabel(place.category)}</Text>
           </View>
 
           <View style={styles.infoCard}>
             <Text style={styles.infoLabel}>{t("place.subcategory")}</Text>
-            <Text style={styles.infoValue}>{place.subcategory}</Text>
+            <Text style={styles.infoValue}>
+              {subcategoryLabel(place.subcategory) || "-"}
+            </Text>
           </View>
 
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>{t("place.price")}</Text>
-            <Text style={styles.infoValue}>{place.price_level}</Text>
-          </View>
+          {shouldShowPrice && (
+            <View style={styles.infoCard}>
+              <Text style={styles.infoLabel}>{t("place.price")}</Text>
+              <Text style={styles.infoValue}>{place.price_level}</Text>
+            </View>
+          )}
 
           <View style={styles.infoCardWide}>
             <Text style={styles.infoLabel}>{t("place.visitTime")}</Text>
@@ -354,18 +426,54 @@ export default function Place() {
 
         {hasGoogleReviews && (
           <>
-            <Text style={styles.sectionTitle}>{t("place.googleReviews")}</Text>
+            <View style={styles.reviewHeaderRow}>
+              <View>
+                <Text style={styles.sectionTitle}>{t("place.googleReviews")}</Text>
+                <Text style={styles.reviewSectionSubtitle}>
+                  {reviewsData.review_count} Google reviews • ⭐ {reviewsData.rating}
+                </Text>
+              </View>
+            </View>
+
             {reviewsData.reviews.slice(0, 3).map((review: any, index: number) => (
               <View key={index} style={styles.reviewCard}>
-                <Text style={styles.reviewAuthor}>
-                  {review.author} ⭐{review.rating}
+                <View style={styles.reviewTopRow}>
+                  <View style={styles.reviewAvatar}>
+                    <Text style={styles.reviewAvatarText}>
+                      {(review.author || "?").charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reviewAuthor}>{review.author}</Text>
+                    <Text style={styles.reviewTime}>
+                      ⭐ {review.rating} {review.publish_time ? `• ${review.publish_time}` : ""}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.reviewText} numberOfLines={5}>
+                  {review.text}
                 </Text>
-                <Text style={styles.reviewText}>{review.text}</Text>
-                {review.publish_time ? (
-                  <Text style={styles.reviewTime}>{review.publish_time}</Text>
-                ) : null}
               </View>
             ))}
+
+            <TouchableOpacity
+              activeOpacity={0.9}
+              style={styles.moreReviewsButton}
+              onPress={() =>
+                openLink(
+                  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    `${place.name} ${place.city || ""}`
+                  )}`
+                )
+              }
+            >
+              <Ionicons name="logo-google" size={18} color={COLORS.white} />
+              <Text style={styles.moreReviewsButtonText}>
+                Google Maps'te daha fazla yorum gör
+              </Text>
+            </TouchableOpacity>
           </>
         )}
 
@@ -461,11 +569,11 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: "rgba(246,241,231,0.88)",
+    backgroundColor: "rgba(28, 31, 48, 0.88)",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.40)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
 
   image: {
@@ -506,9 +614,10 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 30,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.white,
     marginBottom: 6,
+    letterSpacing: -0.5,
   },
 
   heroMeta: {
@@ -525,7 +634,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     zIndex: 4,
   },
-saveButton: {
+
+  saveButton: {
     flex: 1,
     height: 52,
     backgroundColor: COLORS.accent,
@@ -538,9 +648,9 @@ saveButton: {
   },
 
   saveButtonText: {
-    color: COLORS.accentDark,
+    color: COLORS.white,
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   mapButton: {
@@ -559,7 +669,7 @@ saveButton: {
   mapButtonText: {
     color: COLORS.text,
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   content: {
@@ -577,16 +687,17 @@ saveButton: {
   },
 
   smartScoreLabel: {
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 6,
+    letterSpacing: 0.2,
   },
 
   smartScoreValue: {
     color: COLORS.text,
     fontSize: 28,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 6,
   },
 
@@ -606,9 +717,9 @@ saveButton: {
   },
 
   mainInsightTitle: {
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 10,
   },
 
@@ -624,9 +735,9 @@ saveButton: {
   },
 
   insightLabel: {
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 8,
   },
 
@@ -675,7 +786,7 @@ saveButton: {
   infoValue: {
     fontSize: 15,
     color: COLORS.text,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   ratingBox: {
@@ -691,7 +802,7 @@ saveButton: {
   ratingTitle: {
     color: COLORS.text,
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   reviewCount: {
@@ -709,10 +820,11 @@ saveButton: {
 
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 22,
     marginBottom: 10,
     color: COLORS.text,
+    letterSpacing: -0.3,
   },
 
   sectionCard: {
@@ -744,7 +856,7 @@ saveButton: {
 
   keyword: {
     backgroundColor: COLORS.surfaceSoft,
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 20,
@@ -753,6 +865,8 @@ saveButton: {
     fontSize: 14,
     fontWeight: "700",
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   reviewCard: {
@@ -765,8 +879,8 @@ saveButton: {
   },
 
   reviewAuthor: {
-    color: COLORS.accentDark,
-    fontWeight: "800",
+    color: COLORS.accent,
+    fontWeight: "700",
     marginBottom: 8,
     fontSize: 15,
   },
@@ -807,8 +921,61 @@ saveButton: {
   },
 
   webLink: {
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     fontSize: 13,
     fontWeight: "700",
+  },
+
+  reviewHeaderRow: {
+    marginTop: 18,
+    marginBottom: 10,
+  },
+
+  reviewSectionSubtitle: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: -4,
+  },
+
+  reviewTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  reviewAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+
+  reviewAvatarText: {
+    color: COLORS.accent,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+
+  moreReviewsButton: {
+    height: 50,
+    borderRadius: 16,
+    backgroundColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    marginTop: 4,
+  },
+
+  moreReviewsButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "700",
+    marginLeft: 8,
   },
 });

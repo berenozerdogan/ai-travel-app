@@ -12,17 +12,22 @@ import {
   Alert,
   Modal,
   FlatList,
+  Linking,
+  Share,
+  Platform
 } from "react-native";
 import MapView, {
   Marker,
   Polyline,
   PROVIDER_GOOGLE,
   Region,
+  Callout,
 } from "react-native-maps";
 import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Place = {
   id: number;
@@ -38,21 +43,24 @@ type Place = {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
+// 🌉 BOĞAZIN KIZILI & SİSLİ GECE MAP RENKLERİ
 const COLORS = {
-  bg: "#D9D2C3",
-  surface: "#F6F1E7",
-  surfaceSoft: "#EFE7D8",
-  border: "#E8E0D1",
-  text: "#1E2418",
-  textSoft: "#5F6656",
-  accent: "#B8CC2A",
-  accentDark: "#28310F",
-  shadow: "#9E9688",
-  hotel: "#5C7FA3",
-  restaurant: "#C7863A",
-  attraction: "#D85B57",
-  selected: "#7A4B00",
-  overlay: "rgba(0,0,0,0.18)",
+  bg: "#131622",          // Derin, puslu gece denizi rengi
+  surface: "#1C1F30",     // Gece mavisi-gri asil kart ve panel yüzeyi
+  surfaceSoft: "#272B42", // Inputlar, iç kartlar ve inaktif çipler için soft kontrast ton
+  border: "rgba(255, 255, 255, 0.03)",
+  text: "#F1F3F9",        // Kirli beyaz başlıklar
+  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
+  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (Muted Crimson)
+  white: "#FFFFFF",
+  shadow: "#090A10",
+  
+  // 📍 Harita Pin Renkleri (Koyu temayla patlamayacak asil tonlar)
+  hotel: "#4A7BB0",       
+  restaurant: "#C48646",  
+  attraction: "#B55353",  
+  selected: "#FFFFFF",    
+  overlay: "rgba(9,10,16,0.65)",
 };
 
 const INITIAL_REGION: Region = {
@@ -67,6 +75,7 @@ const SHEET_EXPANDED = SCREEN_HEIGHT - 360;
 const NEARBY_RADIUS = 80;
 
 export default function MapScreen() {
+  const { t } = useLanguage();
   const params = useLocalSearchParams();
   const routeParam = typeof params.route === "string" ? params.route : "";
 
@@ -95,7 +104,7 @@ export default function MapScreen() {
   const isRouteMode = routePlaces.length > 1;
 
   useEffect(() => {
-    fetch("http://192.168.1.102:8000/places")
+    fetch("http://10.0.2.2:8000/places")
       .then((res) => res.json())
       .then((data) => setAllPlaces(data))
       .catch((err) => console.log(err));
@@ -251,7 +260,7 @@ export default function MapScreen() {
         filter !== "all" && filter !== "saved" ? `&category=${filter}` : "";
 
       const res = await fetch(
-        `http://192.168.1.102:8000/nearby?lat=${coords.latitude}&lng=${coords.longitude}&radius=${NEARBY_RADIUS}${categoryParam}`
+        `http://10.0.2.2:8000/nearby?lat=${coords.latitude}&lng=${coords.longitude}&radius=${NEARBY_RADIUS}${categoryParam}`
       );
       const data = await res.json();
 
@@ -310,6 +319,22 @@ export default function MapScreen() {
     fetchNearbyPlaces(userLocation, activeFilter);
   }, [activeFilter]);
 
+  const shareRoute = async () => {
+    if (!routePlaces.length) return;
+
+    const routeText = routePlaces
+      .map((place, index) => `${index + 1}. ${place.name} - ${place.city}`)
+      .join("\n");
+
+    try {
+      await Share.share({
+        message: `AI Travel App Rotam\n\n${routeText}`,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const clearRoute = () => {
     setRoutePlaces([]);
     setSelectedPlace(null);
@@ -359,6 +384,20 @@ export default function MapScreen() {
     );
   };
 
+  const openInMaps = (place: Place) => {
+    const lat = place.latitude;
+    const lng = place.longitude;
+
+    const url = Platform.select({
+      ios: `http://maps.apple.com/?ll=${lat},${lng}`,
+      android: `geo:${lat},${lng}?q=${lat},${lng}(${place.name})`,
+    });
+
+    if (url) {
+      Linking.openURL(url);
+    }
+  };
+
   const markerColor = (place: Place) => {
     if (selectedPlace?.id === place.id) return COLORS.selected;
     if (place.category === "hotel") return COLORS.hotel;
@@ -382,7 +421,7 @@ export default function MapScreen() {
     >
       <View style={styles.nearbyItemLeft}>
         <View style={styles.nearbyItemIcon}>
-          <Ionicons name="location-outline" size={18} color={COLORS.accentDark} />
+          <Ionicons name="location-outline" size={18} color={COLORS.white} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.nearbyItemTitle} numberOfLines={1}>
@@ -408,7 +447,7 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
       <MapView
         ref={mapRef}
@@ -416,6 +455,7 @@ export default function MapScreen() {
         style={styles.map}
         initialRegion={INITIAL_REGION}
         onPress={() => setSelectedPlace(null)}
+        userInterfaceStyle="dark" // Google haritasının gece moduna daha yakın durmasını tetikler
       >
         {isRouteMode && (
           <Polyline
@@ -435,15 +475,30 @@ export default function MapScreen() {
               latitude: place.latitude,
               longitude: place.longitude,
             }}
-            pinColor={markerColor(place)}
+            pinColor={!isRouteMode ? markerColor(place) : undefined}
             onPress={() => focusPlace(place)}
-          />
+          >
+            {isRouteMode ? (
+              <View style={styles.routeMarker}>
+                <Text style={styles.routeMarkerText}>{index + 1}</Text>
+              </View>
+            ) : null}
+
+            <Callout>
+              <View style={styles.calloutBox}>
+                <Text style={styles.calloutTitle}>{place.name}</Text>
+                <Text style={styles.calloutMeta}>
+                  {place.city} • {place.category}
+                </Text>
+              </View>
+            </Callout>
+          </Marker>
         ))}
 
         {userLocation && (
           <Marker
             coordinate={userLocation}
-            pinColor="#4A6CF7"
+            pinColor="#3A86FF"
             title="You are here"
           />
         )}
@@ -453,15 +508,26 @@ export default function MapScreen() {
         {isRouteMode ? (
           <View style={styles.tripHeader}>
             <View>
-              <Text style={styles.tripTitle}>Trip Map</Text>
+              <Text style={styles.tripTitle}>{t("map.tripMap")}</Text>
               <Text style={styles.tripSubtitle}>
-                {routePlaces.length} stops selected
+                {routePlaces.length} {t("map.stopsSelected")}
               </Text>
             </View>
 
-            <TouchableOpacity style={styles.clearButton} onPress={clearRoute}>
-              <Text style={styles.clearButtonText}>Clear Route</Text>
-            </TouchableOpacity>
+            <View style={styles.tripActions}>
+              <TouchableOpacity style={styles.shareRouteButton} onPress={shareRoute}>
+                <Ionicons
+                  name="share-social-outline"
+                  size={16}
+                  color={COLORS.text}
+                />
+                <Text style={styles.shareRouteButtonText}>{t("map.share")}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.clearButton} onPress={clearRoute}>
+                <Text style={styles.clearButtonText}>{t("map.clear")}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           <>
@@ -561,14 +627,19 @@ export default function MapScreen() {
               style={styles.secondaryButton}
               onPress={() => router.push(`/place?name=${selectedPlace.name}`)}
             >
-              <Text style={styles.secondaryButtonText}>View Details</Text>
+              <Text style={styles.secondaryButtonText}>{t("map.details")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={() => focusPlace(selectedPlace)}
+              style={styles.mapsButton}
+              onPress={() => openInMaps(selectedPlace)}
             >
-              <Text style={styles.primaryButtonText}>Focus</Text>
+              <Ionicons
+                name="navigate-outline"
+                size={18}
+                color={COLORS.white}
+              />
+              <Text style={styles.mapsButtonText}>{t("map.navigate")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -583,64 +654,98 @@ export default function MapScreen() {
 
           <View style={styles.sheetHeader}>
             <View>
-              <Text style={styles.sheetTitle}>Your Route</Text>
+              <Text style={styles.sheetTitle}>{t("map.yourRoute")}</Text>
               <Text style={styles.sheetSubtitle}>
-                {routePlaces.length} places in this plan
+                {routePlaces.length} {t("map.placesInPlan")}
               </Text>
             </View>
 
             <TouchableOpacity style={styles.sheetMapButton} onPress={centerAll}>
               <Ionicons name="map-outline" size={18} color={COLORS.text} />
-              <Text style={styles.sheetMapButtonText}>Refit</Text>
+              <Text style={styles.sheetMapButtonText}>{t("map.refit")}</Text>
             </TouchableOpacity>
           </View>
 
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.routeChipsRow}
+            contentContainerStyle={styles.routeCardsRow}
           >
             {routePlaces.map((place, index) => (
               <TouchableOpacity
                 key={`${place.id}-${index}`}
-                style={styles.routeChip}
-                onPress={() => setSelectedPlace(place)}
+                style={[
+                  styles.routeModernCard,
+                  selectedPlace?.id === place.id && styles.routeModernCardActive,
+                ]}
+                activeOpacity={0.9}
+                onPress={() => focusPlace(place)}
               >
-                <Text style={styles.routeChipIndex}>{index + 1}</Text>
-                <Text style={styles.routeChipText} numberOfLines={1}>
-                  {place.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          <View style={styles.sheetList}>
-            {routePlaces.map((place, index) => (
-              <TouchableOpacity
-                key={`row-${place.id}-${index}`}
-                style={styles.sheetRow}
-                onPress={() => setSelectedPlace(place)}
-              >
-                <View style={styles.sheetRowLeft}>
-                  <View style={styles.sheetRowIndex}>
-                    <Text style={styles.sheetRowIndexText}>{index + 1}</Text>
+                <View style={styles.routeModernTop}>
+                  <View style={styles.routeNumber}>
+                    <Text style={styles.routeNumberText}>{index + 1}</Text>
                   </View>
-                  <View>
-                    <Text style={styles.sheetRowTitle}>{place.name}</Text>
-                    <Text style={styles.sheetRowMeta}>
-                      {place.city} • {place.category}
+
+                  <View style={{ flex: 1 }}>
+                    <Text numberOfLines={1} style={styles.routeModernTitle}>
+                      {place.name}
+                    </Text>
+                    <Text style={styles.routeModernMeta}>
+                      {place.city}
                     </Text>
                   </View>
                 </View>
 
-                <Ionicons
-                  name="chevron-forward"
-                  size={18}
-                  color={COLORS.textSoft}
-                />
+                <View style={styles.routeModernBottom}>
+                  <Text style={styles.routeModernCategory}>
+                    {place.subcategory || place.category}
+                  </Text>
+                  <Text style={styles.routeModernRating}>
+                    ⭐ {place.rating ?? "-"}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.routeDetailsButton}
+                  activeOpacity={0.9}
+                  onPress={() => router.push(`/place?name=${place.name}`)}
+                >
+                  <Text style={styles.routeDetailsButtonText}>{t("map.detailsButton")}</Text>
+                  <Ionicons name="chevron-forward" size={15} color={COLORS.white} />
+                </TouchableOpacity>
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
+
+          <ScrollView style={styles.sheetListWrapper} showsVerticalScrollIndicator={false}>
+            <View style={styles.sheetList}>
+              {routePlaces.map((place, index) => (
+                <TouchableOpacity
+                  key={`row-${place.id}-${index}`}
+                  style={styles.sheetRow}
+                  onPress={() => setSelectedPlace(place)}
+                >
+                  <View style={styles.sheetRowLeft}>
+                    <View style={styles.sheetRowIndex}>
+                      <Text style={styles.sheetRowIndexText}>{index + 1}</Text>
+                    </View>
+                    <View>
+                      <Text style={styles.sheetRowTitle}>{place.name}</Text>
+                      <Text style={styles.sheetRowMeta}>
+                        {place.city} • {place.category}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Ionicons
+                    name="chevron-forward"
+                    size={18}
+                    color={COLORS.textSoft}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         </Animated.View>
       )}
 
@@ -749,7 +854,7 @@ const styles = StyleSheet.create({
   },
 
   tripHeader: {
-    backgroundColor: "rgba(246,241,231,0.96)",
+    backgroundColor: "rgba(28, 31, 48, 0.95)",
     borderRadius: 22,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -758,7 +863,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.14,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 4,
@@ -766,9 +871,10 @@ const styles = StyleSheet.create({
 
   tripTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 2,
+    letterSpacing: -0.3,
   },
 
   tripSubtitle: {
@@ -786,8 +892,8 @@ const styles = StyleSheet.create({
   },
 
   clearButtonText: {
-    color: COLORS.accentDark,
-    fontWeight: "800",
+    color: COLORS.white,
+    fontWeight: "700",
     fontSize: 13,
   },
 
@@ -799,14 +905,14 @@ const styles = StyleSheet.create({
     height: 44,
     paddingHorizontal: 16,
     borderRadius: 999,
-    backgroundColor: "rgba(246,241,231,0.96)",
+    backgroundColor: "rgba(28, 31, 48, 0.95)",
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.2,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
@@ -820,16 +926,17 @@ const styles = StyleSheet.create({
   filterChipText: {
     color: COLORS.text,
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "600",
   },
 
   filterChipTextActive: {
-    color: COLORS.accentDark,
+    color: COLORS.white,
+    fontWeight: "700",
   },
 
   nearbyBanner: {
     marginTop: 10,
-    backgroundColor: "rgba(246,241,231,0.96)",
+    backgroundColor: "rgba(28, 31, 48, 0.95)",
     borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -854,14 +961,14 @@ const styles = StyleSheet.create({
   nearbyBannerHint: {
     color: COLORS.textSoft,
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "500",
     marginRight: 12,
   },
 
   nearbyBannerAction: {
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   rightButtons: {
@@ -874,13 +981,13 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: "rgba(246,241,231,0.96)",
+    backgroundColor: "rgba(28, 31, 48, 0.95)",
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.25,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
@@ -897,7 +1004,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     padding: 16,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.16,
+    shadowOpacity: 0.3,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
     elevation: 5,
@@ -911,9 +1018,10 @@ const styles = StyleSheet.create({
 
   selectedTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 4,
+    letterSpacing: -0.3,
   },
 
   selectedMeta: {
@@ -939,7 +1047,7 @@ const styles = StyleSheet.create({
   ratingBadgeText: {
     color: COLORS.text,
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   selectedActions: {
@@ -958,22 +1066,7 @@ const styles = StyleSheet.create({
 
   secondaryButtonText: {
     color: COLORS.text,
-    fontWeight: "700",
-    fontSize: 14,
-  },
-
-  primaryButton: {
-    flex: 1,
-    height: 46,
-    borderRadius: 16,
-    backgroundColor: COLORS.accent,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  primaryButtonText: {
-    color: COLORS.accentDark,
-    fontWeight: "800",
+    fontWeight: "600",
     fontSize: 14,
   },
 
@@ -991,7 +1084,7 @@ const styles = StyleSheet.create({
     paddingBottom: 26,
     paddingHorizontal: 16,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.35,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: -4 },
     elevation: 8,
@@ -1002,7 +1095,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 5,
     borderRadius: 999,
-    backgroundColor: "#C7BEAF",
+    backgroundColor: "#3A3F58",
     marginBottom: 12,
   },
 
@@ -1015,9 +1108,10 @@ const styles = StyleSheet.create({
 
   sheetTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 2,
+    letterSpacing: -0.3,
   },
 
   sheetSubtitle: {
@@ -1036,52 +1130,19 @@ const styles = StyleSheet.create({
 
   sheetMapButtonText: {
     color: COLORS.text,
-    fontWeight: "700",
+    fontWeight: "600",
     fontSize: 13,
     marginLeft: 6,
   },
 
-  routeChipsRow: {
-    paddingRight: 8,
-    marginBottom: 14,
-  },
-
-  routeChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.surfaceSoft,
-    borderRadius: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginRight: 10,
-    maxWidth: 200,
-  },
-
-  routeChipIndex: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: COLORS.accent,
-    color: COLORS.accentDark,
-    textAlign: "center",
-    textAlignVertical: "center",
-    fontSize: 12,
-    fontWeight: "800",
-    marginRight: 8,
-    overflow: "hidden",
-    includeFontPadding: false,
-    paddingTop: 3,
-  },
-
-  routeChipText: {
-    color: COLORS.text,
-    fontSize: 13,
-    fontWeight: "700",
-    maxWidth: 140,
+  sheetListWrapper: {
+    flex: 1,
+    marginTop: 4,
   },
 
   sheetList: {
     gap: 10,
+    paddingBottom: 180, // Scroll alanının alt kısımlarda rahat kayması için
   },
 
   sheetRow: {
@@ -1091,6 +1152,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceSoft,
     borderRadius: 18,
     padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   sheetRowLeft: {
@@ -1102,22 +1165,24 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
 
   sheetRowIndexText: {
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   sheetRowTitle: {
     color: COLORS.text,
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 2,
   },
 
@@ -1154,7 +1219,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 5,
     borderRadius: 999,
-    backgroundColor: "#C7BEAF",
+    backgroundColor: "#3A3F58",
     marginBottom: 12,
   },
 
@@ -1168,8 +1233,9 @@ const styles = StyleSheet.create({
   listTitle: {
     color: COLORS.text,
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 2,
+    letterSpacing: -0.4,
   },
 
   listSubtitle: {
@@ -1208,11 +1274,12 @@ const styles = StyleSheet.create({
   sortChipText: {
     color: COLORS.text,
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "600",
   },
 
   sortChipTextActive: {
-    color: COLORS.accentDark,
+    color: COLORS.white,
+    fontWeight: "700",
   },
 
   nearbyItem: {
@@ -1223,6 +1290,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   nearbyItemLeft: {
@@ -1236,7 +1305,9 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -1245,7 +1316,7 @@ const styles = StyleSheet.create({
   nearbyItemTitle: {
     color: COLORS.text,
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 2,
   },
 
@@ -1256,7 +1327,7 @@ const styles = StyleSheet.create({
   },
 
   nearbyItemDistance: {
-    color: COLORS.accentDark,
+    color: COLORS.accent,
     fontSize: 12,
     fontWeight: "700",
   },
@@ -1269,7 +1340,7 @@ const styles = StyleSheet.create({
   nearbyItemRating: {
     color: COLORS.text,
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 6,
   },
 
@@ -1284,6 +1355,177 @@ const styles = StyleSheet.create({
   emptyListText: {
     color: COLORS.textSoft,
     fontSize: 14,
+    fontWeight: "500",
+  },
+
+  routeMarker: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: COLORS.accent,
+    borderWidth: 2,
+    borderColor: COLORS.white,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+
+  routeMarkerText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+
+  calloutBox: {
+    width: 180,
+    padding: 4,
+  },
+
+  calloutTitle: {
+    color: "#131622", // Callout balon içi beyaz olduğu için yazı koyu kalmalı
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+
+  calloutMeta: {
+    color: "#686E85",
+    fontSize: 12,
+  },
+
+  tripActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  shareRouteButton: {
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
+
+  shareRouteButtonText: {
+    color: COLORS.text,
     fontWeight: "600",
+    fontSize: 13,
+    marginLeft: 5,
+  },
+
+  routeCardsRow: {
+    paddingRight: 8,
+    marginBottom: 18,
+  },
+
+  routeModernCard: {
+    width: 220,
+    backgroundColor: COLORS.surfaceSoft,
+    borderRadius: 24,
+    padding: 16,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  routeModernCardActive: {
+    borderColor: COLORS.accent,
+    backgroundColor: "rgba(214, 90, 90, 0.08)",
+  },
+
+  routeModernTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+
+  routeNumber: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+
+  routeNumberText: {
+    color: COLORS.accent,
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  routeModernTitle: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+
+  routeModernMeta: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+  },
+
+  routeModernBottom: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  routeModernCategory: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    textTransform: "capitalize",
+  },
+
+  routeModernRating: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
+  routeDetailsButton: {
+    marginTop: 12,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: COLORS.accent,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  routeDetailsButtonText: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: "700",
+    marginRight: 4,
+  },
+
+  mapsButton: {
+    flex: 1,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
+
+  mapsButtonText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 14,
+    marginLeft: 6,
   },
 });
