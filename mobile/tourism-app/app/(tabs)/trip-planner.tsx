@@ -19,15 +19,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "../../context/LanguageContext";
 
 const COLORS = {
-  bg: "#131622",
-  surface: "#1C1F30",
-  surfaceSoft: "#272B42",
-  border: "rgba(255,255,255,0.04)",
-  text: "#F1F3F9",
-  textSoft: "#8E95B2",
-  accent: "#D65A5A",
+  bg: "#F7F4EF",
+  surface: "#FFFFFF",
+  surfaceSoft: "#F4F1EB",
+  border: "rgba(31,41,55,0.08)",
+  text: "#1F2937",
+  textSoft: "#6B7280",
+  accent: "#E85D75",
   white: "#FFFFFF",
-  shadow: "#090A10",
+  shadow: "#D6CEC2",
 };
 
 export default function TripPlanner() {
@@ -226,7 +226,7 @@ export default function TripPlanner() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
 
       <ScrollView
         ref={scrollRef}
@@ -247,7 +247,7 @@ export default function TripPlanner() {
           <TextInput
             style={styles.input}
             placeholder={t("tripPlanner.cityPlaceholder")}
-            placeholderTextColor="#5C627D"
+            placeholderTextColor="#9CA3AF"
             value={city}
             onChangeText={updateCity}
           />
@@ -256,7 +256,7 @@ export default function TripPlanner() {
           <TextInput
             style={styles.input}
             placeholder={t("tripPlanner.daysPlaceholder")}
-            placeholderTextColor="#5C627D"
+            placeholderTextColor="#9CA3AF"
             value={days}
             onChangeText={updateDays}
             keyboardType="numeric"
@@ -266,7 +266,7 @@ export default function TripPlanner() {
           <TextInput
             style={styles.input}
             placeholder={t("tripPlanner.interestsPlaceholder")}
-            placeholderTextColor="#5C627D"
+            placeholderTextColor="#9CA3AF"
             value={interests}
             onChangeText={updateInterests}
           />
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
   },
 
   budgetAmount: {
-    color: COLORS.white,
+    color: COLORS.accent,
     fontSize: 24,
     fontWeight: "800",
     marginBottom: 6,

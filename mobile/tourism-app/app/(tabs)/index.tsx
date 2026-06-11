@@ -28,18 +28,110 @@ const HERO_MAX_HEIGHT = 330;
 const HERO_MIN_HEIGHT = 190;
 const HERO_SCROLL_DISTANCE = HERO_MAX_HEIGHT - HERO_MIN_HEIGHT;
 
-// 🌉 BOĞAZIN KIZILI & SİSLİ GECE TEMASI (Muted Crimson & Midnight)
+// 🌤️ PREMIUM AÇIK TURİZM TEMASI
 const COLORS = {
-  bg: "#131622",          // Fotoğraftaki o derin, puslu gece denizi rengi
-  surface: "#1C1F30",     // Gece mavisi-gri asil kart yüzeyi
-  surfaceSoft: "#272B42", // İkon kutuları ve input için soft kontrast ton
-  text: "#F1F3F9",        // Göz yormayan, net kirli beyaz başlıklar
-  textSoft: "#8E95B2",    // Görseldeki sis bulutlarının puslu grisi
-  accent: "#D65A5A",      // 🎯 Aradığın o büyüleyici köprü kırmızısı (Muted Crimson)
-  accentDark: "#3F4463",  // Kategoriler ve yan ögeler için koyu lila-gri asalet tonu
+  bg: "#F7F4EF",
+  surface: "#FFFFFF",
+  surfaceSoft: "#F1EEE8",
+  text: "#1F2937",
+  textSoft: "#6B7280",
+  accent: "#E85D75",
+  accentDark: "#7C3AED",
   white: "#FFFFFF",
-  shadow: "#090A10",
+  shadow: "#C9BFB3",
 };
+
+function isValidImageUrl(uri?: string) {
+  if (!uri) return false;
+  const value = String(uri).trim();
+
+  if (
+    !value ||
+    value === "unknown" ||
+    value === "null" ||
+    value === "undefined"
+  ) {
+    return false;
+  }
+
+  return value.startsWith("http://") || value.startsWith("https://");
+}
+
+function getPlaceholderIcon(category?: string) {
+  const cat = String(category || "").toLowerCase();
+
+  if (cat.includes("hotel")) return "bed-outline";
+  if (cat.includes("restaurant") || cat.includes("food")) return "restaurant-outline";
+  if (cat.includes("cafe")) return "cafe-outline";
+  if (cat.includes("museum") || cat.includes("historical")) return "business-outline";
+  if (cat.includes("nature") || cat.includes("park")) return "leaf-outline";
+  if (cat.includes("tourism") || cat.includes("attraction")) return "map-outline";
+
+  return "image-outline";
+}
+
+function getPlaceholderLabel(category?: string) {
+  const cat = String(category || "").toLowerCase();
+
+  if (cat.includes("hotel")) return "Hotel";
+  if (cat.includes("restaurant") || cat.includes("food")) return "Restaurant";
+  if (cat.includes("cafe")) return "Cafe";
+  if (cat.includes("museum")) return "Museum";
+  if (cat.includes("historical")) return "Historical";
+  if (cat.includes("nature") || cat.includes("park")) return "Nature";
+  if (cat.includes("tourism") || cat.includes("attraction")) return "Travel Spot";
+
+  return "No Image";
+}
+
+function SmartImageBackground({
+  uri,
+  category,
+  style,
+  imageStyle,
+  children,
+}: any) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const showRealImage = isValidImageUrl(uri) && !imageFailed;
+
+  if (showRealImage) {
+    return (
+      <ImageBackground
+        source={{ uri: String(uri).trim() }}
+        style={style}
+        imageStyle={imageStyle}
+        onError={() => setImageFailed(true)}
+      >
+        {children}
+      </ImageBackground>
+    );
+  }
+
+  return (
+    <LinearGradient
+      colors={["#FFFFFF", "#F1EEE8", "#EDE7DD"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[style, imageStyle, styles.placeholderImage]}
+    >
+      <View style={styles.placeholderCenter}>
+        <View style={styles.placeholderIconWrap}>
+          <Ionicons
+            name={getPlaceholderIcon(category) as any}
+            size={34}
+            color={COLORS.accent}
+          />
+        </View>
+
+        <Text style={styles.placeholderTitle}>{getPlaceholderLabel(category)}</Text>
+        <Text style={styles.placeholderText}>Image not available</Text>
+      </View>
+
+      {children}
+    </LinearGradient>
+  );
+}
+
 
 export default function Home() {
   const { t } = useLanguage();
@@ -255,15 +347,8 @@ export default function Home() {
     router.push(`/(tabs)/explore?filter=${item.filter}`);
   };
 
-  const getFeaturedImage = (item: any, index: number) => {
-    if (item?.image) return item.image;
-    const fallbackImages = [
-      "https://i.pinimg.com/1200x/8d/d4/64/8dd4640d383f56a69a000561ad79bd36.jpg",
-      "https://images.unsplash.com/photo-1570213489059-0aac6626cade?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200&auto=format&fit=crop",
-    ];
-    return fallbackImages[index % fallbackImages.length];
+  const getFeaturedImage = (item: any) => {
+    return isValidImageUrl(item?.image) ? item.image : "";
   };
 
   const heroHeight = scrollY.interpolate({
@@ -324,7 +409,7 @@ export default function Home() {
             imageStyle={styles.heroImage}
           >
             <LinearGradient
-              colors={["rgba(19,22,34,0.15)", "rgba(19,22,34,0.55)", "#131622"]}
+              colors={["rgba(0,0,0,0.05)", "rgba(0,0,0,0.38)", "rgba(247,244,239,0.98)"]}
               style={styles.heroOverlay}
             />
           </ImageBackground>
@@ -359,7 +444,7 @@ export default function Home() {
               <Ionicons name="search-outline" size={20} color={COLORS.textSoft} />
               <TextInput
                 placeholder={t("home.searchPlaceholder")}
-                placeholderTextColor="#5C627D"
+                placeholderTextColor="#9CA3AF"
                 style={styles.searchInput}
                 value={query}
                 onChangeText={setQuery}
@@ -457,7 +542,7 @@ export default function Home() {
                   onPress={() => router.push("/(tabs)/trip-planner")}
                 >
                   <LinearGradient
-                    colors={["#3A242B", "#191B2A", "#1C1F30"]} 
+                    colors={["#FFF5F7", "#FFFFFF", "#F5F0EA"]} 
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.plannerGradient}
@@ -525,8 +610,10 @@ export default function Home() {
                         activeOpacity={0.92}
                         onPress={() => router.push({ pathname: "/place", params: { id: String(item.id) } })}
                       >
-                        <ImageBackground
-                          source={{ uri: getFeaturedImage(item, index) }}
+                        <SmartImageBackground
+                          uri={item.image}
+                          category={item.category}
+                          index={index}
                           style={styles.aiPickImage}
                           imageStyle={styles.aiPickImageStyle}
                         >
@@ -556,7 +643,7 @@ export default function Home() {
                               </View>
                             </View>
                           </LinearGradient>
-                        </ImageBackground>
+                        </SmartImageBackground>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -584,8 +671,10 @@ export default function Home() {
                     onPress={() => router.push({ pathname: "/place", params: { id: String(item.id) } })}
                     activeOpacity={0.92}
                   >
-                    <ImageBackground
-                      source={{ uri: getFeaturedImage(item, index) }}
+                    <SmartImageBackground
+                      uri={item.image}
+                      category={item.category}
+                      index={index}
                       style={styles.featuredImage}
                       imageStyle={styles.featuredImageStyle}
                     >
@@ -607,7 +696,7 @@ export default function Home() {
                           </View>
                         </View>
                       </LinearGradient>
-                    </ImageBackground>
+                    </SmartImageBackground>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -752,9 +841,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(255,255,255,0.22)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.14)",
+    borderColor: "rgba(255,255,255,0.34)",
   },
   heroCircleButton: {
     width: 38,
@@ -762,9 +851,9 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(255,255,255,0.22)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.14)",
+    borderColor: "rgba(255,255,255,0.34)",
   },
   greeting: {
     color: "rgba(255,255,255,0.75)",
@@ -792,7 +881,7 @@ const styles = StyleSheet.create({
     paddingRight: 6,
     height: 56,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.03)",
+    borderColor: "rgba(31,41,55,0.08)",
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -865,7 +954,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.03)",
+    borderColor: "rgba(31,41,55,0.08)",
   },
   categoryPillIcon: {
     width: 26,
@@ -893,7 +982,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(31,41,55,0.08)",
   },
   plannerContent: {
     flex: 1.3,
@@ -903,7 +992,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(214, 90, 90, 0.15)", 
+    backgroundColor: "rgba(232, 93, 117, 0.12)", 
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
@@ -955,7 +1044,7 @@ const styles = StyleSheet.create({
     width: 76,
     height: 76,
     borderRadius: 20,
-    backgroundColor: "rgba(214, 90, 90, 0.08)",
+    backgroundColor: "rgba(232, 93, 117, 0.10)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1010,7 +1099,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   hiddenGemText: {
-    color: COLORS.text,
+    color: COLORS.white,
     fontSize: 11,
     fontWeight: "600",
   },
@@ -1076,7 +1165,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "rgba(19,22,34,0.4)",
+    backgroundColor: "rgba(19,22,34,0.35)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1091,7 +1180,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   locationText: {
-    color: "#D1D5DB",
+    color: "rgba(255,255,255,0.82)",
     fontSize: 13,
     marginLeft: 4,
     fontWeight: "500",
@@ -1102,7 +1191,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 18,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.03)",
+    borderColor: "rgba(31,41,55,0.08)",
   },
   aiLeft: {
     flexDirection: "row",
@@ -1152,7 +1241,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.02)",
+    borderColor: "rgba(31,41,55,0.07)",
   },
   infoIconBox: {
     width: 40,
@@ -1207,6 +1296,38 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: 18,
     padding: 20,
+  },
+
+  placeholderImage: {
+    overflow: "hidden",
+  },
+  placeholderCenter: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 18,
+  },
+  placeholderIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    backgroundColor: "rgba(232, 93, 117, 0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "rgba(31,41,55,0.08)",
+  },
+  placeholderTitle: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+  placeholderText: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "600",
   },
   noResultText: {
     color: COLORS.textSoft,

@@ -26,16 +26,124 @@ type DayPlan = {
 };
 
 const COLORS = {
-  bg: "#131622",
-  surface: "#1C1F30",
-  surfaceSoft: "#272B42",
-  border: "rgba(255,255,255,0.04)",
-  text: "#F1F3F9",
-  textSoft: "#8E95B2",
-  accent: "#D65A5A",
+  bg: "#F7F4EF",
+  surface: "#FFFFFF",
+  surfaceSoft: "#F4F1EB",
+  border: "rgba(31,41,55,0.08)",
+  text: "#1F2937",
+  textSoft: "#6B7280",
+  accent: "#E85D75",
   white: "#FFFFFF",
-  overlay: "rgba(9,10,16,0.65)",
+  overlay: "rgba(0,0,0,0.25)",
+  shadow: "#D6CEC2",
 };
+
+
+const CHAT_FALLBACKS: Record<string, Record<string, string>> = {
+  "chat.title": {
+    tr: "AI Rehber",
+    en: "AI Guide",
+    de: "AI Reiseführer",
+    ru: "AI Гид",
+  },
+  "chat.subtitle": {
+    tr: "Türkiye genelinde gezileri; gezilecek yerler, oteller ve restoranlarla planla.",
+    en: "Plan trips across Turkey with attractions, hotels and restaurants.",
+    de: "Plane Reisen in der Türkei mit Sehenswürdigkeiten, Hotels und Restaurants.",
+    ru: "Планируй поездки по Турции с достопримечательностями, отелями и ресторанами.",
+  },
+  "chat.welcome": {
+    tr: "Merhaba! Ben Türkiye için AI seyahat asistanınım. Bana şehir planları, oteller, restoranlar, rotalar veya gezilecek yerler sorabilirsin.",
+    en: "Hi! I’m your AI travel assistant for Turkey. Ask me for city plans, hotels, restaurants, routes or attractions.",
+    de: "Hallo! Ich bin dein AI-Reiseassistent für die Türkei. Frag mich nach Stadtplänen, Hotels, Restaurants, Routen oder Sehenswürdigkeiten.",
+    ru: "Привет! Я твой AI-помощник по путешествиям в Турции. Спроси меня о планах городов, отелях, ресторанах, маршрутах или достопримечательностях.",
+  },
+  "chat.chats": {
+    tr: "Sohbetler",
+    en: "Chats",
+    de: "Chats",
+    ru: "Чаты",
+  },
+  "chat.newChat": {
+    tr: "Yeni Sohbet",
+    en: "New Chat",
+    de: "Neuer Chat",
+    ru: "Новый чат",
+  },
+  "chat.untitledChat": {
+    tr: "Başlıksız sohbet",
+    en: "Untitled chat",
+    de: "Unbenannter Chat",
+    ru: "Без названия",
+  },
+  "chat.noSavedChats": {
+    tr: "Henüz kayıtlı sohbet yok.",
+    en: "No saved chats yet.",
+    de: "Noch keine gespeicherten Chats.",
+    ru: "Пока нет сохранённых чатов.",
+  },
+  "chat.thinking": {
+    tr: "AI düşünüyor...",
+    en: "AI is thinking...",
+    de: "AI denkt nach...",
+    ru: "AI думает...",
+  },
+  "chat.askPlaceholder": {
+    tr: "Seyahat asistanına sor...",
+    en: "Ask travel assistant...",
+    de: "Frag den Reiseassistenten...",
+    ru: "Спроси помощника...",
+  },
+  "chat.serverError": {
+    tr: "Üzgünüm, sunucuya bağlanamadım.",
+    en: "Sorry, I could not connect to the server.",
+    de: "Entschuldigung, ich konnte keine Verbindung zum Server herstellen.",
+    ru: "Извините, не удалось подключиться к серверу.",
+  },
+  "chat.somethingWrong": {
+    tr: "Bir şeyler ters gitti.",
+    en: "Something went wrong.",
+    de: "Etwas ist schiefgelaufen.",
+    ru: "Что-то пошло не так.",
+  },
+  "chat.day": {
+    tr: "Gün",
+    en: "Day",
+    de: "Tag",
+    ru: "День",
+  },
+  "chat.showDayRoute": {
+    tr: "Günün Rotasını Göster",
+    en: "Show Day Route",
+    de: "Tagesroute anzeigen",
+    ru: "Показать маршрут дня",
+  },
+  "chat.showRoute": {
+    tr: "Rotayı Göster",
+    en: "Show Route",
+    de: "Route anzeigen",
+    ru: "Показать маршрут",
+  },
+  "common.showOnMap": {
+    tr: "Haritada Göster",
+    en: "Show on Map",
+    de: "Auf Karte anzeigen",
+    ru: "Показать на карте",
+  },
+};
+
+function safeT(
+  t: (key: string) => string,
+  key: string,
+  fallback: string,
+  language: string
+) {
+  const value = t(key);
+  if (value && value !== key) return value;
+
+  const lang = String(language || "en").toLowerCase();
+  return CHAT_FALLBACKS[key]?.[lang] || CHAT_FALLBACKS[key]?.en || fallback;
+}
 
 export default function Chat() {
   const params = useLocalSearchParams();
@@ -51,6 +159,7 @@ export default function Chat() {
   } = useChat();
 
   const messages = activeChat?.messages ?? [];
+  const welcomeText = safeT(t, "chat.welcome", "Merhaba! Ben Türkiye için AI seyahat asistanınım. Bana şehir planları, oteller, restoranlar, rotalar veya gezilecek yerler sorabilirsin.", language);
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,9 +170,23 @@ export default function Chat() {
 
   useEffect(() => {
     if (!activeChatId) {
-      createNewChat(t("chat.welcome"));
+      createNewChat(welcomeText);
     }
-  }, [activeChatId, t, createNewChat]);
+  }, [activeChatId, welcomeText, createNewChat]);
+
+
+  useEffect(() => {
+    const onlyWelcome =
+      messages.length <= 1 &&
+      (!messages[0] || messages[0].sender === "ai");
+
+    if (activeChatId && onlyWelcome) {
+      createNewChat(welcomeText);
+      setInput("");
+      setLoading(false);
+      setHasAutoSent(false);
+    }
+  }, [language]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -72,7 +195,7 @@ export default function Chat() {
   };
 
   const newChat = () => {
-    createNewChat(t("chat.welcome"));
+    createNewChat(welcomeText);
     setInput("");
     setLoading(false);
     setHasAutoSent(false);
@@ -150,7 +273,7 @@ export default function Chat() {
 
       const aiMessage: ChatMessage = {
         id: Date.now().toString() + "_ai",
-        text: data.reply || t("chat.somethingWrong"),
+        text: data.reply || safeT(t, "chat.somethingWrong", "Bir şeyler ters gitti.", language),
         sender: "ai",
         places: data.places || [],
         days: data.days || [],
@@ -162,7 +285,7 @@ export default function Chat() {
 
       appendMessageToChat(currentChatId, {
         id: Date.now().toString() + "_error",
-        text: t("chat.serverError"),
+        text: safeT(t, "chat.serverError", "Üzgünüm, sunucuya bağlanamadım.", language),
         sender: "ai",
         places: [],
         days: [],
@@ -231,7 +354,7 @@ export default function Chat() {
             {item.days!.map((dayItem: DayPlan, dayIndex: number) => (
               <View key={dayIndex} style={styles.dayCard}>
                 <Text style={styles.dayTitle}>
-                  {t("chat.day")} {dayItem.day}
+                  {safeT(t, "chat.day", "Gün", language)} {dayItem.day}
                 </Text>
 
                 <View style={styles.chipsWrap}>
@@ -245,8 +368,8 @@ export default function Chat() {
                   >
                     <Text style={styles.routeButtonText}>
                       {dayItem.places.length === 1
-                        ? t("common.showOnMap")
-                        : t("chat.showDayRoute")}
+                        ? safeT(t, "common.showOnMap", "Haritada Göster", language)
+                        : safeT(t, "chat.showDayRoute", "Günün Rotasını Göster", language)}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -266,8 +389,8 @@ export default function Chat() {
               >
                 <Text style={styles.routeButtonText}>
                   {item.places.length === 1
-                    ? t("common.showOnMap")
-                    : t("chat.showRoute")}
+                    ? safeT(t, "common.showOnMap", "Haritada Göster", language)
+                    : safeT(t, "chat.showRoute", "Rotayı Göster", language)}
                 </Text>
               </TouchableOpacity>
             )}
@@ -279,7 +402,7 @@ export default function Chat() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
 
       <Modal
         visible={menuVisible}
@@ -294,11 +417,11 @@ export default function Chat() {
           />
 
           <View style={styles.sideMenu}>
-            <Text style={styles.sideMenuTitle}>{t("chat.chats")}</Text>
+            <Text style={styles.sideMenuTitle}>{safeT(t, "chat.chats", "Sohbetler", language)}</Text>
 
             <TouchableOpacity style={styles.sideNewChat} onPress={newChat}>
               <Ionicons name="add-outline" size={18} color={COLORS.white} />
-              <Text style={styles.sideNewChatText}>{t("chat.newChat")}</Text>
+              <Text style={styles.sideNewChatText}>{safeT(t, "chat.newChat", "Yeni Sohbet", language)}</Text>
             </TouchableOpacity>
 
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -315,12 +438,12 @@ export default function Chat() {
                       color={COLORS.accent}
                     />
                     <Text style={styles.historyItemText} numberOfLines={2}>
-                      {chat.title || t("chat.untitledChat")}
+                      {chat.title || safeT(t, "chat.untitledChat", "Başlıksız sohbet", language)}
                     </Text>
                   </TouchableOpacity>
                 ))
               ) : (
-                <Text style={styles.emptyHistory}>{t("chat.noSavedChats")}</Text>
+                <Text style={styles.emptyHistory}>{safeT(t, "chat.noSavedChats", "Henüz kayıtlı sohbet yok.", language)}</Text>
               )}
             </ScrollView>
           </View>
@@ -333,7 +456,7 @@ export default function Chat() {
         keyboardVerticalOffset={8}
       >
         <LinearGradient
-          colors={["#1C1F30", "#161826", "#131622"]}
+          colors={["#FFFFFF", "#FAF8F5", "#F7F4EF"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.header}
@@ -348,12 +471,12 @@ export default function Chat() {
 
             <TouchableOpacity style={styles.newChatButton} onPress={newChat}>
               <Ionicons name="add-outline" size={16} color={COLORS.white} />
-              <Text style={styles.newChatButtonText}>{t("chat.newChat")}</Text>
+              <Text style={styles.newChatButtonText}>{safeT(t, "chat.newChat", "Yeni Sohbet", language)}</Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.title}>{t("chat.title")}</Text>
-          <Text style={styles.subtitle}>{t("chat.subtitle")}</Text>
+          <Text style={styles.title}>{safeT(t, "chat.title", "AI Rehber", language)}</Text>
+          <Text style={styles.subtitle}>{safeT(t, "chat.subtitle", "Türkiye genelinde gezileri; gezilecek yerler, oteller ve restoranlarla planla.", language)}</Text>
         </LinearGradient>
 
         <FlatList
@@ -366,7 +489,7 @@ export default function Chat() {
           ListFooterComponent={
             loading ? (
               <View style={styles.loadingBubble}>
-                <Text style={styles.loadingText}>{t("chat.thinking")}</Text>
+                <Text style={styles.loadingText}>{safeT(t, "chat.thinking", "AI düşünüyor...", language)}</Text>
               </View>
             ) : null
           }
@@ -375,8 +498,8 @@ export default function Chat() {
         <View style={styles.inputBar}>
           <TextInput
             style={styles.input}
-            placeholder={t("chat.askPlaceholder")}
-            placeholderTextColor="#5C627D"
+            placeholder={safeT(t, "chat.askPlaceholder", "Seyahat asistanına sor...", language)}
+            placeholderTextColor="#9CA3AF"
             value={input}
             onChangeText={setInput}
             multiline
@@ -423,7 +546,12 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 16,
     borderLeftWidth: 1,
-    borderLeftColor: "rgba(255,255,255,0.02)",
+    borderLeftColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    shadowOffset: { width: -6, height: 0 },
+    elevation: 12,
   },
 
   sideMenuTitle: {
@@ -482,6 +610,13 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
 
   topRow: {
@@ -496,9 +631,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.14)",
+    borderColor: COLORS.border,
   },
 
   newChatButton: {
@@ -518,14 +653,14 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: COLORS.white,
+    color: COLORS.text,
     fontSize: 30,
     fontWeight: "700",
     marginBottom: 6,
   },
 
   subtitle: {
-    color: "rgba(255,255,255,0.75)",
+    color: COLORS.textSoft,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -559,6 +694,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     borderBottomLeftRadius: 6,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   messageText: {
@@ -586,6 +726,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 14,
     marginTop: 8,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
   },
 
   dayTitle: {
@@ -661,6 +806,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 10,
   },
 
   input: {

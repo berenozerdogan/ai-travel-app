@@ -18,19 +18,19 @@ import { useLanguage } from "../context/LanguageContext";
 
 // 🌉 BOĞAZIN KIZILI & SİSLİ GECE PLACE DETAILS RENKLERİ
 const COLORS = {
-  bg: "#131622",          // Derin, puslu gece denizi rengi
-  surface: "#1C1F30",     // Gece mavisi-gri asil kart yüzeyi
-  surfaceSoft: "#272B42", // Bilgi kartları, etiket çipleri ve avatar zeminleri
-  border: "rgba(255, 255, 255, 0.03)",
-  text: "#F1F3F9",        // Göz yormayan kirli beyaz ana başlıklar
-  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
-  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (Muted Crimson)
+  bg: "#F7F4EF",
+  surface: "#FFFFFF",
+  surfaceSoft: "#F4F1EB",
+  border: "rgba(31,41,55,0.08)",
+  text: "#1F2937",
+  textSoft: "#6B7280",
+  accent: "#E85D75",
   white: "#FFFFFF",
-  shadow: "#090A10",
+  shadow: "#D6CEC2",
 };
 
 export default function Place() {
-  const { id, name } = useLocalSearchParams();
+  const { id, name, from } = useLocalSearchParams();
   const { t, language } = useLanguage();
 
   const [place, setPlace] = useState<any>(null);
@@ -275,7 +275,7 @@ export default function Place() {
   if (!place) {
     return (
       <View style={styles.loadingContainer}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle="dark-content" />
         <Text style={styles.loadingText}>{t("common.loading")}</Text>
       </View>
     );
@@ -302,10 +302,16 @@ export default function Place() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
 
       <View style={styles.heroWrap}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => {
+  if (from === "map") {
+    router.replace("/(tabs)/map");
+  } else {
+    router.back();
+  }
+}}>
           <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
 
@@ -646,11 +652,16 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: "rgba(28, 31, 48, 0.88)",
+    backgroundColor: "rgba(255,255,255,0.92)",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 4,
   },
 
   image: {
@@ -722,6 +733,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginRight: 10,
     gap: 8,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.24,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
   },
 
   saveButtonText: {
@@ -741,6 +757,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   mapButtonText: {
@@ -770,6 +791,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     marginBottom: 14,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
 
   smartScoreLabel: {
@@ -800,6 +826,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     marginBottom: 12,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
   },
 
   mainInsightTitle: {
@@ -850,6 +881,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 14,
     marginBottom: 10,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   infoCardWide: {
@@ -860,6 +896,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 14,
     marginBottom: 10,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   infoLabel: {
@@ -883,6 +924,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   ratingTitle: {
@@ -919,6 +965,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: 14,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   description: {
@@ -962,6 +1013,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   reviewAuthor: {
@@ -990,6 +1046,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   webTitle: {

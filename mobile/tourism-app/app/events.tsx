@@ -22,17 +22,16 @@ type EventItem = {
   source: string;
 };
 
-// 🌉 BOĞAZIN KIZILI & SİSLİ GECE EVENTS RENKLERİ
 const COLORS = {
-  bg: "#131622",          // Derin, puslu gece denizi rengi
-  surface: "#1C1F30",     // Gece mavisi-gri asil kart yüzeyi
-  surfaceSoft: "#272B42", // Input içi, ikon zeminleri ve yan haplar için kontrast ton
-  border: "rgba(255, 255, 255, 0.03)",
-  text: "#F1F3F9",        // Göz yormayan kirli beyaz başlıklar
-  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
-  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (Muted Crimson)
+  bg: "#F7F4EF",
+  surface: "#FFFFFF",
+  surfaceSoft: "#F4F1EB",
+  border: "rgba(31,41,55,0.08)",
+  text: "#1F2937",
+  textSoft: "#6B7280",
+  accent: "#E85D75",
   white: "#FFFFFF",
-  shadow: "#090A10",
+  shadow: "#D6CEC2",
 };
 
 export default function EventsScreen() {
@@ -64,22 +63,18 @@ export default function EventsScreen() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="light-content" />
-      
-      {/* 🌅 HOME VE EXPLORE EKRAANLARIYLA SENKRONİZE KOYU GRADYAN BAŞLIK ALANI */}
+      <StatusBar barStyle="dark-content" />
+
       <LinearGradient
-        colors={["#1C1F30", "#161826", "#131622"]}
+        colors={["#FFFFFF", "#FAF8F5", "#F7F4EF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.hero}
       >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
-        
+
         <Text style={styles.title}>Live Events</Text>
         <Text style={styles.subtitle}>
           Discover concerts, festivals and local events by city.
@@ -87,17 +82,14 @@ export default function EventsScreen() {
 
         <View style={styles.searchRow}>
           <View style={styles.inputWrap}>
-            <Ionicons
-              name="location-outline"
-              size={18}
-              color={COLORS.textSoft}
-            />
+            <Ionicons name="location-outline" size={18} color={COLORS.textSoft} />
+
             <TextInput
               style={styles.input}
               value={city}
               onChangeText={setCity}
               placeholder="City"
-              placeholderTextColor="#5C627D"
+              placeholderTextColor="#9CA3AF"
             />
           </View>
 
@@ -114,16 +106,12 @@ export default function EventsScreen() {
           </View>
         ) : events.length === 0 ? (
           <View style={styles.infoBox}>
-            <Text style={styles.info}>
-              No live events found for this city yet.
-            </Text>
+            <Text style={styles.info}>No live events found for this city yet.</Text>
           </View>
         ) : (
           <FlatList
             data={events}
-            keyExtractor={(item, index) =>
-              `${item.title}-${item.date}-${index}`
-            }
+            keyExtractor={(item, index) => `${item.title}-${item.date}-${index}`}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 110 }}
             renderItem={({ item }) => (
@@ -141,29 +129,17 @@ export default function EventsScreen() {
                 <Text style={styles.eventTitle}>{item.title}</Text>
 
                 <View style={styles.metaRow}>
-                  <Ionicons
-                    name="location-outline"
-                    size={16}
-                    color={COLORS.textSoft}
-                  />
+                  <Ionicons name="location-outline" size={16} color={COLORS.textSoft} />
                   <Text style={styles.meta}>{item.venue}</Text>
                 </View>
 
                 <View style={styles.metaRow}>
-                  <Ionicons
-                    name="calendar-outline"
-                    size={16}
-                    color={COLORS.textSoft}
-                  />
+                  <Ionicons name="calendar-outline" size={16} color={COLORS.textSoft} />
                   <Text style={styles.meta}>{item.date}</Text>
                 </View>
 
                 <View style={styles.metaRow}>
-                  <Ionicons
-                    name="time-outline"
-                    size={16}
-                    color={COLORS.textSoft}
-                  />
+                  <Ionicons name="time-outline" size={16} color={COLORS.textSoft} />
                   <Text style={styles.meta}>{item.time}</Text>
                 </View>
 
@@ -189,18 +165,25 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
 
   title: {
     fontSize: 32,
     fontWeight: "700",
-    color: COLORS.white,
+    color: COLORS.text,
     marginBottom: 8,
     letterSpacing: -0.5,
   },
 
   subtitle: {
-    color: "rgba(255,255,255,0.75)",
+    color: COLORS.textSoft,
     fontSize: 15,
     lineHeight: 22,
     marginBottom: 18,
@@ -214,7 +197,7 @@ const styles = StyleSheet.create({
   inputWrap: {
     flex: 1,
     height: 52,
-    backgroundColor: COLORS.surfaceSoft,
+    backgroundColor: COLORS.surface,
     borderRadius: 18,
     paddingHorizontal: 14,
     flexDirection: "row",
@@ -258,6 +241,11 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
   },
 
   info: {
@@ -274,7 +262,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.18,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 3,
@@ -349,7 +337,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: COLORS.surfaceSoft,
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: "center",

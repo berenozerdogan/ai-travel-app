@@ -17,21 +17,140 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLanguage } from "../../context/LanguageContext";
 
 const COLORS = {
-  bg: "#131622",
-  surface: "#1C1F30",
-  surfaceSoft: "#272B42",
-  border: "rgba(255, 255, 255, 0.03)",
-  text: "#F1F3F9",
-  textSoft: "#8E95B2",
-  accent: "#D65A5A",
+  bg: "#F7F4EF",
+  surface: "#FFFFFF",
+  surfaceSoft: "#F4F1EB",
+  border: "rgba(31,41,55,0.08)",
+  text: "#1F2937",
+  textSoft: "#6B7280",
+  accent: "#E85D75",
   white: "#FFFFFF",
-  shadow: "#090A10",
+  shadow: "#D6CEC2",
 };
+
+
+const SAVED_FALLBACKS: Record<string, Record<string, string>> = {
+  "saved.title": {
+    tr: "Favoriler",
+    en: "Saved",
+    de: "Gespeichert",
+    ru: "Сохранённое",
+  },
+  "saved.subtitle": {
+    tr: "Favori yerlerin, offline rotaların ve gezi notların.",
+    en: "Your favorite places, offline routes and travel notes.",
+    de: "Deine Lieblingsorte, Offline-Routen und Reisenotizen.",
+    ru: "Избранные места, офлайн-маршруты и заметки.",
+  },
+  "saved.places": {
+    tr: "Favoriler",
+    en: "Favorites",
+    de: "Favoriten",
+    ru: "Избранное",
+  },
+  "settings.visited": {
+    tr: "Ziyaret",
+    en: "Visited",
+    de: "Besucht",
+    ru: "Посещено",
+  },
+  "saved.routes": {
+    tr: "Rotalar",
+    en: "Routes",
+    de: "Routen",
+    ru: "Маршруты",
+  },
+  "saved.journal": {
+    tr: "Günlük",
+    en: "Journal",
+    de: "Tagebuch",
+    ru: "Дневник",
+  },
+  "saved.noPlacesTitle": {
+    tr: "Henüz favori yer yok",
+    en: "No saved places yet",
+    de: "Noch keine gespeicherten Orte",
+    ru: "Пока нет сохранённых мест",
+  },
+  "saved.noPlacesText": {
+    tr: "Favori yerlerin burada görünecek.",
+    en: "Your favorite places will appear here.",
+    de: "Deine Lieblingsorte erscheinen hier.",
+    ru: "Твои избранные места появятся здесь.",
+  },
+  "saved.noRoutesTitle": {
+    tr: "Henüz kayıtlı rota yok",
+    en: "No saved routes yet",
+    de: "Noch keine gespeicherten Routen",
+    ru: "Пока нет сохранённых маршрутов",
+  },
+  "saved.noRoutesText": {
+    tr: "Haritada rota kaydettiğinde burada offline görebilirsin.",
+    en: "When you save a route on the map, you can view it here offline.",
+    de: "Wenn du eine Route speicherst, kannst du sie hier offline ansehen.",
+    ru: "Когда ты сохранишь маршрут на карте, он появится здесь офлайн.",
+  },
+  "saved.noJournalTitle": {
+    tr: "Gezi günlüğün boş",
+    en: "Travel journal is empty",
+    de: "Reisetagebuch ist leer",
+    ru: "Дневник путешествий пуст",
+  },
+  "saved.noJournalText": {
+    tr: "Haritada bir yere not eklediğinde burada görünür.",
+    en: "When you add a note to a place on the map, it will appear here.",
+    de: "Wenn du einem Ort eine Notiz hinzufügst, erscheint sie hier.",
+    ru: "Когда ты добавишь заметку к месту на карте, она появится здесь.",
+  },
+  "saved.savedRoute": {
+    tr: "Kayıtlı Rota",
+    en: "Saved Route",
+    de: "Gespeicherte Route",
+    ru: "Сохранённый маршрут",
+  },
+  "saved.stops": {
+    tr: "durak",
+    en: "stops",
+    de: "Stopps",
+    ru: "остановок",
+  },
+  "saved.removeErrorTitle": {
+    tr: "Hata",
+    en: "Error",
+    de: "Fehler",
+    ru: "Ошибка",
+  },
+  "saved.removeErrorText": {
+    tr: "Kayıtlı yer silinemedi.",
+    en: "Could not remove saved place.",
+    de: "Gespeicherter Ort konnte nicht entfernt werden.",
+    ru: "Не удалось удалить сохранённое место.",
+  },
+  "saved.routeRemoveError": {
+    tr: "Rota silinemedi.",
+    en: "Could not remove route.",
+    de: "Route konnte nicht entfernt werden.",
+    ru: "Не удалось удалить маршрут.",
+  },
+};
+
+function safeT(
+  t: (key: string) => string,
+  key: string,
+  fallback: string,
+  language: string
+) {
+  const value = t(key);
+  if (value && value !== key) return value;
+
+  const lang = String(language || "en").toLowerCase();
+  return SAVED_FALLBACKS[key]?.[lang] || SAVED_FALLBACKS[key]?.en || fallback;
+}
 
 type TabKey = "places" | "visited" | "routes" | "journal";
 
 export default function Saved() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabKey>("places");
   const [savedPlaces, setSavedPlaces] = useState<any[]>([]);
   const [savedRoutes, setSavedRoutes] = useState<any[]>([]);
@@ -93,7 +212,7 @@ export default function Saved() {
       loadAllSavedData();
     } catch (error) {
       console.log(error);
-      Alert.alert(t("saved.removeErrorTitle"), t("saved.removeErrorText"));
+      Alert.alert(safeT(t, "saved.removeErrorTitle", "Hata", language), safeT(t, "saved.removeErrorText", "Kayıtlı yer silinemedi.", language));
     }
   };
 
@@ -105,7 +224,7 @@ export default function Saved() {
       loadAllSavedData();
     } catch (error) {
       console.log(error);
-      Alert.alert(t("saved.removeErrorTitle"), t("saved.removeErrorText"));
+      Alert.alert(safeT(t, "saved.removeErrorTitle", "Hata", language), safeT(t, "saved.removeErrorText", "Kayıtlı yer silinemedi.", language));
     }
   };
 
@@ -116,7 +235,7 @@ export default function Saved() {
       await AsyncStorage.setItem("saved_routes", JSON.stringify(updated));
     } catch (error) {
       console.log(error);
-      Alert.alert(t("saved.removeErrorTitle"), t("saved.routeRemoveError"));
+      Alert.alert(safeT(t, "saved.removeErrorTitle", "Hata", language), safeT(t, "saved.routeRemoveError", "Rota silinemedi.", language));
     }
   };
 
@@ -160,10 +279,10 @@ export default function Saved() {
   const renderTabs = () => (
     <View style={styles.tabsRow}>
       {[
-        { key: "places", label: t("saved.places"), icon: "heart-outline" },
-        { key: "visited", label: t("settings.visited"), icon: "checkmark-done-outline" },
-        { key: "routes", label: t("saved.routes"), icon: "map-outline" },
-        { key: "journal", label: t("saved.journal"), icon: "book-outline" },
+        { key: "places", label: safeT(t, "saved.places", "Favoriler", language), icon: "heart-outline" },
+        { key: "visited", label: safeT(t, "settings.visited", "Ziyaret", language), icon: "checkmark-done-outline" },
+        { key: "routes", label: safeT(t, "saved.routes", "Rotalar", language), icon: "map-outline" },
+        { key: "journal", label: safeT(t, "saved.journal", "Günlük", language), icon: "book-outline" },
       ].map((tab: any) => {
         const active = activeTab === tab.key;
         return (
@@ -181,7 +300,7 @@ export default function Saved() {
   );
 
   const renderPlaces = () => {
-    if (savedPlaces.length === 0) return <EmptyState icon="heart-outline" title={t("saved.noPlacesTitle")} text={t("saved.noPlacesText")} />;
+    if (savedPlaces.length === 0) return <EmptyState icon="heart-outline" title={safeT(t, "saved.noPlacesTitle", "Henüz favori yer yok", language)} text={safeT(t, "saved.noPlacesText", "Favori yerlerin burada görünecek.", language)} />;
     return (
       <FlatList
         data={savedPlaces}
@@ -205,7 +324,7 @@ export default function Saved() {
 
   const renderVisited = () => {
     if (visitedPlaces.length === 0) {
-      return <EmptyState icon="checkmark-done-outline" title={t("settings.visited")} text={t("saved.noPlacesText")} />;
+      return <EmptyState icon="checkmark-done-outline" title={safeT(t, "settings.visited", "Ziyaret", language)} text={safeT(t, "saved.noPlacesText", "Favori yerlerin burada görünecek.", language)} />;
     }
     return (
       <FlatList
@@ -229,7 +348,7 @@ export default function Saved() {
   };
 
   const renderRoutes = () => {
-    if (savedRoutes.length === 0) return <EmptyState icon="map-outline" title={t("saved.noRoutesTitle")} text={t("saved.noRoutesText")} />;
+    if (savedRoutes.length === 0) return <EmptyState icon="map-outline" title={safeT(t, "saved.noRoutesTitle", "Henüz kayıtlı rota yok", language)} text={safeT(t, "saved.noRoutesText", "Haritada rota kaydettiğinde burada offline görebilirsin.", language)} />;
     return (
       <FlatList
         data={savedRoutes}
@@ -239,16 +358,16 @@ export default function Saved() {
         renderItem={({ item }) => (
           <View style={styles.routeCard}>
             <TouchableOpacity style={{ flex: 1 }} onPress={() => openRoute(item)}>
-              <Text style={styles.name} numberOfLines={1}>{item.title || t("saved.savedRoute")}</Text>
-              <Text style={styles.meta}>{item.places?.length || 0} {t("saved.stops")} • {new Date(item.createdAt || Date.now()).toLocaleDateString()}</Text>
+              <Text style={styles.name} numberOfLines={1}>{item.title || safeT(t, "saved.savedRoute", "Kayıtlı Rota", language)}</Text>
+              <Text style={styles.meta}>{item.places?.length || 0} {safeT(t, "saved.stops", "durak", language)} • {new Date(item.createdAt || Date.now()).toLocaleDateString()}</Text>
               <Text style={styles.routePreview} numberOfLines={2}>{(item.places || []).map((p: any) => p.name).join(" → ")}</Text>
             </TouchableOpacity>
             <View style={styles.routeActions}>
               <TouchableOpacity style={styles.smallActionButton} onPress={() => openRoute(item)}>
-                <Ionicons name="navigate-outline" size={15} color={COLORS.white} />
+                <Ionicons name="navigate-outline" size={15} color={COLORS.accent} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.smallActionButton} onPress={() => shareRouteText(item)}>
-                <Ionicons name="share-social-outline" size={15} color={COLORS.white} />
+                <Ionicons name="share-social-outline" size={15} color={COLORS.accent} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.smallActionButtonDanger} onPress={() => removeRoute(item.id)}>
                 <Ionicons name="trash-outline" size={15} color={COLORS.white} />
@@ -261,7 +380,7 @@ export default function Saved() {
   };
 
   const renderJournal = () => {
-    if (journalItems.length === 0) return <EmptyState icon="book-outline" title={t("saved.noJournalTitle")} text={t("saved.noJournalText")} />;
+    if (journalItems.length === 0) return <EmptyState icon="book-outline" title={safeT(t, "saved.noJournalTitle", "Gezi günlüğün boş", language)} text={safeT(t, "saved.noJournalText", "Haritada bir yere not eklediğinde burada görünür.", language)} />;
     return (
       <FlatList
         data={journalItems}
@@ -286,15 +405,15 @@ export default function Saved() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="light-content" />
-      <LinearGradient colors={["#1C1F30", "#161826", "#131622"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+      <StatusBar barStyle="dark-content" />
+      <LinearGradient colors={["#FFFFFF", "#FAF8F5", "#F7F4EF"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <View style={styles.topRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={22} color={COLORS.text} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.title}>{t("saved.title") || "Saved"}</Text>
-        <Text style={styles.subtitle}>{t("saved.subtitle")}</Text>
+        <Text style={styles.title}>{safeT(t, "saved.title", "Favoriler", language)}</Text>
+        <Text style={styles.subtitle}>{safeT(t, "saved.subtitle", "Favori yerlerin, offline rotaların ve gezi notların.", language)}</Text>
       </LinearGradient>
 
       <View style={styles.content}>
@@ -322,13 +441,13 @@ function EmptyState({ icon, title, text }: { icon: any; title: string; text: str
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
-  hero: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 24, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
+  hero: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 24, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, borderWidth: 1, borderColor: COLORS.border, shadowColor: COLORS.shadow, shadowOpacity: 0.22, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
   topRow: { flexDirection: "row", alignItems: "center", marginBottom: 18 },
   backButton: { width: 42, height: 42, borderRadius: 14, backgroundColor: COLORS.surface, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: COLORS.border },
-  title: { fontSize: 32, fontWeight: "700", color: COLORS.white, marginBottom: 8, letterSpacing: -0.5 },
-  subtitle: { color: "rgba(255,255,255,0.75)", fontSize: 15, lineHeight: 22 },
+  title: { fontSize: 32, fontWeight: "700", color: COLORS.text, marginBottom: 8, letterSpacing: -0.5 },
+  subtitle: { color: COLORS.textSoft, fontSize: 15, lineHeight: 22 },
   content: { flex: 1, paddingHorizontal: 18, paddingTop: 18 },
-  tabsRow: { flexDirection: "row", backgroundColor: COLORS.surface, borderRadius: 18, padding: 5, marginBottom: 16, borderWidth: 1, borderColor: COLORS.border },
+  tabsRow: { flexDirection: "row", backgroundColor: COLORS.surface, borderRadius: 18, padding: 5, marginBottom: 16, borderWidth: 1, borderColor: COLORS.border, shadowColor: COLORS.shadow, shadowOpacity: 0.16, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
   tabButton: { flex: 1, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center", flexDirection: "row" },
   tabButtonActive: { backgroundColor: COLORS.accent },
   tabText: { color: COLORS.textSoft, fontWeight: "700", fontSize: 12, marginLeft: 5 },
@@ -338,14 +457,14 @@ const styles = StyleSheet.create({
   emptyTitle: { color: COLORS.text, fontSize: 20, fontWeight: "700", marginBottom: 8, textAlign: "center" },
   emptyText: { color: COLORS.textSoft, fontSize: 15, textAlign: "center", lineHeight: 22 },
   card: { backgroundColor: COLORS.surface, borderRadius: 22, padding: 16, marginBottom: 14, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: COLORS.border, shadowColor: COLORS.shadow, shadowOpacity: 0.2, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 4 },
-  routeCard: { backgroundColor: COLORS.surface, borderRadius: 22, padding: 16, marginBottom: 14, flexDirection: "row", borderWidth: 1, borderColor: COLORS.border },
-  journalCard: { backgroundColor: COLORS.surface, borderRadius: 22, padding: 16, marginBottom: 14, flexDirection: "row", borderWidth: 1, borderColor: COLORS.border },
+  routeCard: { backgroundColor: COLORS.surface, borderRadius: 22, padding: 16, marginBottom: 14, flexDirection: "row", borderWidth: 1, borderColor: COLORS.border, shadowColor: COLORS.shadow, shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 3 },
+  journalCard: { backgroundColor: COLORS.surface, borderRadius: 22, padding: 16, marginBottom: 14, flexDirection: "row", borderWidth: 1, borderColor: COLORS.border, shadowColor: COLORS.shadow, shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 3 },
   name: { color: COLORS.text, fontSize: 18, fontWeight: "700", marginBottom: 6, letterSpacing: -0.3 },
   meta: { color: COLORS.textSoft, fontSize: 14, lineHeight: 20 },
   routePreview: { color: COLORS.textSoft, fontSize: 13, lineHeight: 19, marginTop: 8 },
   noteText: { color: COLORS.textSoft, fontSize: 15, lineHeight: 22, marginTop: 8 },
   routeActions: { flexDirection: "row", alignItems: "center", marginLeft: 8 },
-  smallActionButton: { width: 34, height: 34, borderRadius: 12, backgroundColor: COLORS.surfaceSoft, alignItems: "center", justifyContent: "center", marginLeft: 6 },
+  smallActionButton: { width: 34, height: 34, borderRadius: 12, backgroundColor: COLORS.surfaceSoft, alignItems: "center", justifyContent: "center", marginLeft: 6, borderWidth: 1, borderColor: COLORS.border },
   smallActionButtonDanger: { width: 34, height: 34, borderRadius: 12, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center", marginLeft: 6 },
   removeButton: { width: 38, height: 38, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.accent, marginLeft: 8 },
 });

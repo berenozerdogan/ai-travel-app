@@ -14,16 +14,171 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "../../context/LanguageContext";
 
 const COLORS = {
-  bg: "#131622",
-  surface: "#1C1F30",
-  surfaceSoft: "#272B42",
-  border: "rgba(255, 255, 255, 0.03)",
-  text: "#F1F3F9",
-  textSoft: "#8E95B2",
-  accent: "#D65A5A",
+  bg: "#F7F4EF",
+  surface: "#FFFFFF",
+  surfaceSoft: "#F4F1EB",
+  border: "rgba(31,41,55,0.08)",
+  text: "#1F2937",
+  textSoft: "#6B7280",
+  accent: "#E85D75",
   white: "#FFFFFF",
-  shadow: "#090A10",
+  shadow: "#D6CEC2",
 };
+
+
+const PROFILE_FALLBACKS: Record<string, Record<string, string>> = {
+  "tabs.profile": {
+    tr: "Profil",
+    en: "Profile",
+    de: "Profil",
+    ru: "Профиль",
+  },
+  "settings.subtitle": {
+    tr: "Dil, kaydedilen rotalar ve gezi günlüğü özeti.",
+    en: "Language, saved routes and travel journal summary.",
+    de: "Sprache, gespeicherte Routen und Reisetagebuch-Übersicht.",
+    ru: "Язык, сохранённые маршруты и сводка дневника путешествий.",
+  },
+  "settings.dashboard": {
+    tr: "Özet Paneli",
+    en: "Dashboard",
+    de: "Übersicht",
+    ru: "Панель обзора",
+  },
+  "settings.favorite": {
+    tr: "Favori",
+    en: "Favorite",
+    de: "Favorit",
+    ru: "Избранное",
+  },
+  "settings.visited": {
+    tr: "Ziyaret Edildi",
+    en: "Visited",
+    de: "Besucht",
+    ru: "Посещено",
+  },
+  "settings.route": {
+    tr: "Rota",
+    en: "Route",
+    de: "Route",
+    ru: "Маршрут",
+  },
+  "settings.note": {
+    tr: "Not",
+    en: "Note",
+    de: "Notiz",
+    ru: "Заметка",
+  },
+  "settings.cities": {
+    tr: "Şehir",
+    en: "City",
+    de: "Stadt",
+    ru: "Город",
+  },
+  "settings.travelJournal": {
+    tr: "Gezi Günlüğü",
+    en: "Travel Journal",
+    de: "Reisetagebuch",
+    ru: "Дневник путешествий",
+  },
+  "settings.journalShortcut": {
+    tr: "Harita notlarını ve offline rotalarını görüntüle.",
+    en: "View your map notes and offline routes.",
+    de: "Sieh dir deine Kartennotizen und Offline-Routen an.",
+    ru: "Просматривай заметки на карте и офлайн-маршруты.",
+  },
+  "settings.achievements": {
+    tr: "Başarılar",
+    en: "Achievements",
+    de: "Erfolge",
+    ru: "Достижения",
+  },
+  "settings.achievementSubtitle": {
+    tr: "Gezdikçe rozetlerin açılır.",
+    en: "Unlock badges as you explore.",
+    de: "Schalte Abzeichen frei, während du reist.",
+    ru: "Открывай значки во время путешествий.",
+  },
+  "settings.language": {
+    tr: "Dil",
+    en: "Language",
+    de: "Sprache",
+    ru: "Язык",
+  },
+  "common.selected": {
+    tr: "Seçili",
+    en: "Selected",
+    de: "Ausgewählt",
+    ru: "Выбрано",
+  },
+  "common.tapToSwitch": {
+    tr: "Değiştirmek için dokun",
+    en: "Tap to switch",
+    de: "Zum Wechseln tippen",
+    ru: "Нажми, чтобы изменить",
+  },
+  "emergency.title": {
+    tr: "Acil / Faydalı Bilgiler",
+    en: "Emergency / Useful Info",
+    de: "Notfall / Nützliche Infos",
+    ru: "Экстренная / Полезная информация",
+  },
+  "emergency.subtitle": {
+    tr: "Seyahat sırasında hızlı erişebileceğin bilgiler.",
+    en: "Helpful information you can quickly access while traveling.",
+    de: "Hilfreiche Informationen für schnellen Zugriff auf Reisen.",
+    ru: "Полезная информация для быстрого доступа в поездке.",
+  },
+  "settings.explorerBadge": {
+    tr: "Kaşif",
+    en: "Explorer",
+    de: "Entdecker",
+    ru: "Исследователь",
+  },
+  "settings.routeMasterBadge": {
+    tr: "Rota Ustası",
+    en: "Route Master",
+    de: "Routenmeister",
+    ru: "Мастер маршрутов",
+  },
+  "settings.journalKeeperBadge": {
+    tr: "Günlük Tutucu",
+    en: "Journal Keeper",
+    de: "Tagebuchführer",
+    ru: "Хранитель дневника",
+  },
+  "settings.cityCollectorBadge": {
+    tr: "Şehir Koleksiyoncusu",
+    en: "City Collector",
+    de: "Städtesammler",
+    ru: "Коллекционер городов",
+  },
+  "settings.foodLoverBadge": {
+    tr: "Lezzet Avcısı",
+    en: "Food Lover",
+    de: "Food Lover",
+    ru: "Любитель еды",
+  },
+  "settings.museumHunterBadge": {
+    tr: "Müze Gezgini",
+    en: "Museum Hunter",
+    de: "Museumsjäger",
+    ru: "Охотник за музеями",
+  },
+};
+
+function safeT(
+  t: (key: string) => string,
+  key: string,
+  fallback: string,
+  language: string
+) {
+  const value = t(key);
+  if (value && value !== key) return value;
+
+  const lang = String(language || "en").toLowerCase();
+  return PROFILE_FALLBACKS[key]?.[lang] || PROFILE_FALLBACKS[key]?.en || fallback;
+}
 
 type Stats = {
   places: number;
@@ -102,42 +257,42 @@ export default function Profile() {
       {
         key: "explorer",
         icon: "compass-outline",
-        label: t("settings.explorerBadge"),
+        label: safeT(t, "settings.explorerBadge", "Kaşif", language),
         unlocked: stats.places >= 3 || stats.visited >= 3,
         progress: `${Math.min(Math.max(stats.places, stats.visited), 3)}/3`,
       },
       {
         key: "routeMaster",
         icon: "map-outline",
-        label: t("settings.routeMasterBadge"),
+        label: safeT(t, "settings.routeMasterBadge", "Rota Ustası", language),
         unlocked: stats.routes >= 1,
         progress: `${Math.min(stats.routes, 1)}/1`,
       },
       {
         key: "journalKeeper",
         icon: "book-outline",
-        label: t("settings.journalKeeperBadge"),
+        label: safeT(t, "settings.journalKeeperBadge", "Günlük Tutucu", language),
         unlocked: stats.notes >= 1,
         progress: `${Math.min(stats.notes, 1)}/1`,
       },
       {
         key: "cityCollector",
         icon: "business-outline",
-        label: t("settings.cityCollectorBadge"),
+        label: safeT(t, "settings.cityCollectorBadge", "Şehir Koleksiyoncusu", language),
         unlocked: stats.cities >= 2,
         progress: `${Math.min(stats.cities, 2)}/2`,
       },
       {
         key: "foodLover",
         icon: "restaurant-outline",
-        label: t("settings.foodLoverBadge"),
+        label: safeT(t, "settings.foodLoverBadge", "Lezzet Avcısı", language),
         unlocked: stats.restaurants >= 2,
         progress: `${Math.min(stats.restaurants, 2)}/2`,
       },
       {
         key: "museumHunter",
         icon: "color-palette-outline",
-        label: t("settings.museumHunterBadge"),
+        label: safeT(t, "settings.museumHunterBadge", "Müze Gezgini", language),
         unlocked: stats.museums >= 1,
         progress: `${Math.min(stats.museums, 1)}/1`,
       },
@@ -147,15 +302,15 @@ export default function Profile() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <LinearGradient
-        colors={["#1C1F30", "#161826", "#131622"]}
+        colors={["#FFFFFF", "#FAF8F5", "#F7F4EF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.hero}
       >
-        <Text style={styles.title}>{t("tabs.profile")}</Text>
-        <Text style={styles.subtitle}>{t("settings.subtitle")}</Text>
+        <Text style={styles.title}>{safeT(t, "tabs.profile", "Profil", language)}</Text>
+        <Text style={styles.subtitle}>{safeT(t, "settings.subtitle", "Dil, kaydedilen rotalar ve gezi günlüğü özeti.", language)}</Text>
       </LinearGradient>
 
       <ScrollView
@@ -163,33 +318,33 @@ export default function Profile() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        <Text style={styles.sectionTitle}>{t("settings.dashboard")}</Text>
+        <Text style={styles.sectionTitle}>{safeT(t, "settings.dashboard", "Özet Paneli", language)}</Text>
 
         <View style={styles.statsGrid}>
           <TouchableOpacity style={styles.statBox} onPress={() => router.push("/(tabs)/saved" as any)}>
             <Ionicons name="heart-outline" size={21} color={COLORS.accent} />
             <Text style={styles.statValue}>{stats.places}</Text>
-            <Text style={styles.statLabel}>{t("settings.favorite")}</Text>
+            <Text style={styles.statLabel}>{safeT(t, "settings.favorite", "Favori", language)}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.statBox} onPress={() => router.push("/(tabs)/saved" as any)}>
             <Ionicons name="checkmark-done-outline" size={21} color={COLORS.accent} />
             <Text style={styles.statValue}>{stats.visited}</Text>
-            <Text style={styles.statLabel}>{t("settings.visited")}</Text>
+            <Text style={styles.statLabel}>{safeT(t, "settings.visited", "Ziyaret Edildi", language)}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.statBox} onPress={() => router.push("/(tabs)/saved" as any)}>
             <Ionicons name="map-outline" size={21} color={COLORS.accent} />
             <Text style={styles.statValue}>{stats.routes}</Text>
-            <Text style={styles.statLabel}>{t("settings.route")}</Text>
+            <Text style={styles.statLabel}>{safeT(t, "settings.route", "Rota", language)}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.statBox} onPress={() => router.push("/(tabs)/saved" as any)}>
             <Ionicons name="book-outline" size={21} color={COLORS.accent} />
             <Text style={styles.statValue}>{stats.notes}</Text>
-            <Text style={styles.statLabel}>{t("settings.note")}</Text>
+            <Text style={styles.statLabel}>{safeT(t, "settings.note", "Not", language)}</Text>
           </TouchableOpacity>
           <View style={styles.statBox}>
             <Ionicons name="business-outline" size={21} color={COLORS.accent} />
             <Text style={styles.statValue}>{stats.cities}</Text>
-            <Text style={styles.statLabel}>{t("settings.cities")}</Text>
+            <Text style={styles.statLabel}>{safeT(t, "settings.cities", "Şehir", language)}</Text>
           </View>
         </View>
 
@@ -198,15 +353,15 @@ export default function Profile() {
             <Ionicons name="book-outline" size={23} color={COLORS.white} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.shortcutTitle}>{t("settings.travelJournal")}</Text>
-            <Text style={styles.shortcutText}>{t("settings.journalShortcut")}</Text>
+            <Text style={styles.shortcutTitle}>{safeT(t, "settings.travelJournal", "Gezi Günlüğü", language)}</Text>
+            <Text style={styles.shortcutText}>{safeT(t, "settings.journalShortcut", "Harita notlarını ve offline rotalarını görüntüle.", language)}</Text>
           </View>
           <Ionicons name="chevron-forward" size={19} color={COLORS.textSoft} />
         </TouchableOpacity>
 
         <View style={styles.achievementCard}>
-          <Text style={styles.section}>{t("settings.achievements")}</Text>
-          <Text style={styles.achievementSubtitle}>{t("settings.achievementSubtitle")}</Text>
+          <Text style={styles.section}>{safeT(t, "settings.achievements", "Başarılar", language)}</Text>
+          <Text style={styles.achievementSubtitle}>{safeT(t, "settings.achievementSubtitle", "Gezdikçe rozetlerin açılır.", language)}</Text>
           <View style={styles.badgeGrid}>
             {achievements.map((badge) => (
               <View key={badge.key} style={[styles.badgeBox, badge.unlocked && styles.badgeUnlocked]}>
@@ -229,14 +384,14 @@ export default function Profile() {
             <Ionicons name="medkit-outline" size={23} color={COLORS.white} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.shortcutTitle}>{t("emergency.title")}</Text>
-            <Text style={styles.shortcutText}>{t("emergency.subtitle")}</Text>
+            <Text style={styles.shortcutTitle}>{safeT(t, "emergency.title", "Acil / Faydalı Bilgiler", language)}</Text>
+            <Text style={styles.shortcutText}>{safeT(t, "emergency.subtitle", "Seyahat sırasında hızlı erişebileceğin bilgiler.", language)}</Text>
           </View>
           <Ionicons name="chevron-forward" size={19} color={COLORS.textSoft} />
         </TouchableOpacity>
 
         <View style={styles.sectionCard}>
-          <Text style={styles.section}>{t("settings.language")}</Text>
+          <Text style={styles.section}>{safeT(t, "settings.language", "Dil", language)}</Text>
           <View style={styles.grid}>
             {languages.map((item) => {
               const isActive = language === item.key;
@@ -256,7 +411,7 @@ export default function Profile() {
                     )}
                   </View>
                   <Text style={[styles.helperText, isActive && styles.activeHelperText]}>
-                    {isActive ? t("common.selected") : t("common.tapToSwitch")}
+                    {isActive ? safeT(t, "common.selected", "Seçili", language) : safeT(t, "common.tapToSwitch", "Değiştirmek için dokun", language)}
                   </Text>
                 </TouchableOpacity>
               );
@@ -271,19 +426,19 @@ export default function Profile() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
   hero: { paddingTop: 60, paddingHorizontal: 20, paddingBottom: 28, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
-  title: { fontSize: 32, fontWeight: "700", color: COLORS.white, marginBottom: 8, letterSpacing: -0.5 },
-  subtitle: { color: "rgba(255,255,255,0.75)", fontSize: 15, lineHeight: 22 },
+  title: { fontSize: 32, fontWeight: "700", color: COLORS.text, marginBottom: 8, letterSpacing: -0.5 },
+  subtitle: { color: COLORS.textSoft, fontSize: 15, lineHeight: 22 },
   content: { flex: 1, paddingHorizontal: 18, paddingTop: 20 },
   sectionTitle: { color: COLORS.text, fontSize: 18, fontWeight: "800", marginBottom: 12 },
   statsGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginBottom: 14 },
-  statBox: { width: "48%", backgroundColor: COLORS.surface, borderRadius: 22, alignItems: "center", paddingVertical: 16, borderWidth: 1, borderColor: COLORS.border, marginBottom: 10 },
+  statBox: { width: "48%", backgroundColor: COLORS.surface, borderRadius: 22, alignItems: "center", paddingVertical: 16, borderWidth: 1, borderColor: COLORS.border, marginBottom: 10, shadowColor: COLORS.shadow, shadowOpacity: 0.20, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 3 },
   statValue: { color: COLORS.text, fontSize: 25, fontWeight: "800", marginTop: 6 },
   statLabel: { color: COLORS.textSoft, fontSize: 12, fontWeight: "700", marginTop: 2 },
-  journalShortcut: { backgroundColor: COLORS.surface, borderRadius: 22, padding: 16, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: COLORS.border, marginBottom: 14 },
+  journalShortcut: { backgroundColor: COLORS.surface, borderRadius: 22, padding: 16, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: COLORS.border, marginBottom: 14, shadowColor: COLORS.shadow, shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 2 },
   shortcutIcon: { width: 48, height: 48, borderRadius: 16, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center", marginRight: 12 },
   shortcutTitle: { color: COLORS.text, fontSize: 18, fontWeight: "800", marginBottom: 4 },
   shortcutText: { color: COLORS.textSoft, fontSize: 13, lineHeight: 19 },
-  achievementCard: { backgroundColor: COLORS.surface, borderRadius: 24, padding: 16, borderWidth: 1, borderColor: COLORS.border, marginBottom: 14 },
+  achievementCard: { backgroundColor: COLORS.surface, borderRadius: 24, padding: 16, borderWidth: 1, borderColor: COLORS.border, marginBottom: 14, shadowColor: COLORS.shadow, shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 2 },
   achievementSubtitle: { color: COLORS.textSoft, fontSize: 13, lineHeight: 19, marginBottom: 12 },
   badgeGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   badgeBox: { width: "48%", backgroundColor: COLORS.surfaceSoft, borderRadius: 18, padding: 12, alignItems: "center", marginBottom: 10, opacity: 0.55 },
