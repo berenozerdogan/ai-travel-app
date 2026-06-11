@@ -1,11 +1,13 @@
+
 const tr = {
   tabs: {
     home: "Keşfet",
     explore: "Ara",
+    planner: "Planlayıcı",
     map: "Harita",
     chat: "AI Chat",
     favorites: "Favoriler",
-    settings: "Ayarlar",
+    profile: "Profil",
   },
 
   common: {
@@ -18,10 +20,22 @@ const tr = {
     allCities: "Tüm Şehirler",
     allDistricts: "Tüm İlçeler",
     placesFound: "yer bulundu",
+    selected: "Seçili",
+    tapToSwitch: "Değiştirmek için dokun",
+    back: "Geri",
+    error: "Hata",
+    retry: "Tekrar dene",
+    remove: "Kaldır",
+    delete: "Sil",
+    share: "Paylaş",
+    saved: "Kaydedildi",
   },
 
   explore: {
     title: "Türkiye'yi Keşfet",
+    subtitle: "Kategori, şehir ve ilçeye göre harika destinasyonları bul.",
+    filters: "Filtreler",
+    filterSubtitle: "Yerleri türüne ve konumuna göre keşfet",
     category: "Kategori",
     city: "Şehir",
     district: "İlçe",
@@ -78,14 +92,14 @@ const tr = {
     loadingGoogleReviews: "Google yorumları yükleniyor...",
     loadingWebMentions: "Web bahsetmeleri yükleniyor...",
     noWebMentions: "Web bahsetmesi bulunamadı.",
+    visited: "Ziyaret Edildi",
+    markVisited: "Ziyaret Edildi Olarak İşaretle",
   },
 
   chat: {
     title: "AI Rehber",
-    subtitle:
-      "Türkiye genelinde gezileri; gezilecek yerler, oteller ve restoranlarla planla.",
-    welcome:
-      "Merhaba! Ben Türkiye için AI seyahat asistanınım. Bana şehir planları, oteller, restoranlar, rotalar veya gezilecek yerler sorabilirsin.",
+    subtitle: "Türkiye genelinde gezileri; gezilecek yerler, oteller ve restoranlarla planla.",
+    welcome: "Merhaba! Ben Türkiye için AI seyahat asistanınım. Bana şehir planları, oteller, restoranlar, rotalar veya gezilecek yerler sorabilirsin.",
     quick1: "Kapadokya'da 2 gün planla",
     quick2: "İstanbul'da 3 gün planla",
     quick3: "Gaziantep'te en iyi yemekler",
@@ -110,12 +124,18 @@ const tr = {
   },
 
   settings: {
-    title: "Ayarlar",
+    title: "Profil",
+    subtitle: "Dil, kaydedilen rotalar ve gezi günlüğü özeti.",
     appearance: "Görünüm",
     language: "Dil",
     light: "Açık",
     dark: "Koyu",
     system: "Sistem",
+    favorite: "Favori",
+    route: "Rota",
+    note: "Not",
+    travelJournal: "Gezi Günlüğü",
+    journalShortcut: "Harita notlarını ve offline rotalarını görüntüle.",
   },
 
   home: {
@@ -123,16 +143,12 @@ const tr = {
     subtitle: "AI Seyahat Asistanı",
     greeting: "Günaydın",
     whereNext: "Sıradaki rota neresi?",
-
     searchPlaceholder: "Destinasyon ara...",
-
     categories: "Kategoriler",
     featured: "Öne Çıkan Yerler",
     featuredDestinations: "Öne Çıkan Yerler",
-
     seeAll: "Tümünü Gör",
     viewAll: "Tümünü Gör",
-
     attractions: "Gezilecek Yerler",
     hotels: "Oteller",
     food: "Yemek",
@@ -141,85 +157,157 @@ const tr = {
     beaches: "Plajlar",
     shopping: "Alışveriş",
     cities: "Şehirler",
-
     searchResults: "Arama Sonuçları",
     noResults: "Sonuç bulunamadı.",
-
     topHotels: "Öne Çıkan Oteller",
     topFood: "Öne Çıkan Lezzetler",
     topFoodPicks: "En İyi Lezzetler",
-
     aiAssistant: "AI Seyahat Asistanı",
     aiTravelCompanion: "AI Seyahat Asistanı",
-
     aiPlanTitle: "Gezini AI ile planla",
-    aiPlanText:
-      "Rotalar, oteller, restoranlar ve şehir önerileri için sor.",
-
+    aiPlanText: "Rotalar, oteller, restoranlar ve şehir önerileri için sor.",
     aiTripPlanner: "AI Gezi Planlayıcı",
-
     aiPowered: "YAPAY ZEKA DESTEKLİ",
-
     planPerfectTrip: "Mükemmel seyahatini planla",
-
-    planPerfectTripText:
-      "Şehir, gün ve ilgi alanlarına göre kişisel rota oluştur.",
-
+    planPerfectTripText: "Şehir, gün ve ilgi alanlarına göre kişisel rota oluştur.",
     planMyTrip: "Seyahatimi Planla",
-
     aiForYou: "Senin İçin",
-
     hiddenGemsPicked: "Senin için seçilmiş gizli yerler",
-
     aiPick: "AI Önerisi",
-
-    aiTravelText:
-      "Oteller, rotalar, etkinlikler ve gizli yerleri sor.",
-
+    aiTravelText: "Oteller, rotalar, etkinlikler ve gizli yerleri sor.",
     startChat: "Sohbet Başlat",
   },
-map: {
-  all: "Tümü",
-  attractions: "Gezilecek",
-  food: "Yemek",
-  hotels: "Oteller",
-  saved: "Kaydedilenler",
 
-  tripMap: "Gezi Haritası",
-  stopsSelected: "durak seçildi",
+  map: {
+    all: "Tümü",
+    attractions: "Gezilecek",
+    food: "Yemek",
+    hotels: "Oteller",
+    saved: "Kaydedilenler",
+    tripMap: "Gezi Haritası",
+    stopsSelected: "durak seçildi",
+    stopsInPlan: "durak planda",
+    share: "Paylaş",
+    clear: "Temizle",
+    saveRoute: "Kaydet",
+    routeSavedTitle: "Rota kaydedildi",
+    routeSavedMessage: "Bu rotayı Favoriler > Rotalar bölümünde çevrimdışı görebilirsin.",
+    routeSaveError: "Rota kaydedilemedi.",
+    nearbyPlaces: "Yakındaki Yerler",
+    nearbyFound: "Yakındaki Yerler • {{count}} bulundu",
+    nearbySubtitle: "Konumuna yakın {{count}} seyahat noktası",
+    found: "bulundu",
+    openList: "Listeyi Aç",
+    exit: "Çık",
+    close: "Kapat",
+    details: "Detaylar",
+    navigate: "Yol Tarifi",
+    yourRoute: "Rotan",
+    placesInPlan: "yer içeriyor",
+    refit: "Ortala",
+    detailsButton: "Detayları Gör",
+    distance: "Mesafe",
+    rating: "Puan",
+    noNearbyPlaces: "Yakında yer bulunamadı.",
+    kmAway: "km uzaklıkta",
+    youAreHere: "Konumun",
+    virtualTour: "Sanal Tur",
+    stopTour: "Turu Durdur",
+    voiceGuide: "Sesli Rehber",
+    mute: "Sustur",
+    addNote: "Bu mekana ait kişisel bir seyahat notu ekle...",
+    myNote: "Notum",
+    noteSavedTitle: "Kaydedildi",
+    noteSavedMessage: "Seyahat notun başarıyla kaydedildi.",
+    locationPermissionTitle: "İzin gerekli",
+    locationPermissionMessage: "Yakındaki yerleri bulmak için konum izni vermelisin.",
+    virtualTourTitle: "Sanal Tur",
+    virtualTourNeedPlaces: "Sanal tur için haritada en az 2 seyahat durağı olmalı.",
+    emergencyInfo: "Acil / Faydalı Bilgiler",
+    usefulInfoSubtitle: "Yakındaki önemli noktaları Google Maps’te aç",
+    weatherAdvice: "Hava Durumu Önerisi",
+    nearbyHospitals: "Yakındaki hastaneler",
+    nearbyPharmacies: "Yakındaki eczaneler",
+    nearbyPolice: "Yakındaki polis merkezleri",
+    nearbyTransport: "Yakındaki toplu taşıma",
+    searchingNearby: "Yakındaki yerler aranıyor...",
+  },
 
-  share: "Paylaş",
-  clear: "Temizle",
-
-  nearbyPlaces: "Yakındaki Yerler",
-  found: "bulundu",
-  openList: "Listeyi Aç",
-  exit: "Çık",
-
-  details: "Detaylar",
-  navigate: "Yol Tarifi",
-
-  yourRoute: "Rotan",
-  placesInPlan: "yer içeriyor",
-  refit: "Ortala",
-
-  detailsButton: "Detayları Gör",
-
-  distance: "Mesafe",
-  rating: "Puan",
-
-  noNearbyPlaces: "Yakında yer bulunamadı.",
-
-  kmAway: "km uzaklıkta",
-
-  youAreHere: "Konumun",
-},
   saved: {
     title: "Kaydedilen Yerler",
+    subtitle: "Favori yerlerin, offline rotaların ve gezi notların.",
     empty: "Henüz kaydedilen yer yok.",
     remove: "Kaldır",
     removeErrorTitle: "Hata",
     removeErrorText: "Kaydedilen yer kaldırılamadı.",
+    places: "Favoriler",
+    routes: "Rotalar",
+    journal: "Günlük",
+    visited: "Ziyaret Edilenler",
+    noPlacesTitle: "Henüz favori yer yok",
+    noPlacesText: "Favori yerlerin burada görünecek.",
+    noRoutesTitle: "Henüz kayıtlı rota yok",
+    noRoutesText: "Haritada rota kaydedince burada çevrimdışı görebilirsin.",
+    noJournalTitle: "Gezi günlüğü boş",
+    noJournalText: "Haritada bir mekana not ekleyince burada görünür.",
+    noVisitedTitle: "Henüz ziyaret edilen yer yok",
+    noVisitedText: "Detay sayfasında ziyaret edildi olarak işaretlediğin yerler burada görünür.",
+    savedRoute: "Kaydedilen Rota",
+    stops: "durak",
+    routeRemoveError: "Rota kaldırılamadı.",
+  },
+
+  tripPlanner: {
+    title: "AI Gezi Planlayıcı",
+    subtitle: "Şehir, gün sayısı ve ilgi alanlarını girerek AI destekli gezi planı oluştur.",
+    city: "Şehir",
+    days: "Gün Sayısı",
+    interests: "İlgi Alanları",
+    cityPlaceholder: "Örn: İstanbul, Antalya, Kapadokya",
+    daysPlaceholder: "Örn: 2",
+    interestsPlaceholder: "Örn: doğa, tarih, yemek",
+    generate: "Gezi Planı Oluştur",
+    generatedPlan: "Oluşturulan Plan",
+    noPlan: "Bu şehir için uygun plan oluşturulamadı.",
+    route: "Rota",
+    share: "Paylaş",
+    save: "Kaydet",
+    missingTitle: "Eksik bilgi",
+    missingMessage: "Lütfen şehir ve gün sayısı gir.",
+    createError: "Gezi planı oluşturulamadı.",
+    budgetEstimate: "AI Bütçe Tahmini",
+    dailyAverage: "Günlük ortalama",
+    day: "Gün",
+    routeSavedTitle: "Rota kaydedildi",
+    routeSavedMessage: "Favoriler > Rotalar bölümünden çevrimdışı görebilirsin.",
+    routeSaveError: "Rota kaydedilemedi.",
+    shareTitle: "AI Travel App Rotası",
+  },
+
+  journal: {
+    title: "Gezi Günlüğü",
+    subtitle: "Haritada mekanlara eklediğin kişisel notlar burada görünür.",
+    clearAll: "Tüm notları sil",
+    clearTitle: "Gezi Günlüğü",
+    clearMessage: "Tüm notları silmek istiyor musun?",
+    emptyTitle: "Henüz not yok",
+    emptyText: "Haritadan bir mekan seç ve gezi notu ekle.",
+    placeFallback: "Mekan",
+  },
+
+  emergency: {
+    title: "Acil & Faydalı Bilgiler",
+    subtitle: "Seyahatte hızlıca erişebileceğin yararlı bilgiler.",
+    emergencyCall: "Acil Çağrı",
+    emergencyDesc: "Türkiye genel acil yardım hattı",
+    hospitals: "Yakındaki Hastaneler",
+    hospitalsDesc: "Google Maps’te hastaneleri ara",
+    pharmacies: "Yakındaki Eczaneler",
+    pharmaciesDesc: "Google Maps’te eczaneleri ara",
+    police: "Polis Merkezi",
+    policeDesc: "Yakındaki polis merkezlerini göster",
+    transport: "Toplu Taşıma",
+    transportDesc: "Yakındaki toplu taşıma seçeneklerini göster",
   },
 };
 

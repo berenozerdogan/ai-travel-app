@@ -30,7 +30,7 @@ const COLORS = {
 };
 
 export default function Place() {
-  const { name } = useLocalSearchParams();
+  const { id, name } = useLocalSearchParams();
   const { t, language } = useLanguage();
 
   const [place, setPlace] = useState<any>(null);
@@ -40,34 +40,81 @@ export default function Place() {
   const [insightData, setInsightData] = useState<any>(null);
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [loadingInsight, setLoadingInsight] = useState(true);
+  const [isVisited, setIsVisited] = useState(false);
 
   useEffect(() => {
-    if (!name) return;
+    const safeId = Array.isArray(id) ? id[0] : id;
+    const safeName = Array.isArray(name) ? name[0] : name;
 
-    const encodedName = encodeURIComponent(String(name));
+    if (!safeId && !safeName) {
+      console.log("Place sayfasına id veya name parametresi gelmedi.");
+      setPlace({
+        error: true,
+        name: "Mekan bilgisi eksik",
+        city: "",
+        category: "",
+        subcategory: "",
+        rating: "-",
+        district: "",
+        description: "Bu sayfa id veya name parametresi olmadan açıldı. Karttan detay sayfasına giderken id gönderdiğinden emin ol.",
+        reviews: [],
+        estimated_visit_time: "-",
+      });
+      return;
+    }
 
-    fetch(`http://10.0.2.2:8000/places/${encodedName}`)
+    const url = safeId
+      ? `http://10.0.2.2:8000/place-by-id/${encodeURIComponent(
+          String(safeId)
+        )}?language=${encodeURIComponent(language)}`
+      : `http://10.0.2.2:8000/places/${encodeURIComponent(
+          String(safeName)
+        )}?language=${encodeURIComponent(language)}`;
+
+    console.log("Fetcher URL:", url);
+
+    fetch(url)
       .then((res) => res.json())
-      .then((data) => setPlace(data))
-      .catch((err) => console.log(err));
-
-    fetch(`http://10.0.2.2:8000/analyze/${encodedName}`)
-      .then((res) => res.json())
-      .then((data) => setAnalysis(data))
-      .catch((err) => console.log(err));
-
-    fetch(
-      `http://10.0.2.2:8000/summary/${encodedName}?language=${encodeURIComponent(
-        language
-      )}`
-    )
-      .then((res) => res.json())
-      .then((data) => setSummary(data))
-      .catch((err) => console.log(err));
-  }, [name, language]);
+      .then((data) => {
+        console.log("Backend'den gelen veri:", data);
+        if (data && !data.error) {
+          setPlace(data);
+        } else {
+          Alert.alert("Hata", "Mekan bulunamadı.");
+          setPlace({
+            error: true,
+            name: "Mekan bulunamadı",
+            city: "",
+            category: "",
+            subcategory: "",
+            rating: "-",
+            district: "",
+            description: "Backend bu mekan için veri döndürmedi. Gelen parametreyi kontrol et: " + (safeId || safeName),
+            reviews: [],
+            estimated_visit_time: "-",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Fetch Hatası:", err);
+        Alert.alert("Hata", "Backend bağlantısı kurulamadı.");
+        setPlace({
+          error: true,
+          name: "Bağlantı hatası",
+          city: "",
+          category: "",
+          subcategory: "",
+          rating: "-",
+          district: "",
+          description: "Backend çalışıyor mu kontrol et. Terminalde uvicorn açık olmalı.",
+          reviews: [],
+          estimated_visit_time: "-",
+        });
+      });
+  }, [id, name, language]);
 
   useEffect(() => {
-    if (!place?.name) return;
+    if (!place?.name || place?.error) return;
 
     setLoadingReviews(true);
     setLoadingInsight(true);
@@ -126,6 +173,25 @@ export default function Place() {
       await AsyncStorage.setItem("saved_places", JSON.stringify(updatedPlaces));
 
       Alert.alert(t("place.savedTitle"), t("place.savedMessage"));
+    } catch (error) {
+      console.log(error);
+      Alert.alert(t("place.errorTitle"), t("place.saveError"));
+    }
+  };
+
+  const toggleVisited = async () => {
+    try {
+      if (!place?.id) return;
+      const raw = await AsyncStorage.getItem("visited_places");
+      const list = raw ? JSON.parse(raw) : [];
+      const safeList = Array.isArray(list) ? list : [];
+      const exists = safeList.some((item: any) => Number(item.id) === Number(place.id));
+      const updated = exists
+        ? safeList.filter((item: any) => Number(item.id) !== Number(place.id))
+        : [place, ...safeList];
+      await AsyncStorage.setItem("visited_places", JSON.stringify(updated));
+      setIsVisited(!exists);
+      Alert.alert(t("place.visitedSavedTitle"), exists ? t("place.unmarkVisited") : t("place.visitedSavedMessage"));
     } catch (error) {
       console.log(error);
       Alert.alert(t("place.errorTitle"), t("place.saveError"));
@@ -277,6 +343,17 @@ export default function Place() {
             <Ionicons name="heart-outline" size={18} color={COLORS.white} />
             <Text style={styles.saveButtonText}>
               {t("common.save") || "Kaydet"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={[styles.mapButton, isVisited && styles.visitedButton]}
+            onPress={toggleVisited}
+          >
+            <Ionicons name={isVisited ? "checkmark-done" : "checkmark-done-outline"} size={18} color={isVisited ? COLORS.white : COLORS.text} />
+            <Text style={[styles.mapButtonText, isVisited && styles.visitedButtonText]}>
+              {isVisited ? t("place.unmarkVisited") : t("place.markVisited")}
             </Text>
           </TouchableOpacity>
 
@@ -668,8 +745,17 @@ const styles = StyleSheet.create({
 
   mapButtonText: {
     color: COLORS.text,
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: "700",
+  },
+
+  visitedButton: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+
+  visitedButtonText: {
+    color: COLORS.white,
   },
 
   content: {

@@ -2,10 +2,11 @@ const ru = {
   tabs: {
     home: "Обзор",
     explore: "Поиск",
+    planner: "Планировщик",
     map: "Карта",
     chat: "AI Chat",
     favorites: "Избранное",
-    settings: "Настройки",
+    profile: "Профиль",
   },
 
   common: {
@@ -18,14 +19,26 @@ const ru = {
     allCities: "Все города",
     allDistricts: "Все районы",
     placesFound: "мест найдено",
+    selected: "Выбрано",
+    tapToSwitch: "Нажмите, чтобы переключить",
+    back: "Назад",
+    error: "Ошибка",
+    retry: "Повторить",
+    remove: "Удалить",
+    delete: "Удалить",
+    share: "Поделиться",
+    saved: "Сохранено",
   },
 
   explore: {
     title: "Откройте Турцию",
+    subtitle: "Находите интересные места по категории, городу и району.",
+    filters: "Фильтры",
+    filterSubtitle: "Открывайте места по типу и расположению",
     category: "Категория",
     city: "Город",
     district: "Район",
-    searchCity: "Поиск города...",
+    searchCity: "Искать город...",
     all: "Все",
     attractions: "Достопримечательности",
     restaurants: "Рестораны",
@@ -78,14 +91,14 @@ const ru = {
     loadingGoogleReviews: "Загрузка отзывов Google...",
     loadingWebMentions: "Загрузка упоминаний из интернета...",
     noWebMentions: "Упоминания в интернете недоступны.",
+    visited: "Посещено",
+    markVisited: "Отметить как посещённое",
   },
 
   chat: {
     title: "AI Гид",
-    subtitle:
-      "Планируйте поездки по Турции с достопримечательностями, отелями и ресторанами.",
-    welcome:
-      "Здравствуйте! Я ваш AI-помощник по путешествиям по Турции. Спросите меня о планах по городам, отелях, ресторанах, маршрутах или достопримечательностях.",
+    subtitle: "Планируйте поездки по Турции с достопримечательностями, отелями и ресторанами.",
+    welcome: "Здравствуйте! Я ваш AI-помощник по путешествиям по Турции. Спросите меня о планах по городам, отелях, ресторанах, маршрутах или достопримечательностях.",
     quick1: "Спланировать 2 дня в Каппадокии",
     quick2: "Спланировать 3 дня в Стамбуле",
     quick3: "Лучшая еда в Газиантепе",
@@ -97,7 +110,7 @@ const ru = {
     login: "Войти",
     register: "Регистрация",
     logout: "Выйти",
-    loggedIn: "Вы вошли как",
+    loggedIn: "Вы вошли",
     notLoggedIn: "Вы не вошли в систему",
     thinking: "AI думает...",
     askPlaceholder: "Спросите туристического помощника...",
@@ -110,31 +123,31 @@ const ru = {
   },
 
   settings: {
-    title: "Настройки",
+    title: "Профиль",
+    subtitle: "Язык, сохранённые маршруты и сводка дневника путешествий.",
     appearance: "Внешний вид",
     language: "Язык",
     light: "Светлая",
     dark: "Тёмная",
     system: "Системная",
+    favorite: "Избранное",
+    route: "Маршрут",
+    note: "Заметка",
+    travelJournal: "Дневник путешествий",
+    journalShortcut: "Посмотреть заметки карты и офлайн-маршруты.",
   },
 
   home: {
     title: "Откройте Турцию",
     subtitle: "AI помощник для путешествий",
-
     greeting: "Доброе утро",
     whereNext: "Куда дальше?",
-
     searchPlaceholder: "Поиск мест...",
-
     categories: "Категории",
-
     featured: "Популярные места",
     featuredDestinations: "Популярные места",
-
     seeAll: "Смотреть все",
     viewAll: "Смотреть все",
-
     attractions: "Достопримечательности",
     hotels: "Отели",
     food: "Еда",
@@ -143,86 +156,157 @@ const ru = {
     beaches: "Пляжи",
     shopping: "Шопинг",
     cities: "Города",
-
     searchResults: "Результаты поиска",
     noResults: "Ничего не найдено.",
-
     topHotels: "Лучшие отели",
     topFood: "Лучшие рестораны",
     topFoodPicks: "Лучшие рестораны",
-
     aiAssistant: "AI помощник для путешествий",
     aiTravelCompanion: "AI помощник для путешествий",
-
     aiPlanTitle: "Планируйте поездку с AI",
-
-    aiPlanText:
-      "Спросите о маршрутах, отелях, ресторанах и рекомендациях по городам.",
-
+    aiPlanText: "Спросите о маршрутах, отелях, ресторанах и рекомендациях по городам.",
     aiTripPlanner: "AI планировщик поездок",
-
     aiPowered: "НА БАЗЕ ИИ",
-
     planPerfectTrip: "Спланируйте идеальное путешествие",
-
-    planPerfectTripText:
-      "Создайте персональный маршрут на основе города, количества дней и интересов.",
-
+    planPerfectTripText: "Создайте персональный маршрут на основе города, количества дней и интересов.",
     planMyTrip: "Спланировать поездку",
-
     aiForYou: "Для вас",
-
     hiddenGemsPicked: "Скрытые жемчужины, подобранные специально для вас",
-
     aiPick: "AI Рекомендация",
-
-    aiTravelText:
-      "Спросите про отели, маршруты, события и скрытые места.",
-
+    aiTravelText: "Спросите про отели, маршруты, события и скрытые места.",
     startChat: "Начать чат",
   },
- map: {
-  all: "Все",
-  attractions: "Места",
-  food: "Еда",
-  hotels: "Отели",
-  saved: "Сохранённые",
 
-  tripMap: "Карта поездки",
-  stopsSelected: "остановок выбрано",
+  map: {
+    all: "Все",
+    attractions: "Места",
+    food: "Еда",
+    hotels: "Отели",
+    saved: "Сохранённые",
+    tripMap: "Карта поездки",
+    stopsSelected: "остановок выбрано",
+    stopsInPlan: "остановок в плане",
+    share: "Поделиться",
+    clear: "Очистить",
+    saveRoute: "Сохранить",
+    routeSavedTitle: "Маршрут сохранён",
+    routeSavedMessage: "Вы можете посмотреть этот маршрут офлайн в Избранное > Маршруты.",
+    routeSaveError: "Не удалось сохранить маршрут.",
+    nearbyPlaces: "Места рядом",
+    nearbyFound: "Места рядом • найдено {{count}}",
+    nearbySubtitle: "{{count}} туристических мест рядом с вами",
+    found: "найдено",
+    openList: "Открыть список",
+    exit: "Выход",
+    close: "Закрыть",
+    details: "Детали",
+    navigate: "Маршрут",
+    yourRoute: "Ваш маршрут",
+    placesInPlan: "мест в этом плане",
+    refit: "Центрировать",
+    detailsButton: "Подробнее",
+    distance: "Расстояние",
+    rating: "Рейтинг",
+    noNearbyPlaces: "Поблизости ничего не найдено.",
+    kmAway: "км отсюда",
+    youAreHere: "Вы здесь",
+    virtualTour: "Виртуальный тур",
+    stopTour: "Остановить тур",
+    voiceGuide: "Голосовой гид",
+    mute: "Отключить звук",
+    addNote: "Добавьте личную заметку об этом месте...",
+    myNote: "Моя заметка",
+    noteSavedTitle: "Сохранено",
+    noteSavedMessage: "Ваша заметка успешно сохранена.",
+    locationPermissionTitle: "Нужно разрешение",
+    locationPermissionMessage: "Разрешите доступ к местоположению, чтобы найти места рядом.",
+    virtualTourTitle: "Виртуальный тур",
+    virtualTourNeedPlaces: "Для виртуального тура нужно минимум 2 остановки на карте.",
+    emergencyInfo: "Экстренная / полезная информация",
+    usefulInfoSubtitle: "Открыть важные места рядом в Google Maps",
+    weatherAdvice: "Совет по погоде",
+    nearbyHospitals: "Больницы рядом",
+    nearbyPharmacies: "Аптеки рядом",
+    nearbyPolice: "Полицейские участки рядом",
+    nearbyTransport: "Общественный транспорт рядом",
+    searchingNearby: "Ищем интересные места рядом...",
+  },
 
-  share: "Поделиться",
-  clear: "Очистить",
-
-  nearbyPlaces: "Места рядом",
-  found: "найдено",
-  openList: "Открыть список",
-  exit: "Выход",
-
-  details: "Детали",
-  navigate: "Маршрут",
-
-  yourRoute: "Ваш маршрут",
-  placesInPlan: "мест в плане",
-  refit: "Центрировать",
-
-  detailsButton: "Подробнее",
-
-  distance: "Расстояние",
-  rating: "Рейтинг",
-
-  noNearbyPlaces: "Поблизости ничего не найдено.",
-
-  kmAway: "км отсюда",
-
-  youAreHere: "Вы здесь",
-},
   saved: {
     title: "Сохранённые места",
+    subtitle: "Ваши избранные места, офлайн-маршруты и заметки.",
     empty: "Пока нет сохранённых мест.",
     remove: "Удалить",
     removeErrorTitle: "Ошибка",
     removeErrorText: "Не удалось удалить сохранённое место.",
+    places: "Избранное",
+    routes: "Маршруты",
+    journal: "Дневник",
+    visited: "Посещённые",
+    noPlacesTitle: "Пока нет избранных мест",
+    noPlacesText: "Ваши избранные места появятся здесь.",
+    noRoutesTitle: "Пока нет сохранённых маршрутов",
+    noRoutesText: "Когда вы сохраните маршрут на карте, он будет доступен здесь офлайн.",
+    noJournalTitle: "Дневник путешествий пуст",
+    noJournalText: "Когда вы добавите заметку к месту на карте, она появится здесь.",
+    noVisitedTitle: "Пока нет посещённых мест",
+    noVisitedText: "Места, отмеченные как посещённые, появятся здесь.",
+    savedRoute: "Сохранённый маршрут",
+    stops: "остановок",
+    routeRemoveError: "Не удалось удалить маршрут.",
+  },
+
+  tripPlanner: {
+    title: "AI планировщик поездок",
+    subtitle: "Введите город, количество дней и интересы, чтобы создать AI-маршрут.",
+    city: "Город",
+    days: "Количество дней",
+    interests: "Интересы",
+    cityPlaceholder: "Например: Стамбул, Анталья, Каппадокия",
+    daysPlaceholder: "Например: 2",
+    interestsPlaceholder: "Например: природа, история, еда",
+    generate: "Создать план поездки",
+    generatedPlan: "Созданный план",
+    noPlan: "Для этого города не удалось создать подходящий план.",
+    route: "Маршрут",
+    share: "Поделиться",
+    save: "Сохранить",
+    missingTitle: "Недостаточно информации",
+    missingMessage: "Введите город и количество дней.",
+    createError: "Не удалось создать план поездки.",
+    budgetEstimate: "AI оценка бюджета",
+    dailyAverage: "В среднем за день",
+    day: "День",
+    routeSavedTitle: "Маршрут сохранён",
+    routeSavedMessage: "Вы можете посмотреть его офлайн в Избранное > Маршруты.",
+    routeSaveError: "Не удалось сохранить маршрут.",
+    shareTitle: "Маршрут AI Travel App",
+  },
+
+  journal: {
+    title: "Дневник путешествий",
+    subtitle: "Личные заметки, добавленные к местам на карте, появятся здесь.",
+    clearAll: "Очистить все заметки",
+    clearTitle: "Дневник путешествий",
+    clearMessage: "Вы хотите удалить все заметки?",
+    emptyTitle: "Пока нет заметок",
+    emptyText: "Выберите место на карте и добавьте заметку.",
+    placeFallback: "Место",
+  },
+
+  emergency: {
+    title: "Экстренная и полезная информация",
+    subtitle: "Полезная информация для быстрого доступа во время поездки.",
+    emergencyCall: "Экстренный вызов",
+    emergencyDesc: "Общая линия экстренной помощи в Türkiye",
+    hospitals: "Больницы рядом",
+    hospitalsDesc: "Искать больницы в Google Maps",
+    pharmacies: "Аптеки рядом",
+    pharmaciesDesc: "Искать аптеки в Google Maps",
+    police: "Полицейский участок",
+    policeDesc: "Показать полицейские участки рядом",
+    transport: "Общественный транспорт",
+    transportDesc: "Показать варианты транспорта рядом",
   },
 };
 

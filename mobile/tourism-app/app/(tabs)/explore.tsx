@@ -10,10 +10,12 @@ import {
   TextInput,
   StatusBar,
   Animated,
+  Alert,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "../../context/LanguageContext";
 
 // 🌉 BOĞAZIN KIZILI & SİSLİ GECE EXPLORE RENKLERİ
@@ -41,10 +43,40 @@ export default function Explore() {
   const [selectedCity, setSelectedCity] = useState(t("common.allCities"));
   const [selectedDistrict, setSelectedDistrict] = useState(t("common.allDistricts"));
   const [citySearch, setCitySearch] = useState("");
+  const [savedIds, setSavedIds] = useState<number[]>([]);
 
   // 🌀 GİRİŞ ANIMASYONU DEĞERLERİ
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateYAnim = useRef(new Animated.Value(30)).current;
+
+  const loadSavedIds = async () => {
+    try {
+      const raw = await AsyncStorage.getItem("saved_places");
+      const list = raw ? JSON.parse(raw) : [];
+      setSavedIds(Array.isArray(list) ? list.map((p: any) => Number(p.id)).filter(Boolean) : []);
+    } catch (error) {
+      console.log("Saved load error:", error);
+    }
+  };
+
+  const toggleFavorite = async (place: any) => {
+    try {
+      if (!place?.id) return;
+      const raw = await AsyncStorage.getItem("saved_places");
+      const list = raw ? JSON.parse(raw) : [];
+      const exists = Array.isArray(list) && list.some((p: any) => Number(p.id) === Number(place.id));
+      const updated = exists
+        ? list.filter((p: any) => Number(p.id) !== Number(place.id))
+        : [...(Array.isArray(list) ? list : []), place];
+      await AsyncStorage.setItem("saved_places", JSON.stringify(updated));
+      setSavedIds(updated.map((p: any) => Number(p.id)).filter(Boolean));
+      Alert.alert(exists ? "Favorilerden çıkarıldı" : "Favorilere eklendi", place.name || "Mekan");
+    } catch (error) {
+      console.log("Favorite error:", error);
+      Alert.alert("Hata", "Favori işlemi yapılamadı.");
+    }
+  };
+
 
   useEffect(() => {
     setSelectedFilter(
@@ -55,11 +87,14 @@ export default function Explore() {
   }, [t, params.filter]);
 
   useEffect(() => {
-    fetch("http://10.0.2.2:8000/places")
-      .then((res) => res.json())
-      .then((data) => setPlaces(data))
-      .catch((err) => console.log("Places fetch error:", err));
-  }, []);
+  loadSavedIds();
+  fetch("http://10.0.2.2:8000/places")
+    .then((res) => res.json())
+    .then((data) => {
+      setPlaces(Array.isArray(data) ? data : []);
+    })
+    .catch((err) => console.log("Hata:", err));
+}, []);
 
   useEffect(() => {
     Animated.parallel([
@@ -237,7 +272,7 @@ export default function Explore() {
 
               <Text style={styles.title}>{t("explore.title")}</Text>
               <Text style={styles.heroSubtitle}>
-                Find amazing destinations by category, city and district.
+                {t("explore.subtitle")}
               </Text>
 
               <View style={styles.searchWrapper}>
@@ -256,8 +291,8 @@ export default function Explore() {
               <View style={styles.filtersCard}>
                 <View style={styles.filtersHeader}>
                   <View>
-                    <Text style={styles.filtersTitle}>Filters</Text>
-                    <Text style={styles.filtersSubtitle}>Discover places by type and location</Text>
+                    <Text style={styles.filtersTitle}>{t("explore.filters")}</Text>
+                    <Text style={styles.filtersSubtitle}>{t("explore.filterSubtitle")}</Text>
                   </View>
                   <View style={styles.filtersBadge}>
                     <Text style={styles.filtersBadgeText}>{filteredPlaces.length}</Text>
@@ -330,7 +365,7 @@ export default function Explore() {
             <TouchableOpacity
               activeOpacity={0.92}
               style={styles.card}
-              onPress={() => router.push(`/place?name=${item.name}`)}
+              onPress={() => router.push({ pathname: "/place", params: { id: String(item.id) } })}
             >
               <View style={styles.cardImageWrap}>
                 <Image
@@ -347,8 +382,8 @@ export default function Explore() {
                   style={styles.imageOverlay}
                 />
 
-                <TouchableOpacity style={styles.favoriteButton}>
-                  <Ionicons name="heart-outline" size={18} color="#FFFFFF" />
+                <TouchableOpacity style={styles.favoriteButton} onPress={(e: any) => { e?.stopPropagation?.(); toggleFavorite(item); }}>
+                  <Ionicons name={savedIds.includes(Number(item.id)) ? "heart" : "heart-outline"} size={18} color="#FFFFFF" />
                 </TouchableOpacity>
 
                 <View style={styles.imageInfo}>

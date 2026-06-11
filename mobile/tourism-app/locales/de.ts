@@ -2,10 +2,11 @@ const de = {
   tabs: {
     home: "Entdecken",
     explore: "Suche",
+    planner: "Planer",
     map: "Karte",
     chat: "AI Chat",
     favorites: "Favoriten",
-    settings: "Einstellungen",
+    profile: "Profil",
   },
 
   common: {
@@ -18,10 +19,22 @@ const de = {
     allCities: "Alle Städte",
     allDistricts: "Alle Bezirke",
     placesFound: "Orte gefunden",
+    selected: "Ausgewählt",
+    tapToSwitch: "Zum Wechseln antippen",
+    back: "Zurück",
+    error: "Fehler",
+    retry: "Erneut versuchen",
+    remove: "Entfernen",
+    delete: "Löschen",
+    share: "Teilen",
+    saved: "Gespeichert",
   },
 
   explore: {
     title: "Entdecke die Türkei",
+    subtitle: "Finde tolle Reiseziele nach Kategorie, Stadt und Bezirk.",
+    filters: "Filter",
+    filterSubtitle: "Entdecke Orte nach Typ und Lage",
     category: "Kategorie",
     city: "Stadt",
     district: "Bezirk",
@@ -78,14 +91,14 @@ const de = {
     loadingGoogleReviews: "Google-Bewertungen werden geladen...",
     loadingWebMentions: "Web-Erwähnungen werden geladen...",
     noWebMentions: "Keine Web-Erwähnungen verfügbar.",
+    visited: "Besucht",
+    markVisited: "Als besucht markieren",
   },
 
   chat: {
     title: "AI Reiseführer",
-    subtitle:
-      "Plane Reisen durch die Türkei mit Sehenswürdigkeiten, Hotels und Restaurants.",
-    welcome:
-      "Hallo! Ich bin dein KI-Reiseassistent für die Türkei. Frage mich nach Stadtplänen, Hotels, Restaurants, Routen oder Sehenswürdigkeiten.",
+    subtitle: "Plane Reisen durch die Türkei mit Sehenswürdigkeiten, Hotels und Restaurants.",
+    welcome: "Hallo! Ich bin dein KI-Reiseassistent für die Türkei. Frage mich nach Stadtplänen, Hotels, Restaurants, Routen oder Sehenswürdigkeiten.",
     quick1: "Plane 2 Tage in Kappadokien",
     quick2: "Plane 3 Tage in Istanbul",
     quick3: "Bestes Essen in Gaziantep",
@@ -102,8 +115,7 @@ const de = {
     thinking: "AI denkt nach...",
     askPlaceholder: "Frage den Reiseassistenten...",
     send: "Senden",
-    serverError:
-      "Entschuldigung, ich konnte keine Verbindung zum Server herstellen.",
+    serverError: "Entschuldigung, ich konnte keine Verbindung zum Server herstellen.",
     somethingWrong: "Etwas ist schiefgelaufen.",
     day: "Tag",
     showDayRoute: "Tagesroute anzeigen",
@@ -111,31 +123,31 @@ const de = {
   },
 
   settings: {
-    title: "Einstellungen",
+    title: "Profil",
+    subtitle: "Sprache, gespeicherte Routen und Zusammenfassung des Reisetagebuchs.",
     appearance: "Darstellung",
     language: "Sprache",
     light: "Hell",
     dark: "Dunkel",
     system: "System",
+    favorite: "Favorit",
+    route: "Route",
+    note: "Notiz",
+    travelJournal: "Reisetagebuch",
+    journalShortcut: "Karten-Notizen und Offline-Routen anzeigen.",
   },
 
   home: {
     title: "Entdecke die Türkei",
     subtitle: "AI Reisebegleiter",
-
     greeting: "Guten Morgen",
     whereNext: "Wohin als Nächstes?",
-
     searchPlaceholder: "Reiseziele suchen...",
-
     categories: "Kategorien",
-
     featured: "Empfohlene Orte",
     featuredDestinations: "Empfohlene Orte",
-
     seeAll: "Alle ansehen",
     viewAll: "Alle ansehen",
-
     attractions: "Sehenswürdigkeiten",
     hotels: "Hotels",
     food: "Essen",
@@ -144,86 +156,157 @@ const de = {
     beaches: "Strände",
     shopping: "Shopping",
     cities: "Städte",
-
     searchResults: "Suchergebnisse",
     noResults: "Keine Ergebnisse gefunden.",
-
     topHotels: "Top Hotels",
     topFood: "Top Restaurants",
     topFoodPicks: "Top Restaurants",
-
     aiAssistant: "AI Reiseassistent",
     aiTravelCompanion: "AI Reisebegleiter",
-
     aiPlanTitle: "Plane deine Reise mit AI",
-
-    aiPlanText:
-      "Frage nach Routen, Hotels, Restaurants und Stadtempfehlungen.",
-
+    aiPlanText: "Frage nach Routen, Hotels, Restaurants und Stadtempfehlungen.",
     aiTripPlanner: "AI Reiseplaner",
-
     aiPowered: "KI GESTÜTZT",
-
     planPerfectTrip: "Plane deine perfekte Reise",
-
-    planPerfectTripText:
-      "Erstelle eine persönliche Reiseroute basierend auf Stadt, Tagen und Interessen.",
-
+    planPerfectTripText: "Erstelle eine persönliche Reiseroute basierend auf Stadt, Tagen und Interessen.",
     planMyTrip: "Meine Reise planen",
-
-    aiForYou: "Für Dich",
-
-    hiddenGemsPicked: "Versteckte Orte nur für dich ausgewählt",
-
+    aiForYou: "Für dich",
+    hiddenGemsPicked: "Versteckte Orte, nur für dich ausgewählt",
     aiPick: "AI Empfehlung",
-
-    aiTravelText:
-      "Frage nach Hotels, Routen, Events und versteckten Orten.",
-
+    aiTravelText: "Frage nach Hotels, Routen, Events und versteckten Orten.",
     startChat: "Chat starten",
   },
+
   map: {
-  all: "Alle",
-  attractions: "Sehenswürdigkeiten",
-  food: "Essen",
-  hotels: "Hotels",
-  saved: "Gespeichert",
+    all: "Alle",
+    attractions: "Sehenswürdigkeiten",
+    food: "Essen",
+    hotels: "Hotels",
+    saved: "Gespeichert",
+    tripMap: "Reisekarte",
+    stopsSelected: "Stopps ausgewählt",
+    stopsInPlan: "Stopps im Plan",
+    share: "Teilen",
+    clear: "Löschen",
+    saveRoute: "Speichern",
+    routeSavedTitle: "Route gespeichert",
+    routeSavedMessage: "Du kannst diese Route offline unter Favoriten > Routen ansehen.",
+    routeSaveError: "Route konnte nicht gespeichert werden.",
+    nearbyPlaces: "Orte in der Nähe",
+    nearbyFound: "Orte in der Nähe • {{count}} gefunden",
+    nearbySubtitle: "{{count}} Reiseorte in deiner Nähe",
+    found: "gefunden",
+    openList: "Liste öffnen",
+    exit: "Beenden",
+    close: "Schließen",
+    details: "Details",
+    navigate: "Navigation",
+    yourRoute: "Deine Route",
+    placesInPlan: "Orte in diesem Plan",
+    refit: "Neu zentrieren",
+    detailsButton: "Details ansehen",
+    distance: "Entfernung",
+    rating: "Bewertung",
+    noNearbyPlaces: "Keine Orte in der Nähe gefunden.",
+    kmAway: "km entfernt",
+    youAreHere: "Du bist hier",
+    virtualTour: "Virtuelle Tour",
+    stopTour: "Tour stoppen",
+    voiceGuide: "Sprachführer",
+    mute: "Stummschalten",
+    addNote: "Füge eine persönliche Reisenotiz für diesen Ort hinzu...",
+    myNote: "Meine Notiz",
+    noteSavedTitle: "Gespeichert",
+    noteSavedMessage: "Deine Reisenotiz wurde erfolgreich gespeichert.",
+    locationPermissionTitle: "Berechtigung erforderlich",
+    locationPermissionMessage: "Bitte erlaube den Standortzugriff, um Orte in der Nähe zu finden.",
+    virtualTourTitle: "Virtuelle Tour",
+    virtualTourNeedPlaces: "Für eine virtuelle Tour müssen mindestens 2 Stopps auf der Karte sein.",
+    emergencyInfo: "Notfall / Nützliche Infos",
+    usefulInfoSubtitle: "Wichtige Orte in der Nähe in Google Maps öffnen",
+    weatherAdvice: "Wetterempfehlung",
+    nearbyHospitals: "Krankenhäuser in der Nähe",
+    nearbyPharmacies: "Apotheken in der Nähe",
+    nearbyPolice: "Polizeistationen in der Nähe",
+    nearbyTransport: "Öffentliche Verkehrsmittel in der Nähe",
+    searchingNearby: "Orte in der Nähe werden gesucht...",
+  },
 
-  tripMap: "Reisekarte",
-  stopsSelected: "Stopps ausgewählt",
-
-  share: "Teilen",
-  clear: "Löschen",
-
-  nearbyPlaces: "Orte in der Nähe",
-  found: "gefunden",
-  openList: "Liste öffnen",
-  exit: "Beenden",
-
-  details: "Details",
-  navigate: "Navigation",
-
-  yourRoute: "Deine Route",
-  placesInPlan: "Orte in diesem Plan",
-  refit: "Neu zentrieren",
-
-  detailsButton: "Details ansehen",
-
-  distance: "Entfernung",
-  rating: "Bewertung",
-
-  noNearbyPlaces: "Keine Orte in der Nähe gefunden.",
-
-  kmAway: "km entfernt",
-
-  youAreHere: "Du bist hier",
-},
   saved: {
     title: "Gespeicherte Orte",
+    subtitle: "Deine Favoriten, Offline-Routen und Reisenotizen.",
     empty: "Noch keine gespeicherten Orte.",
     remove: "Entfernen",
     removeErrorTitle: "Fehler",
     removeErrorText: "Gespeicherter Ort konnte nicht entfernt werden.",
+    places: "Favoriten",
+    routes: "Routen",
+    journal: "Tagebuch",
+    visited: "Besucht",
+    noPlacesTitle: "Noch keine Favoriten",
+    noPlacesText: "Deine Lieblingsorte erscheinen hier.",
+    noRoutesTitle: "Noch keine gespeicherten Routen",
+    noRoutesText: "Wenn du eine Route auf der Karte speicherst, kannst du sie hier offline sehen.",
+    noJournalTitle: "Reisetagebuch ist leer",
+    noJournalText: "Wenn du einem Ort auf der Karte eine Notiz hinzufügst, erscheint sie hier.",
+    noVisitedTitle: "Noch keine besuchten Orte",
+    noVisitedText: "Orte, die du als besucht markierst, erscheinen hier.",
+    savedRoute: "Gespeicherte Route",
+    stops: "Stopps",
+    routeRemoveError: "Route konnte nicht entfernt werden.",
+  },
+
+  tripPlanner: {
+    title: "AI Reiseplaner",
+    subtitle: "Gib Stadt, Anzahl der Tage und Interessen ein, um einen AI-Reiseplan zu erstellen.",
+    city: "Stadt",
+    days: "Anzahl der Tage",
+    interests: "Interessen",
+    cityPlaceholder: "Beispiel: Istanbul, Antalya, Kappadokien",
+    daysPlaceholder: "Beispiel: 2",
+    interestsPlaceholder: "Beispiel: Natur, Geschichte, Essen",
+    generate: "Reiseplan erstellen",
+    generatedPlan: "Erstellter Plan",
+    noPlan: "Für diese Stadt konnte kein passender Plan erstellt werden.",
+    route: "Route",
+    share: "Teilen",
+    save: "Speichern",
+    missingTitle: "Fehlende Informationen",
+    missingMessage: "Bitte gib Stadt und Anzahl der Tage ein.",
+    createError: "Reiseplan konnte nicht erstellt werden.",
+    budgetEstimate: "AI Budgetschätzung",
+    dailyAverage: "Tagesdurchschnitt",
+    day: "Tag",
+    routeSavedTitle: "Route gespeichert",
+    routeSavedMessage: "Du kannst sie offline unter Favoriten > Routen ansehen.",
+    routeSaveError: "Route konnte nicht gespeichert werden.",
+    shareTitle: "AI Travel App Route",
+  },
+
+  journal: {
+    title: "Reisetagebuch",
+    subtitle: "Persönliche Notizen, die du auf der Karte hinzugefügt hast, erscheinen hier.",
+    clearAll: "Alle Notizen löschen",
+    clearTitle: "Reisetagebuch",
+    clearMessage: "Möchtest du alle Notizen löschen?",
+    emptyTitle: "Noch keine Notizen",
+    emptyText: "Wähle einen Ort auf der Karte und füge eine Reisenotiz hinzu.",
+    placeFallback: "Ort",
+  },
+
+  emergency: {
+    title: "Notfall & nützliche Infos",
+    subtitle: "Hilfreiche Informationen, auf die du während der Reise schnell zugreifen kannst.",
+    emergencyCall: "Notruf",
+    emergencyDesc: "Allgemeine Notrufnummer in Türkiye",
+    hospitals: "Krankenhäuser in der Nähe",
+    hospitalsDesc: "Krankenhäuser in Google Maps suchen",
+    pharmacies: "Apotheken in der Nähe",
+    pharmaciesDesc: "Apotheken in Google Maps suchen",
+    police: "Polizeistation",
+    policeDesc: "Polizeistationen in der Nähe anzeigen",
+    transport: "Öffentliche Verkehrsmittel",
+    transportDesc: "Verkehrsoptionen in der Nähe anzeigen",
   },
 };
 

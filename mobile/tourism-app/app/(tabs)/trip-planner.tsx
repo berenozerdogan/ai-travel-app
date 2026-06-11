@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -13,19 +13,19 @@ import {
   Alert,
   Share,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "../../context/LanguageContext";
 
-// 🌉 BOĞAZIN KIZILI & SİSLİ GECE TRIP PLANNER RENKLERİ
 const COLORS = {
-  bg: "#131622",          // Derin, puslu gece denizi rengi
-  surface: "#1C1F30",     // Gece mavisi-gri asil kart yüzeyi
-  surfaceSoft: "#272B42", // Inputlar ve iç kartlar için soft kontrast ton
-  border: "rgba(255, 255, 255, 0.03)",
-  text: "#F1F3F9",        // Kirli beyaz ana başlıklar
-  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
-  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (Muted Crimson)
+  bg: "#131622",
+  surface: "#1C1F30",
+  surfaceSoft: "#272B42",
+  border: "rgba(255,255,255,0.04)",
+  text: "#F1F3F9",
+  textSoft: "#8E95B2",
+  accent: "#D65A5A",
   white: "#FFFFFF",
   shadow: "#090A10",
 };
@@ -38,6 +38,80 @@ export default function TripPlanner() {
   const [interests, setInterests] = useState("");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<any>(null);
+  const [budget, setBudget] = useState<any>(null);
+
+  const scrollRef = useRef<ScrollView>(null);
+
+  const resetPlan = () => {
+    setPlan(null);
+    setBudget(null);
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    }, 80);
+  };
+
+  const clearAll = () => {
+    setCity("");
+    setDays("");
+    setInterests("");
+    setPlan(null);
+    setBudget(null);
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    }, 80);
+  };
+
+  const updateCity = (value: string) => {
+    setCity(value);
+    if (plan) {
+      setPlan(null);
+      setBudget(null);
+    }
+  };
+
+  const updateDays = (value: string) => {
+    setDays(value);
+    if (plan) {
+      setPlan(null);
+      setBudget(null);
+    }
+  };
+
+  const updateInterests = (value: string) => {
+    setInterests(value);
+    if (plan) {
+      setPlan(null);
+      setBudget(null);
+    }
+  };
+
+  const fetchBudget = async (places: any[], dayCount: number) => {
+    try {
+      if (!places?.length) {
+        setBudget(null);
+        return;
+      }
+
+      const res = await fetch("http://10.0.2.2:8000/budget-estimate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          places,
+          days: dayCount,
+          traveler_count: 1,
+          language,
+        }),
+      });
+
+      const data = await res.json();
+      setBudget(data);
+    } catch (error) {
+      console.log("Budget error:", error);
+      setBudget(null);
+    }
+  };
 
   const generateTrip = async () => {
     const cleanCity = city.trim();
@@ -45,13 +119,14 @@ export default function TripPlanner() {
     const cleanInterests = interests.trim();
 
     if (!cleanCity || !cleanDays) {
-      Alert.alert("Eksik bilgi", "Lütfen şehir ve gün sayısı gir.");
+      Alert.alert(t("tripPlanner.missingTitle"), t("tripPlanner.missingMessage"));
       return;
     }
 
     try {
       setLoading(true);
       setPlan(null);
+      setBudget(null);
 
       const res = await fetch("http://10.0.2.2:8000/trip-plan", {
         method: "POST",
@@ -68,9 +143,19 @@ export default function TripPlanner() {
 
       const data = await res.json();
       setPlan(data);
+
+      const allPlaces =
+        data?.places ||
+        (data?.days || []).flatMap((day: any) => day.places || []);
+
+      await fetchBudget(allPlaces, Number(cleanDays) || 1);
+
+      setTimeout(() => {
+        scrollRef.current?.scrollTo({ y: 520, animated: true });
+      }, 120);
     } catch (error) {
       console.log(error);
-      Alert.alert("Hata", "Gezi planı oluşturulamadı.");
+      Alert.alert(t("common.error"), t("tripPlanner.createError"));
     } finally {
       setLoading(false);
     }
@@ -85,7 +170,7 @@ export default function TripPlanner() {
           .map((place: any, index: number) => `${index + 1}. ${place.name}`)
           .join("\n");
 
-        return `Gün ${day.day}${day.title ? ` - ${day.title}` : ""}\n${places}${
+        return `${t("tripPlanner.day")} ${day.day}${day.title ? ` - ${day.title}` : ""}\n${places}${
           day.note ? `\n\n${day.note}` : ""
         }`;
       })
@@ -93,10 +178,40 @@ export default function TripPlanner() {
 
     try {
       await Share.share({
-        message: `AI Travel App Rotam\n\n${text}`,
+        message: `${t("tripPlanner.shareTitle")}\n\n${text}`,
       });
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const saveRoute = async () => {
+    try {
+      if (!plan?.days?.length) return;
+
+      const raw = await AsyncStorage.getItem("saved_routes");
+      const list = raw ? JSON.parse(raw) : [];
+
+      const route = {
+        id: Date.now().toString(),
+        title: `${city} - ${days} ${t("tripPlanner.day")}`,
+        city,
+        days,
+        interests,
+        plan,
+        budget,
+        createdAt: new Date().toISOString(),
+      };
+
+      await AsyncStorage.setItem(
+        "saved_routes",
+        JSON.stringify([route, ...(Array.isArray(list) ? list : [])])
+      );
+
+      Alert.alert(t("tripPlanner.routeSavedTitle"), t("tripPlanner.routeSavedMessage"));
+    } catch (error) {
+      console.log(error);
+      Alert.alert(t("common.error"), t("tripPlanner.routeSaveError"));
     }
   };
 
@@ -114,47 +229,46 @@ export default function TripPlanner() {
       <StatusBar barStyle="light-content" />
 
       <ScrollView
+        ref={scrollRef}
         style={styles.container}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>AI Trip Planner</Text>
-        <Text style={styles.subtitle}>
-          Şehir, gün sayısı ve ilgi alanlarını girerek aynı ekranda yapay zekâ
-          destekli gezi planı oluştur.
-        </Text>
+        <Text style={styles.title}>{t("tripPlanner.title")}</Text>
+        <Text style={styles.subtitle}>{t("tripPlanner.subtitle")}</Text>
 
         <View style={styles.card}>
-          <Text style={styles.label}>Şehir</Text>
+          <Text style={styles.label}>{t("tripPlanner.city")}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Örn: İstanbul, Antalya, Nevşehir"
+            placeholder={t("tripPlanner.cityPlaceholder")}
             placeholderTextColor="#5C627D"
             value={city}
-            onChangeText={setCity}
+            onChangeText={updateCity}
           />
 
-          <Text style={styles.label}>Gün Sayısı</Text>
+          <Text style={styles.label}>{t("tripPlanner.days")}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Örn: 2"
+            placeholder={t("tripPlanner.daysPlaceholder")}
             placeholderTextColor="#5C627D"
             value={days}
-            onChangeText={setDays}
+            onChangeText={updateDays}
             keyboardType="numeric"
           />
 
-          <Text style={styles.label}>İlgi Alanları</Text>
+          <Text style={styles.label}>{t("tripPlanner.interests")}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Örn: doğa, tarih, yemek"
+            placeholder={t("tripPlanner.interestsPlaceholder")}
             placeholderTextColor="#5C627D"
             value={interests}
-            onChangeText={setInterests}
+            onChangeText={updateInterests}
           />
 
           <TouchableOpacity
@@ -170,44 +284,74 @@ export default function TripPlanner() {
               <ActivityIndicator color={COLORS.white} />
             ) : (
               <>
-                <Ionicons
-                  name="sparkles-outline"
-                  size={18}
-                  color={COLORS.white}
-                />
-                <Text style={styles.buttonText}>Gezi Planı Oluştur</Text>
+                <Ionicons name="sparkles-outline" size={18} color={COLORS.white} />
+                <Text style={styles.buttonText}>{t("tripPlanner.generate")}</Text>
               </>
             )}
           </TouchableOpacity>
+
+          {(plan || city || days || interests) && (
+            <TouchableOpacity style={styles.clearButton} onPress={clearAll}>
+              <Ionicons name="refresh-outline" size={16} color={COLORS.text} />
+              <Text style={styles.clearButtonText}>Yeni plan yaz</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {plan && (
           <View style={styles.resultWrapper}>
             <View style={styles.resultHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.resultTitle}>Oluşturulan Plan</Text>
+                <Text style={styles.resultTitle}>{t("tripPlanner.generatedPlan")}</Text>
                 {plan.reply ? (
                   <Text style={styles.resultIntro}>{plan.reply}</Text>
                 ) : null}
               </View>
+            </View>
+
+            <View style={styles.actionsRow}>
+              <TouchableOpacity style={styles.actionButton} onPress={resetPlan}>
+                <Ionicons name="create-outline" size={16} color={COLORS.text} />
+                <Text style={styles.actionButtonText}>Düzenle</Text>
+              </TouchableOpacity>
 
               {plan.days?.length > 0 && (
-                <TouchableOpacity style={styles.shareButton} onPress={shareTrip}>
-                  <Ionicons
-                    name="share-social-outline"
-                    size={16}
-                    color={COLORS.white}
-                  />
-                  <Text style={styles.shareButtonText}>Paylaş</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity style={styles.actionButton} onPress={saveRoute}>
+                    <Ionicons name="download-outline" size={16} color={COLORS.text} />
+                    <Text style={styles.actionButtonText}>{t("tripPlanner.save")}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.actionButton} onPress={shareTrip}>
+                    <Ionicons name="share-social-outline" size={16} color={COLORS.text} />
+                    <Text style={styles.actionButtonText}>{t("tripPlanner.share")}</Text>
+                  </TouchableOpacity>
+                </>
               )}
             </View>
 
+            {budget && (
+              <View style={styles.budgetCard}>
+                <View style={styles.budgetTop}>
+                  <Ionicons name="wallet-outline" size={20} color={COLORS.accent} />
+                  <Text style={styles.budgetTitle}>{t("tripPlanner.budgetEstimate")}</Text>
+                </View>
+
+                <Text style={styles.budgetAmount}>
+                  {budget.min_total} - {budget.max_total} {budget.currency || "TRY"}
+                </Text>
+
+                <Text style={styles.budgetText}>
+                  {t("tripPlanner.dailyAverage")}: {budget.daily_average} {budget.currency || "TRY"}
+                </Text>
+
+                {budget.note ? <Text style={styles.budgetNote}>{budget.note}</Text> : null}
+              </View>
+            )}
+
             {plan.days?.length === 0 && (
               <View style={styles.emptyBox}>
-                <Text style={styles.emptyText}>
-                  Bu şehir için uygun plan oluşturulamadı.
-                </Text>
+                <Text style={styles.emptyText}>{t("tripPlanner.noPlan")}</Text>
               </View>
             )}
 
@@ -215,7 +359,9 @@ export default function TripPlanner() {
               <View key={day.day} style={styles.dayCard}>
                 <View style={styles.dayHeader}>
                   <View style={{ flex: 1, paddingRight: 8 }}>
-                    <Text style={styles.dayTitle}>Gün {day.day}</Text>
+                    <Text style={styles.dayTitle}>
+                      {t("tripPlanner.day")} {day.day}
+                    </Text>
                     {day.title ? (
                       <Text style={styles.daySubtitle}>{day.title}</Text>
                     ) : null}
@@ -226,12 +372,8 @@ export default function TripPlanner() {
                       style={styles.routeButton}
                       onPress={() => showDayRoute(day.places)}
                     >
-                      <Ionicons
-                        name="map-outline"
-                        size={15}
-                        color={COLORS.white}
-                      />
-                      <Text style={styles.routeButtonText}>Rota</Text>
+                      <Ionicons name="map-outline" size={15} color={COLORS.white} />
+                      <Text style={styles.routeButtonText}>{t("tripPlanner.route")}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -243,22 +385,25 @@ export default function TripPlanner() {
                     key={place.id}
                     style={styles.placeCard}
                     activeOpacity={0.92}
-                    onPress={() => router.push(`/place?name=${place.name}`)}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/place",
+                        params: { id: String(place.id) },
+                      })
+                    }
                   >
                     {place.image ? (
                       <Image source={{ uri: place.image }} style={styles.placeImage} />
                     ) : (
                       <View style={styles.placeholderImage}>
-                        <Ionicons
-                          name="image-outline"
-                          size={24}
-                          color={COLORS.textSoft}
-                        />
+                        <Ionicons name="image-outline" size={24} color={COLORS.textSoft} />
                       </View>
                     )}
 
                     <View style={styles.placeInfo}>
-                      <Text style={styles.placeName} numberOfLines={1}>{place.name}</Text>
+                      <Text style={styles.placeName} numberOfLines={1}>
+                        {place.name}
+                      </Text>
                       <Text style={styles.placeMeta}>
                         {place.category} • ⭐ {place.rating || 0}
                       </Text>
@@ -376,6 +521,25 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
+  clearButton: {
+    marginTop: 12,
+    backgroundColor: COLORS.surfaceSoft,
+    paddingVertical: 13,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  clearButtonText: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 14,
+    marginLeft: 6,
+  },
+
   resultWrapper: {
     marginTop: 24,
   },
@@ -399,27 +563,73 @@ const styles = StyleSheet.create({
     color: COLORS.textSoft,
     fontSize: 15,
     lineHeight: 22,
+    marginBottom: 12,
+  },
+
+  actionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
     marginBottom: 16,
   },
 
-  shareButton: {
+  actionButton: {
     backgroundColor: COLORS.surfaceSoft,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: 999,
-    paddingVertical: 9,
+    paddingVertical: 10,
     paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 10,
-    marginTop: 2,
   },
 
-  shareButtonText: {
+  actionButtonText: {
     color: COLORS.text,
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "700",
     marginLeft: 5,
+  },
+
+  budgetCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 16,
+  },
+
+  budgetTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  budgetTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "700",
+    marginLeft: 8,
+  },
+
+  budgetAmount: {
+    color: COLORS.white,
+    fontSize: 24,
+    fontWeight: "800",
+    marginBottom: 6,
+  },
+
+  budgetText: {
+    color: COLORS.textSoft,
+    fontSize: 14,
+    marginBottom: 8,
+  },
+
+  budgetNote: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    lineHeight: 18,
   },
 
   emptyBox: {
@@ -482,32 +692,28 @@ const styles = StyleSheet.create({
   note: {
     color: COLORS.textSoft,
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 20,
     marginBottom: 12,
   },
 
   placeCard: {
+    flexDirection: "row",
     backgroundColor: COLORS.surfaceSoft,
     borderRadius: 18,
-    padding: 10,
-    flexDirection: "row",
+    overflow: "hidden",
     marginBottom: 10,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
 
   placeImage: {
-    width: 86,
-    height: 86,
-    borderRadius: 14,
-    marginRight: 12,
+    width: 82,
+    height: 82,
   },
 
   placeholderImage: {
-    width: 86,
-    height: 86,
-    borderRadius: 14,
-    marginRight: 12,
+    width: 82,
+    height: 82,
     backgroundColor: COLORS.surface,
     alignItems: "center",
     justifyContent: "center",
@@ -515,6 +721,7 @@ const styles = StyleSheet.create({
 
   placeInfo: {
     flex: 1,
+    padding: 12,
     justifyContent: "center",
   },
 
@@ -522,13 +729,13 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontSize: 15,
     fontWeight: "700",
-    marginBottom: 5,
+    marginBottom: 4,
   },
 
   placeMeta: {
     color: COLORS.textSoft,
     fontSize: 13,
-    marginBottom: 4,
+    marginBottom: 3,
   },
 
   placeCity: {

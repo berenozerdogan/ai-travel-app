@@ -2,10 +2,11 @@ const en = {
   tabs: {
     home: "Explore",
     explore: "Search",
+    planner: "Planner",
     map: "Map",
     chat: "AI Chat",
     favorites: "Favorites",
-    settings: "Settings",
+    profile: "Profile",
   },
 
   common: {
@@ -18,10 +19,22 @@ const en = {
     allCities: "All Cities",
     allDistricts: "All Districts",
     placesFound: "places found",
+    selected: "Selected",
+    tapToSwitch: "Tap to switch",
+    back: "Back",
+    error: "Error",
+    retry: "Retry",
+    remove: "Remove",
+    delete: "Delete",
+    share: "Share",
+    saved: "Saved",
   },
 
   explore: {
     title: "Explore Turkey",
+    subtitle: "Find amazing destinations by category, city and district.",
+    filters: "Filters",
+    filterSubtitle: "Discover places by type and location",
     category: "Category",
     city: "City",
     district: "District",
@@ -78,14 +91,14 @@ const en = {
     loadingGoogleReviews: "Loading Google reviews...",
     loadingWebMentions: "Loading web mentions...",
     noWebMentions: "No web mentions available.",
+    visited: "Visited",
+    markVisited: "Mark as Visited",
   },
 
   chat: {
     title: "AI Guide",
-    subtitle:
-      "Plan trips across Turkey with attractions, hotels and restaurants.",
-    welcome:
-      "Hi! I’m your AI travel assistant for Turkey. Ask me for city plans, hotels, restaurants, routes or attractions.",
+    subtitle: "Plan trips across Turkey with attractions, hotels and restaurants.",
+    welcome: "Hi! I’m your AI travel assistant for Turkey. Ask me for city plans, hotels, restaurants, routes or attractions.",
     quick1: "Plan 2 days in Cappadocia",
     quick2: "Plan 3 days in Istanbul",
     quick3: "Best food in Gaziantep",
@@ -110,31 +123,31 @@ const en = {
   },
 
   settings: {
-    title: "Settings",
+    title: "Profile",
+    subtitle: "Language, saved routes and travel journal summary.",
     appearance: "Appearance",
     language: "Language",
     light: "Light",
     dark: "Dark",
     system: "System",
+    favorite: "Favorite",
+    route: "Route",
+    note: "Note",
+    travelJournal: "Travel Journal",
+    journalShortcut: "View your map notes and offline routes.",
   },
 
   home: {
     title: "Explore Turkey",
     subtitle: "AI Travel Companion",
-
     greeting: "Good morning",
     whereNext: "Where to next?",
-
     searchPlaceholder: "Search destinations...",
-
     categories: "Categories",
-
     featured: "Featured Destinations",
     featuredDestinations: "Featured Destinations",
-
     seeAll: "See all",
     viewAll: "View all",
-
     attractions: "Attractions",
     hotels: "Hotels",
     food: "Food",
@@ -143,86 +156,157 @@ const en = {
     beaches: "Beaches",
     shopping: "Shopping",
     cities: "Cities",
-
     searchResults: "Search Results",
     noResults: "No results found.",
-
     topHotels: "Top Hotels",
     topFood: "Top Food Picks",
     topFoodPicks: "Top Food Picks",
-
     aiAssistant: "AI Travel Assistant",
     aiTravelCompanion: "AI Travel Companion",
-
     aiPlanTitle: "Plan your trip with AI",
-
-    aiPlanText:
-      "Ask for routes, hotels, restaurants and city recommendations.",
-
+    aiPlanText: "Ask for routes, hotels, restaurants and city recommendations.",
     aiTripPlanner: "AI Trip Planner",
-
     aiPowered: "AI POWERED",
-
     planPerfectTrip: "Plan your perfect trip",
-
-    planPerfectTripText:
-      "Create a personalized itinerary based on your city, days and interests.",
-
+    planPerfectTripText: "Create a personalized itinerary based on your city, days and interests.",
     planMyTrip: "Plan My Trip",
-
     aiForYou: "AI For You",
-
     hiddenGemsPicked: "Hidden gems picked just for you",
-
     aiPick: "AI Pick",
-
-    aiTravelText:
-      "Ask for hotels, routes, events and hidden gems.",
-
+    aiTravelText: "Ask for hotels, routes, events and hidden gems.",
     startChat: "Start Chat",
   },
+
   map: {
-  all: "All",
-  attractions: "Attractions",
-  food: "Food",
-  hotels: "Hotels",
-  saved: "Saved",
+    all: "All",
+    attractions: "Attractions",
+    food: "Food",
+    hotels: "Hotels",
+    saved: "Saved",
+    tripMap: "Trip Map",
+    stopsSelected: "stops selected",
+    stopsInPlan: "stops in plan",
+    share: "Share",
+    clear: "Clear",
+    saveRoute: "Save",
+    routeSavedTitle: "Route saved",
+    routeSavedMessage: "You can view this route offline in Favorites > Routes.",
+    routeSaveError: "Could not save route.",
+    nearbyPlaces: "Nearby Places",
+    nearbyFound: "Nearby Places • {{count}} found",
+    nearbySubtitle: "{{count}} travel spots near your location",
+    found: "found",
+    openList: "Open List",
+    exit: "Exit",
+    close: "Close",
+    details: "Details",
+    navigate: "Navigate",
+    yourRoute: "Your Route",
+    placesInPlan: "places in this plan",
+    refit: "Refit",
+    detailsButton: "View Details",
+    distance: "Distance",
+    rating: "Rating",
+    noNearbyPlaces: "No nearby places found.",
+    kmAway: "km away",
+    youAreHere: "You are here",
+    virtualTour: "Virtual Tour",
+    stopTour: "Stop Tour",
+    voiceGuide: "Voice Guide",
+    mute: "Mute",
+    addNote: "Add a personal travel note for this place...",
+    myNote: "My note",
+    noteSavedTitle: "Saved",
+    noteSavedMessage: "Your travel note was saved successfully.",
+    locationPermissionTitle: "Permission needed",
+    locationPermissionMessage: "Please allow location permission to find nearby places.",
+    virtualTourTitle: "Virtual Tour",
+    virtualTourNeedPlaces: "Please have at least 2 travel stops on the map for a virtual tour.",
+    emergencyInfo: "Emergency / Useful Info",
+    usefulInfoSubtitle: "Open nearby important places in Google Maps",
+    weatherAdvice: "Weather Advice",
+    nearbyHospitals: "Nearby hospitals",
+    nearbyPharmacies: "Nearby pharmacies",
+    nearbyPolice: "Nearby police stations",
+    nearbyTransport: "Nearby public transport",
+    searchingNearby: "Searching nearby gems...",
+  },
 
-  tripMap: "Trip Map",
-  stopsSelected: "stops selected",
-
-  share: "Share",
-  clear: "Clear",
-
-  nearbyPlaces: "Nearby Places",
-  found: "found",
-  openList: "Open List",
-  exit: "Exit",
-
-  details: "Details",
-  navigate: "Navigate",
-
-  yourRoute: "Your Route",
-  placesInPlan: "places in this plan",
-  refit: "Refit",
-
-  detailsButton: "View Details",
-
-  distance: "Distance",
-  rating: "Rating",
-
-  noNearbyPlaces: "No nearby places found.",
-
-  kmAway: "km away",
-
-  youAreHere: "You are here",
-},
   saved: {
     title: "Saved Places",
+    subtitle: "Your favorite places, offline routes and travel notes.",
     empty: "No saved places yet.",
     remove: "Remove",
     removeErrorTitle: "Error",
     removeErrorText: "Could not remove saved place.",
+    places: "Favorites",
+    routes: "Routes",
+    journal: "Journal",
+    visited: "Visited",
+    noPlacesTitle: "No saved places yet",
+    noPlacesText: "Your favorite places will appear here.",
+    noRoutesTitle: "No saved routes yet",
+    noRoutesText: "When you save a route on the map, you can view it here offline.",
+    noJournalTitle: "Travel journal is empty",
+    noJournalText: "When you add a note to a place on the map, it will appear here.",
+    noVisitedTitle: "No visited places yet",
+    noVisitedText: "Places you mark as visited will appear here.",
+    savedRoute: "Saved Route",
+    stops: "stops",
+    routeRemoveError: "Could not remove route.",
+  },
+
+  tripPlanner: {
+    title: "AI Trip Planner",
+    subtitle: "Enter a city, number of days and interests to create an AI-powered trip plan.",
+    city: "City",
+    days: "Number of Days",
+    interests: "Interests",
+    cityPlaceholder: "Example: Istanbul, Antalya, Cappadocia",
+    daysPlaceholder: "Example: 2",
+    interestsPlaceholder: "Example: nature, history, food",
+    generate: "Create Trip Plan",
+    generatedPlan: "Generated Plan",
+    noPlan: "A suitable plan could not be created for this city.",
+    route: "Route",
+    share: "Share",
+    save: "Save",
+    missingTitle: "Missing information",
+    missingMessage: "Please enter city and number of days.",
+    createError: "Trip plan could not be created.",
+    budgetEstimate: "AI Budget Estimate",
+    dailyAverage: "Daily average",
+    day: "Day",
+    routeSavedTitle: "Route saved",
+    routeSavedMessage: "You can view it offline from Favorites > Routes.",
+    routeSaveError: "Route could not be saved.",
+    shareTitle: "AI Travel App Route",
+  },
+
+  journal: {
+    title: "Travel Journal",
+    subtitle: "Personal notes you added to places on the map appear here.",
+    clearAll: "Clear all notes",
+    clearTitle: "Travel Journal",
+    clearMessage: "Do you want to delete all notes?",
+    emptyTitle: "No notes yet",
+    emptyText: "Select a place on the map and add a travel note.",
+    placeFallback: "Place",
+  },
+
+  emergency: {
+    title: "Emergency & Useful Info",
+    subtitle: "Helpful information you can quickly access while traveling.",
+    emergencyCall: "Emergency Call",
+    emergencyDesc: "Türkiye general emergency line",
+    hospitals: "Nearby Hospitals",
+    hospitalsDesc: "Search hospitals on Google Maps",
+    pharmacies: "Nearby Pharmacies",
+    pharmaciesDesc: "Search pharmacies on Google Maps",
+    police: "Police Station",
+    policeDesc: "Show nearby police stations",
+    transport: "Public Transport",
+    transportDesc: "Show nearby transport options",
   },
 };
 

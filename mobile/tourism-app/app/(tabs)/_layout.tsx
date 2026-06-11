@@ -4,14 +4,13 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "../../context/LanguageContext";
 
-// 🌉 BOĞAZIN KIZILI & SİSLİ GECE TAB BAR RENKLERİ
 const COLORS = {
-  surface: "#1C1F30",     // Home ekranındaki kart yüzeyi ile birebir aynı (Gece Mavisi)
-  border: "rgba(255, 255, 255, 0.04)", // Çok hafif puslu şeffaf sınır çizgisi
-  active: "#D65A5A",      // 🎯 O asil köprü kırmızısı (Aktif ikon ve yazı rengi)
-  activeBg: "rgba(214, 90, 90, 0.14)", // Aktif olan ikonun arkasındaki soft kızıl parlama
-  inactive: "#8E95B2",    // Sis bulutlarının puslu grisi (İnaktif ögeler)
-  shadow: "#090A10",      // Derin gölge tonu
+  surface: "#1C1F30",
+  border: "rgba(255, 255, 255, 0.04)",
+  active: "#D65A5A",
+  activeBg: "rgba(214, 90, 90, 0.14)",
+  inactive: "#8E95B2",
+  shadow: "#090A10",
 };
 
 const TAB_CONFIG = [
@@ -29,7 +28,7 @@ const TAB_CONFIG = [
   },
   {
     name: "trip-planner",
-    labelKey: "",
+    labelKey: "tabs.planner",
     fallback: "Planner",
     icons: ["sparkles-outline", "sparkles"],
   },
@@ -53,9 +52,9 @@ const TAB_CONFIG = [
   },
   {
     name: "profile",
-    labelKey: "tabs.settings",
-    fallback: "Settings",
-    icons: ["settings-outline", "settings"],
+    labelKey: "tabs.profile",
+    fallback: "Profile",
+    icons: ["person-outline", "person"],
   },
 ] as const;
 
@@ -66,9 +65,7 @@ function CustomTabBar({ state, navigation }: any) {
     <View style={styles.wrapper}>
       <View style={styles.tabBar}>
         {state.routes.map((route: any) => {
-          const index = TAB_CONFIG.findIndex((item) => item.name === route.name);
-          const config = TAB_CONFIG[index];
-
+          const config = TAB_CONFIG.find((item) => item.name === route.name);
           if (!config) return null;
 
           const isFocused = state.routes[state.index].name === route.name;
@@ -93,7 +90,11 @@ function CustomTabBar({ state, navigation }: any) {
           };
 
           const iconName = isFocused ? config.icons[1] : config.icons[0];
-          const label = config.labelKey ? t(config.labelKey) : config.fallback;
+          const translatedLabel = config.labelKey ? t(config.labelKey) : "";
+          const label =
+            translatedLabel && !translatedLabel.startsWith("tabs.")
+              ? translatedLabel
+              : config.fallback;
 
           return (
             <TouchableOpacity
@@ -108,7 +109,7 @@ function CustomTabBar({ state, navigation }: any) {
               <View style={[styles.iconWrap, isFocused && styles.iconWrapActive]}>
                 <Ionicons
                   name={iconName as any}
-                  size={19}
+                  size={18}
                   color={isFocused ? COLORS.active : COLORS.inactive}
                 />
               </View>
@@ -119,6 +120,8 @@ function CustomTabBar({ state, navigation }: any) {
                   isFocused ? styles.labelActive : styles.labelInactive,
                 ]}
                 numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
               >
                 {label}
               </Text>
@@ -130,7 +133,7 @@ function CustomTabBar({ state, navigation }: any) {
   );
 }
 
-export default function Layout() {
+export default function TabLayout() {
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 8,
     right: 8,
-    bottom: 14,
+    bottom: 12,
   },
 
   tabBar: {
@@ -162,14 +165,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: COLORS.surface,
-    borderRadius: 28,
+    borderRadius: 24,
     paddingHorizontal: 4,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.35,
-    shadowRadius: 15,
+    shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 8,
   },
@@ -178,16 +181,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 54,
+    minHeight: 50,
+    paddingHorizontal: 1,
   },
 
   iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 2,
+    marginBottom: 1,
   },
 
   iconWrapActive: {
@@ -197,7 +201,8 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 9,
     fontWeight: "700",
-    letterSpacing: -0.1,
+    letterSpacing: -0.2,
+    textAlign: "center",
   },
 
   labelActive: {

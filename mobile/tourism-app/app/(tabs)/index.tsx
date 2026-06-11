@@ -10,6 +10,7 @@ import {
   Animated,
   Dimensions,
   ScrollView,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import {
@@ -18,6 +19,7 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "../../context/LanguageContext";
 
 const { width } = Dimensions.get("window");
@@ -96,6 +98,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [aiPicks, setAiPicks] = useState<any[]>([]);
+  const [savedIds, setSavedIds] = useState<number[]>([]);
 
   // 🌀 EFEKTLER İÇİN ANIMASYON DEĞERLERİ
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -106,12 +109,46 @@ export default function Home() {
   const plannerScale = useRef(new Animated.Value(1)).current;
   const chatScale = useRef(new Animated.Value(1)).current;
 
+  const loadSavedIds = async () => {
+    try {
+      const raw = await AsyncStorage.getItem("saved_places");
+      const list = raw ? JSON.parse(raw) : [];
+      setSavedIds(Array.isArray(list) ? list.map((p: any) => Number(p.id)).filter(Boolean) : []);
+    } catch (error) {
+      console.log("Saved load error:", error);
+    }
+  };
+
+  const toggleFavorite = async (place: any) => {
+    try {
+      if (!place?.id) return;
+      const raw = await AsyncStorage.getItem("saved_places");
+      const list = raw ? JSON.parse(raw) : [];
+      const exists = Array.isArray(list) && list.some((p: any) => Number(p.id) === Number(place.id));
+      const updated = exists
+        ? list.filter((p: any) => Number(p.id) !== Number(place.id))
+        : [...(Array.isArray(list) ? list : []), place];
+      await AsyncStorage.setItem("saved_places", JSON.stringify(updated));
+      setSavedIds(updated.map((p: any) => Number(p.id)).filter(Boolean));
+      Alert.alert(exists ? "Favorilerden çıkarıldı" : "Favorilere eklendi", place.name || "Mekan");
+    } catch (error) {
+      console.log("Favorite error:", error);
+      Alert.alert("Hata", "Favori işlemi yapılamadı.");
+    }
+  };
+
+
   useEffect(() => {
-    fetch("http://10.0.2.2:8000/places")
-      .then((res) => res.json())
-      .then((data) => setPlaces(data))
-      .catch((err) => console.log("Places fetch error:", err));
-  }, []);
+  loadSavedIds();
+  fetch("http://10.0.2.2:8000/places")
+    .then((res) => res.json())
+    .then((data) => {
+      // Backend artık direkt liste dönüyor, o yüzden {data: ...} kısmını sildik
+      console.log("Gelen liste:", data);
+      setPlaces(Array.isArray(data) ? data : []);
+    })
+    .catch((err) => console.log("Hata:", err));
+}, []);
 
   useEffect(() => {
     fetch("http://10.0.2.2:8000/hidden-gems?city=Istanbul")
@@ -310,18 +347,18 @@ export default function Home() {
           </View>
 
           <Animated.View style={{ opacity: heroSubtitleOpacity }}>
-            <Text style={styles.greeting}>{t("home.greeting") || "Good morning"} ✨</Text>
+            <Text style={styles.greeting}>{t("home.greeting")} ✨</Text>
           </Animated.View>
 
           <Animated.View style={{ opacity: heroTitleOpacity }}>
-            <Text style={styles.heroTitle}>{t("home.whereNext") || "Where to next?"}</Text>
+            <Text style={styles.heroTitle}>{t("home.whereNext")}</Text>
           </Animated.View>
 
           <Animated.View style={[styles.searchWrapper, { transform: [{ translateY: searchTranslateY }] }]}>
             <View style={styles.searchBar}>
               <Ionicons name="search-outline" size={20} color={COLORS.textSoft} />
               <TextInput
-                placeholder={t("home.searchPlaceholder") || "Search places, hotels, restaurants..."}
+                placeholder={t("home.searchPlaceholder")}
                 placeholderTextColor="#5C627D"
                 style={styles.searchInput}
                 value={query}
@@ -351,7 +388,7 @@ export default function Home() {
           {query.trim() ? (
             <View style={styles.searchSection}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{t("home.searchResults") || "Search Results"}</Text>
+                <Text style={styles.sectionTitle}>{t("home.searchResults")}</Text>
               </View>
 
               {searchResults.length > 0 ? (
@@ -359,8 +396,12 @@ export default function Home() {
                   <TouchableOpacity
                     key={item.id}
                     style={styles.searchCard}
-                    onPress={() => router.push(`/place?name=${item.name}`)}
+                    onPress={() => router.push({
+    pathname: "/place", // Senin detay sayfanın adı (dosya yapına göre /place veya /(tabs)/place-detail olabilir)
+    params: { id: item.id } 
+  })}
                   >
+                  
                     <View style={styles.searchCardIcon}>
                       <Ionicons name="location-outline" size={19} color={COLORS.accent} />
                     </View>
@@ -375,16 +416,16 @@ export default function Home() {
                 ))
               ) : (
                 <View style={styles.emptyState}>
-                  <Text style={styles.noResultText}>{t("home.noResults") || "No results found."}</Text>
+                  <Text style={styles.noResultText}>{t("home.noResults")}</Text>
                 </View>
               )}
             </View>
           ) : (
             <>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{t("home.categories") || "Categories"}</Text>
+                <Text style={styles.sectionTitle}>{t("home.categories")}</Text>
                 <TouchableOpacity onPress={() => router.push("/(tabs)/explore")}>
-                  <Text style={styles.viewAllText}>{t("home.seeAll") || "See all"}</Text>
+                  <Text style={styles.viewAllText}>{t("home.seeAll")}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -426,18 +467,18 @@ export default function Home() {
                         <Animated.View style={{ transform: [{ scale: sparkleScale }] }}>
                           <Ionicons name="sparkles" size={11} color={COLORS.accent} />
                         </Animated.View>
-                        <Text style={styles.aiPoweredText}>{t("home.aiPowered") || "AI POWERED"}</Text>
+                        <Text style={styles.aiPoweredText}>{t("home.aiPowered")}</Text>
                       </View>
 
                       <Text style={styles.plannerHeroTitle}>
-                        {t("home.planPerfectTrip") || "Plan your perfect trip"}
+                        {t("home.planPerfectTrip")}
                       </Text>
                       <Text style={styles.plannerHeroText}>
-                        {t("home.planPerfectTripText") || "Create a personalized itinerary based on your city, days and interests."}
+                        {t("home.planPerfectTripText")}
                       </Text>
 
                       <View style={styles.plannerButton}>
-                        <Text style={styles.plannerButtonText}>{t("home.planMyTrip") || "Plan My Trip"}</Text>
+                        <Text style={styles.plannerButtonText}>{t("home.planMyTrip")}</Text>
                         <Ionicons name="arrow-forward" size={15} color={COLORS.white} />
                       </View>
                     </View>
@@ -462,13 +503,13 @@ export default function Home() {
                 <>
                   <View style={styles.sectionHeader}>
                     <View>
-                      <Text style={styles.sectionTitle}>{t("home.aiForYou") || "AI For You"}</Text>
+                      <Text style={styles.sectionTitle}>{t("home.aiForYou")}</Text>
                       <Text style={styles.sectionSubtitle}>
-                        {t("home.hiddenGemsPicked") || "Hidden gems picked just for you"}
+                        {t("home.hiddenGemsPicked")}
                       </Text>
                     </View>
                     <TouchableOpacity>
-                      <Text style={styles.viewAllText}>See all</Text>
+                      <Text style={styles.viewAllText}>{t("home.seeAll")}</Text>
                     </TouchableOpacity>
                   </View>
 
@@ -482,7 +523,7 @@ export default function Home() {
                         key={item.id || index}
                         style={styles.aiPickCard}
                         activeOpacity={0.92}
-                        onPress={() => router.push(`/place?name=${item.name}`)}
+                        onPress={() => router.push({ pathname: "/place", params: { id: String(item.id) } })}
                       >
                         <ImageBackground
                           source={{ uri: getFeaturedImage(item, index) }}
@@ -495,10 +536,10 @@ export default function Home() {
                           >
                             <View style={styles.aiPickTop}>
                               <View style={styles.hiddenGemBadge}>
-                                <Text style={styles.hiddenGemText}>{t("home.aiPick") || "AI Pick"}</Text>
+                                <Text style={styles.hiddenGemText}>{t("home.aiPick")}</Text>
                               </View>
-                              <TouchableOpacity style={styles.aiHeart}>
-                                <Ionicons name="heart" size={18} color={COLORS.accent} />
+                              <TouchableOpacity style={styles.aiHeart} onPress={(e: any) => { e?.stopPropagation?.(); toggleFavorite(item); }}>
+                                <Ionicons name={savedIds.includes(Number(item.id)) ? "heart" : "heart-outline"} size={18} color={COLORS.accent} />
                               </TouchableOpacity>
                             </View>
 
@@ -524,10 +565,10 @@ export default function Home() {
 
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>
-                  {t("home.featuredDestinations") || "Featured Destinations"}
+                  {t("home.featuredDestinations")}
                 </Text>
                 <TouchableOpacity onPress={() => router.push("/(tabs)/explore")}>
-                  <Text style={styles.viewAllText}>{t("home.viewAll") || "View all"}</Text>
+                  <Text style={styles.viewAllText}>{t("home.viewAll")}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -540,7 +581,7 @@ export default function Home() {
                   <TouchableOpacity
                     key={item.id || index}
                     style={styles.featuredCard}
-                    onPress={() => router.push(`/place?name=${item.name}`)}
+                    onPress={() => router.push({ pathname: "/place", params: { id: String(item.id) } })}
                     activeOpacity={0.92}
                   >
                     <ImageBackground
@@ -552,8 +593,8 @@ export default function Home() {
                         colors={["transparent", "rgba(19,22,34,0.15)", "rgba(19,22,34,0.85)"]}
                         style={styles.featuredOverlay}
                       >
-                        <TouchableOpacity style={styles.favoriteButton}>
-                          <Ionicons name="heart-outline" size={18} color="#FFFFFF" />
+                        <TouchableOpacity style={styles.favoriteButton} onPress={(e: any) => { e?.stopPropagation?.(); toggleFavorite(item); }}>
+                          <Ionicons name={savedIds.includes(Number(item.id)) ? "heart" : "heart-outline"} size={18} color="#FFFFFF" />
                         </TouchableOpacity>
 
                         <View>
@@ -586,27 +627,27 @@ export default function Home() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.aiTitle}>
-                        {t("home.aiTravelCompanion") || "AI Travel Companion"}
+                        {t("home.aiTravelCompanion")}
                       </Text>
                       <Text style={styles.aiText}>
-                        {t("home.aiTravelText") || "Ask for hotels, routes, events and hidden gems."}
+                        {t("home.aiTravelText")}
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.aiButton}>
-                    <Text style={styles.aiButtonText}>{t("home.startChat") || "Start Chat"}</Text>
+                    <Text style={styles.aiButtonText}>{t("home.startChat")}</Text>
                     <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
                   </View>
                 </TouchableOpacity>
               </Animated.View>
 
-              <Text style={styles.subSectionTitle}>{t("home.topHotels") || "Top Hotels"}</Text>
+              <Text style={styles.subSectionTitle}>{t("home.topHotels")}</Text>
               {featuredHotels.map((hotel, index) => (
                 <TouchableOpacity
                   key={hotel.id || index}
                   style={styles.infoCard}
-                  onPress={() => router.push(`/place?name=${hotel.name}`)}
+                  onPress={() => router.push({ pathname: "/place", params: { id: String(hotel.id) } })}
                 >
                   <View style={styles.infoIconBox}>
                     <Ionicons name="bed-outline" size={19} color={COLORS.accent} />
@@ -621,12 +662,12 @@ export default function Home() {
                 </TouchableOpacity>
               ))}
 
-              <Text style={styles.subSectionTitle}>{t("home.topFoodPicks") || "Top Food Picks"}</Text>
+              <Text style={styles.subSectionTitle}>{t("home.topFoodPicks")}</Text>
               {featuredRestaurants.map((restaurant, index) => (
                 <TouchableOpacity
                   key={restaurant.id || index}
                   style={styles.infoCard}
-                  onPress={() => router.push(`/place?name=${restaurant.name}`)}
+                  onPress={() => router.push({ pathname: "/place", params: { id: String(restaurant.id) } })}
                 >
                   <View style={styles.infoIconBox}>
                     <Ionicons name="restaurant-outline" size={19} color={COLORS.accent} />

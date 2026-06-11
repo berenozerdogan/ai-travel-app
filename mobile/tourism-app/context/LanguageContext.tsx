@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import tr from "../locales/tr";
@@ -6,27 +6,45 @@ import en from "../locales/en";
 import de from "../locales/de";
 import ru from "../locales/ru";
 
-type Language = "tr" | "en" | "de" | "ru";
+export type Language = "tr" | "en" | "de" | "ru";
 
-const translations = { tr, en, de, ru };
+type LanguageContextType = {
+  language: Language;
+  setLanguage: (lang: Language) => Promise<void>;
+  t: (key: string, fallback?: string) => string;
+};
 
-const LanguageContext = createContext({
-  language: "en" as Language,
-  setLanguage: async (lang: Language) => {},
-  t: (key: string) => key,
+const dictionaries: Record<Language, any> = { tr, en, de, ru };
+
+const LanguageContext = createContext<LanguageContextType>({
+  language: "en",
+  setLanguage: async () => {},
+  t: (key, fallback) => fallback || key,
 });
 
-export const LanguageProvider = ({ children }: any) => {
+const getNestedValue = (source: any, key: string) => {
+  return key.split(".").reduce((acc, part) => {
+    if (acc && typeof acc === "object" && part in acc) return acc[part];
+    return undefined;
+  }, source);
+};
+
+export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguageState] = useState<Language>("en");
 
   useEffect(() => {
-    const load = async () => {
-      const saved = await AsyncStorage.getItem("app_language");
-      if (saved === "tr" || saved === "en" || saved === "de" || saved === "ru") {
-        setLanguageState(saved);
+    const loadLanguage = async () => {
+      try {
+        const saved = await AsyncStorage.getItem("app_language");
+        if (saved === "tr" || saved === "en" || saved === "de" || saved === "ru") {
+          setLanguageState(saved);
+        }
+      } catch (error) {
+        console.log("Language load error:", error);
       }
     };
-    load();
+
+    loadLanguage();
   }, []);
 
   const setLanguage = async (lang: Language) => {
@@ -34,27 +52,24 @@ export const LanguageProvider = ({ children }: any) => {
     setLanguageState(lang);
   };
 
-  
-  const t = (key: string) => {
-    const keys = key.split(".");
-    let value: any = translations[language];
+  const t = useMemo(() => {
+    return (key: string, fallback?: string) => {
+      const selectedValue = getNestedValue(dictionaries[language], key);
+      if (typeof selectedValue === "string") return selectedValue;
 
-    for (const k of keys) {
-      if (value && typeof value === "object") {
-        value = value[k];
-      } else {
-        return key;
-      }
-    }
+      const englishValue = getNestedValue(dictionaries.en, key);
+      if (typeof englishValue === "string") return englishValue;
 
-    return value || key;
-  };
+      return fallback || key;
+    };
+  }, [language]);
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
+  const value = useMemo(
+    () => ({ language, setLanguage, t }),
+    [language, t]
   );
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 };
 
 export const useLanguage = () => useContext(LanguageContext);

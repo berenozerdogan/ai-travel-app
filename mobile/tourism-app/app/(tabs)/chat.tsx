@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -15,17 +15,6 @@ import {
   StatusBar,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { auth, db } from "../../lib/firebase";
-import { signOut, onAuthStateChanged } from "firebase/auth";
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  orderBy,
-  onSnapshot,
-} from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLanguage } from "../../context/LanguageContext";
@@ -36,32 +25,16 @@ type DayPlan = {
   places: string[];
 };
 
-type LocalUser = {
-  uid: string;
-  email: string | null;
-} | null;
-
-type SavedChat = {
-  id: string;
-  message: string;
-  reply: string;
-  places?: string[];
-  days?: DayPlan[];
-};
-
-// 🌉 BOĞAZIN KIZILI & SİSLİ GECE CHAT RENKLERİ
 const COLORS = {
-  bg: "#131622",          // Derin, puslu gece denizi rengi
-  surface: "#1C1F30",     // Gece mavisi-gri asil kart ve yan menü yüzeyi
-  surfaceSoft: "#272B42", // İkinci katman kartlar, inaktif çipler ve input içi
-  surfaceMuted: "#181A28",// Çok hafif koyu fonlar için geçiş rengi
-  border: "rgba(255, 255, 255, 0.03)",
-  text: "#F1F3F9",        // Kirli beyaz metinler
-  textSoft: "#8E95B2",    // Sis bulutlarının puslu grisi
-  accent: "#D65A5A",      // O büyüleyici köprü kırmızısı (User balonları ve ana aksiyonlar)
+  bg: "#131622",
+  surface: "#1C1F30",
+  surfaceSoft: "#272B42",
+  border: "rgba(255,255,255,0.04)",
+  text: "#F1F3F9",
+  textSoft: "#8E95B2",
+  accent: "#D65A5A",
   white: "#FFFFFF",
-  shadow: "#090A10",
-  overlay: "rgba(9, 10, 16, 0.65)", // Karartılmış asil arka plan katmanı
+  overlay: "rgba(9,10,16,0.65)",
 };
 
 export default function Chat() {
@@ -75,7 +48,6 @@ export default function Chat() {
     createNewChat,
     appendMessageToChat,
     loadChatSession,
-    resetChats,
   } = useChat();
 
   const messages = activeChat?.messages ?? [];
@@ -83,75 +55,15 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasAutoSent, setHasAutoSent] = useState(false);
-  const [user, setUser] = useState<LocalUser>(null);
-  const [savedChats, setSavedChats] = useState<SavedChat[]>([]);
   const [menuVisible, setMenuVisible] = useState(false);
 
   const listRef = useRef<FlatList<any>>(null);
-
-  const quickPrompts = [
-    t("chat.quick1"),
-    t("chat.quick2"),
-    t("chat.quick3"),
-    t("chat.quick4"),
-  ];
 
   useEffect(() => {
     if (!activeChatId) {
       createNewChat(t("chat.welcome"));
     }
   }, [activeChatId, t, createNewChat]);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-        });
-      } else {
-        setUser(null);
-        setSavedChats([]);
-      }
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (!auth.currentUser?.uid) {
-      setSavedChats([]);
-      return;
-    }
-
-    const q = query(
-      collection(db, "users", auth.currentUser.uid, "chats"),
-      orderBy("createdAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const items: SavedChat[] = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            message: data.message || "",
-            reply: data.reply || "",
-            places: data.places || [],
-            days: data.days || [],
-          };
-        });
-
-        setSavedChats(items);
-      },
-      (error) => {
-        console.log("FIRESTORE ERROR:", error);
-      }
-    );
-
-    return unsubscribe;
-  }, [user]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -168,43 +80,6 @@ export default function Chat() {
     router.replace("/(tabs)/chat");
   };
 
-  const openSavedChat = (chat: SavedChat) => {
-    const loadedMessages: ChatMessage[] = [
-      {
-        id: `welcome_${chat.id}`,
-        text: t("chat.welcome"),
-        sender: "ai",
-        places: [],
-        days: [],
-      },
-      {
-        id: `${chat.id}_user`,
-        text: chat.message,
-        sender: "user",
-      },
-      {
-        id: `${chat.id}_ai`,
-        text: chat.reply,
-        sender: "ai",
-        places: chat.places || [],
-        days: chat.days || [],
-      },
-    ];
-
-    loadChatSession({
-      id: chat.id,
-      title: chat.message || t("chat.untitledChat"),
-      createdAt: Date.now(),
-      messages: loadedMessages,
-    });
-
-    setMenuVisible(false);
-
-    setTimeout(() => {
-      listRef.current?.scrollToEnd({ animated: false });
-    }, 100);
-  };
-
   const openLocalChat = (chatId: string) => {
     const chat = chats.find((item) => item.id === chatId);
     if (!chat) return;
@@ -217,20 +92,6 @@ export default function Chat() {
     }, 100);
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      await AsyncStorage.removeItem("logged_user");
-      setUser(null);
-      setSavedChats([]);
-      resetChats();
-      setMenuVisible(false);
-      router.replace("/(tabs)/chat");
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const showRoute = async (places: string[]) => {
     try {
       if (!places || places.length === 0) return;
@@ -240,7 +101,7 @@ export default function Chat() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ places }),
+        body: JSON.stringify({ places, language }),
       });
 
       const data = await res.json();
@@ -281,22 +142,11 @@ export default function Chat() {
         },
         body: JSON.stringify({
           message: finalText,
-          language: language,
+          language,
         }),
       });
 
       const data = await res.json();
-
-      if (auth.currentUser?.uid) {
-        await addDoc(collection(db, "users", auth.currentUser.uid, "chats"), {
-          message: finalText,
-          reply: data.reply || "",
-          places: data.places || [],
-          days: data.days || [],
-          language,
-          createdAt: serverTimestamp(),
-        });
-      }
 
       const aiMessage: ChatMessage = {
         id: Date.now().toString() + "_ai",
@@ -335,6 +185,21 @@ export default function Chat() {
     }
   }, [params.prompt, hasAutoSent, activeChatId]);
 
+  const renderPlaceChip = (place: string, index: number) => (
+    <TouchableOpacity
+      key={`${place}-${index}`}
+      style={styles.placeChip}
+      onPress={() =>
+        router.push({
+          pathname: "/place",
+          params: { name: place },
+        })
+      }
+    >
+      <Text style={styles.placeChipText}>{place}</Text>
+    </TouchableOpacity>
+  );
+
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const hasDays = item.sender === "ai" && item.days && item.days.length > 0;
     const hasFlatPlaces =
@@ -363,22 +228,14 @@ export default function Chat() {
 
         {hasDays && (
           <View style={styles.dayPlansContainer}>
-            {item.days!.map((dayItem, dayIndex) => (
+            {item.days!.map((dayItem: DayPlan, dayIndex: number) => (
               <View key={dayIndex} style={styles.dayCard}>
                 <Text style={styles.dayTitle}>
                   {t("chat.day")} {dayItem.day}
                 </Text>
 
                 <View style={styles.chipsWrap}>
-                  {dayItem.places.map((place, index) => (
-                    <TouchableOpacity
-                      key={`${place}-${index}`}
-                      style={styles.placeChip}
-                      onPress={() => router.push(`/place?name=${place}`)}
-                    >
-                      <Text style={styles.placeChipText}>{place}</Text>
-                    </TouchableOpacity>
-                  ))}
+                  {dayItem.places.map(renderPlaceChip)}
                 </View>
 
                 {dayItem.places.length > 0 && (
@@ -400,17 +257,7 @@ export default function Chat() {
 
         {hasFlatPlaces && (
           <>
-            <View style={styles.chipsWrap}>
-              {item.places!.map((place, index) => (
-                <TouchableOpacity
-                  key={`${place}-${index}`}
-                  style={styles.placeChip}
-                  onPress={() => router.push(`/place?name=${place}`)}
-                >
-                  <Text style={styles.placeChipText}>{place}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <View style={styles.chipsWrap}>{item.places!.map(renderPlaceChip)}</View>
 
             {item.places && item.places.length > 0 && (
               <TouchableOpacity
@@ -455,7 +302,7 @@ export default function Chat() {
             </TouchableOpacity>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              {chats.length > 0 &&
+              {chats.length > 0 ? (
                 chats.map((chat) => (
                   <TouchableOpacity
                     key={chat.id}
@@ -471,27 +318,8 @@ export default function Chat() {
                       {chat.title || t("chat.untitledChat")}
                     </Text>
                   </TouchableOpacity>
-                ))}
-
-              {savedChats.length > 0 &&
-                savedChats.map((chat) => (
-                  <TouchableOpacity
-                    key={chat.id}
-                    style={styles.historyItem}
-                    onPress={() => openSavedChat(chat)}
-                  >
-                    <Ionicons
-                      name="time-outline"
-                      size={16}
-                      color={COLORS.accent}
-                    />
-                    <Text style={styles.historyItemText} numberOfLines={2}>
-                      {chat.message || t("chat.untitledChat")}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-
-              {chats.length === 0 && savedChats.length === 0 && (
+                ))
+              ) : (
                 <Text style={styles.emptyHistory}>{t("chat.noSavedChats")}</Text>
               )}
             </ScrollView>
@@ -519,65 +347,14 @@ export default function Chat() {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.newChatButton} onPress={newChat}>
-              <Ionicons
-                name="add-outline"
-                size={16}
-                color={COLORS.white}
-              />
+              <Ionicons name="add-outline" size={16} color={COLORS.white} />
               <Text style={styles.newChatButtonText}>{t("chat.newChat")}</Text>
             </TouchableOpacity>
           </View>
 
           <Text style={styles.title}>{t("chat.title")}</Text>
           <Text style={styles.subtitle}>{t("chat.subtitle")}</Text>
-
-          <View style={styles.authButtonsRow}>
-            {!user ? (
-              <>
-                <TouchableOpacity
-                  style={styles.loginButton}
-                  onPress={() => router.push("/login" as any)}
-                >
-                  <Text style={styles.loginButtonText}>{t("chat.login")}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.registerButton}
-                  onPress={() => router.push("/register" as any)}
-                >
-                  <Text style={styles.registerButtonText}>
-                    {t("chat.register")}
-                  </Text>
-                </TouchableOpacity>
-              </>
-            ) : (
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={handleLogout}
-              >
-                <Text style={styles.logoutButtonText}>{t("chat.logout")}</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <Text style={styles.userStatus}>
-            {user
-              ? `${t("chat.loggedIn")}: ${user.email}`
-              : t("chat.notLoggedIn")}
-          </Text>
         </LinearGradient>
-
-        <View style={styles.quickRow}>
-          {quickPrompts.map((prompt, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.quickChip}
-              onPress={() => sendMessage(prompt)}
-            >
-              <Text style={styles.quickChipText}>{prompt}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
 
         <FlatList
           ref={listRef}
@@ -646,7 +423,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 16,
     borderLeftWidth: 1,
-    borderLeftColor: "rgba(255, 255, 255, 0.02)",
+    borderLeftColor: "rgba(255,255,255,0.02)",
   },
 
   sideMenuTitle: {
@@ -654,7 +431,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     marginBottom: 16,
-    letterSpacing: -0.4,
   },
 
   sideNewChat: {
@@ -703,7 +479,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 18,
     paddingTop: 10,
-    paddingBottom: 16,
+    paddingBottom: 18,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
@@ -711,7 +487,7 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 14,
+    marginBottom: 16,
   },
 
   menuButton: {
@@ -720,9 +496,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(255,255,255,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.14)",
+    borderColor: "rgba(255,255,255,0.14)",
   },
 
   newChatButton: {
@@ -745,112 +521,30 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 30,
     fontWeight: "700",
-    marginBottom: 4,
-    letterSpacing: -0.5,
+    marginBottom: 6,
   },
 
   subtitle: {
-    color: "rgba(255, 255, 255, 0.75)",
+    color: "rgba(255,255,255,0.75)",
     fontSize: 14,
     lineHeight: 20,
   },
 
-  authButtonsRow: {
-    flexDirection: "row",
-    marginTop: 14,
-  },
-
-  loginButton: {
-    backgroundColor: COLORS.accent,
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    marginRight: 10,
-  },
-
-  loginButtonText: {
-    color: COLORS.white,
-    fontWeight: "700",
-    fontSize: 14,
-  },
-
-  registerButton: {
-    backgroundColor: COLORS.surface,
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-
-  registerButtonText: {
-    color: COLORS.text,
-    fontWeight: "600",
-    fontSize: 14,
-  },
-
-  logoutButton: {
-    backgroundColor: COLORS.surface,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-
-  logoutButtonText: {
-    color: COLORS.text,
-    fontWeight: "600",
-    fontSize: 14,
-  },
-
-  userStatus: {
-    color: COLORS.textSoft,
-    marginTop: 10,
-    fontSize: 13,
-  },
-
-  quickRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 14,
-    paddingTop: 14,
-    paddingBottom: 6,
-    backgroundColor: COLORS.bg,
-  },
-
-  quickChip: {
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    borderRadius: 18,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-
-  quickChipText: {
-    color: COLORS.text,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-
   messagesContainer: {
-    paddingHorizontal: 14,
-    paddingTop: 10,
-    paddingBottom: 28,
+    paddingHorizontal: 16,
+    paddingTop: 18,
+    paddingBottom: 120,
   },
 
   messageBlock: {
-    marginBottom: 12,
+    marginBottom: 14,
   },
 
   messageBubble: {
-    maxWidth: "84%",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    maxWidth: "88%",
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
   },
 
   userBubble: {
@@ -862,14 +556,14 @@ const styles = StyleSheet.create({
   aiBubble: {
     alignSelf: "flex-start",
     backgroundColor: COLORS.surface,
-    borderBottomLeftRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
+    borderBottomLeftRadius: 6,
   },
 
   messageText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 15,
+    lineHeight: 22,
   },
 
   userText: {
@@ -882,7 +576,7 @@ const styles = StyleSheet.create({
   },
 
   dayPlansContainer: {
-    marginTop: 8,
+    marginTop: 10,
   },
 
   dayCard: {
@@ -890,28 +584,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: 18,
-    padding: 12,
-    marginBottom: 10,
+    padding: 14,
+    marginTop: 8,
   },
 
   dayTitle: {
     color: COLORS.text,
-    fontSize: 16,
     fontWeight: "700",
+    fontSize: 16,
     marginBottom: 8,
   },
 
   chipsWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginTop: 4,
+    marginTop: 8,
   },
 
   placeChip: {
     backgroundColor: COLORS.surfaceSoft,
+    borderRadius: 999,
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 18,
+    paddingHorizontal: 11,
     marginRight: 8,
     marginBottom: 8,
     borderWidth: 1,
@@ -919,34 +613,32 @@ const styles = StyleSheet.create({
   },
 
   placeChipText: {
-    color: COLORS.accent,
-    fontSize: 14,
-    fontWeight: "700",
+    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: "600",
   },
 
   routeButton: {
     alignSelf: "flex-start",
-    marginTop: 4,
     backgroundColor: COLORS.accent,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 16,
+    paddingVertical: 9,
+    paddingHorizontal: 13,
+    borderRadius: 14,
+    marginTop: 8,
   },
 
   routeButtonText: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
   },
 
   loadingBubble: {
     alignSelf: "flex-start",
     backgroundColor: COLORS.surface,
-    borderBottomLeftRadius: 6,
-    borderRadius: 20,
+    borderRadius: 18,
     paddingVertical: 12,
     paddingHorizontal: 14,
-    marginTop: 4,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
@@ -957,49 +649,40 @@ const styles = StyleSheet.create({
   },
 
   inputBar: {
+    position: "absolute",
+    left: 12,
+    right: 12,
+    bottom: 74,
     flexDirection: "row",
     alignItems: "flex-end",
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 14,
-    marginBottom: 50,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.02)",
-    backgroundColor: COLORS.bg,
-  },
-
-  input: {
-    flex: 1,
-    minHeight: 58,
-    maxHeight: 120,
     backgroundColor: COLORS.surface,
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 14,
-    color: COLORS.text,
-    fontSize: 16,
-    marginRight: 10,
+    borderRadius: 22,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
 
+  input: {
+    flex: 1,
+    maxHeight: 110,
+    color: COLORS.text,
+    fontSize: 15,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+
   sendButton: {
-    width: 58,
-    height: 58,
+    width: 48,
+    height: 48,
     borderRadius: 18,
     backgroundColor: COLORS.accent,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
   },
 
   sendDisabled: {
-    opacity: 0.5,
-  },
-
-  sendButtonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: "700",
+    opacity: 0.55,
   },
 });
