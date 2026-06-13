@@ -241,129 +241,130 @@ function cleanGuideDescription(description: string, language: string) {
 
   if (!raw) return "";
 
-  if (language === "tr") {
-    if (lower.includes("landmark in")) return "Şehir rotalarında kısa keşif durağı olarak öne çıkan bir noktadır";
-    if (lower.includes("restaurant in")) return "Şehir gezisi sırasında yemek molası için değerlendirilebilecek bir restorandır";
-    if (lower.includes("hotel on") || lower.includes("hotel in")) return "Konaklama planı için değerlendirilebilecek bir oteldir";
-    if (lower.includes("cafe in")) return "Kısa mola ve dinlenme için değerlendirilebilecek bir kafedir";
+  if (
+    lower === "unknown" ||
+    lower === "null" ||
+    lower === "undefined" ||
+    lower.includes("restaurant in") ||
+    lower.includes("hotel in") ||
+    lower.includes("hotel on") ||
+    lower.includes("landmark in") ||
+    lower.length < 12
+  ) {
+    return "";
   }
 
-  return raw;
+  return raw.replace(/\s+/g, " ").replace(/\.$/, "");
 }
 
-function guideTextForPlace(place: Place, language: string) {
-  const category = categoryDisplay(place.category, language);
-  const city = place.city || (language === "tr" ? "Türkiye" : "Turkey");
-  const district = place.district ? String(place.district).replace(/^\d{5}\s*/, "").split(/[\/,]/)[0].trim() : "";
-  const visitTime = Number(place.estimated_visit_time || 45);
-  const description = cleanGuideDescription(String(place.description || ""), language);
-  const c = normalizeCategory(place.category);
+function placeMood(category: string, subcategory: string | undefined, language: string) {
+  const c = normalizeCategory(category);
+  const s = String(subcategory || "").toLowerCase();
 
   if (language === "tr") {
-    const intro =
-      c === "hotel"
-        ? `Şu anda ${city}${district ? " " + district : ""} bölgesindeki ${place.name} adlı konaklama noktasını görüntülüyorsun.`
-        : c === "restaurant"
-        ? `Şu anda ${city}${district ? " " + district : ""} bölgesindeki ${place.name} adlı yemek durağını görüntülüyorsun.`
-        : `Şu anda ${city}${district ? " " + district : ""} bölgesindeki ${place.name} adlı gezi noktasını görüntülüyorsun.`;
-
-    const detail =
-      description && description.length > 12
-        ? `${description}.`
-        : c === "hotel"
-        ? "Bu yer, şehir gezisini konforlu bir konaklama noktasıyla birleştirmek isteyen ziyaretçiler için değerlendirilebilir."
-        : c === "restaurant"
-        ? "Burası, gezi sırasında kısa bir mola vermek veya rotaya keyifli bir yemek durağı eklemek için uygun olabilir."
-        : "Burası, çevredeki diğer duraklarla birlikte planlandığında rotanı daha keyifli ve verimli hale getirebilir.";
-
-    const role =
-      c === "hotel"
-        ? "Özellikle şehir merkezine yakın kalmak, ulaşımı kolaylaştırmak ve gezi planını daha rahat yönetmek isteyenler için iyi bir seçenek olabilir."
-        : c === "restaurant"
-        ? "Yakındaki turistik noktaları gezdikten sonra burada mola vererek rotanı daha dengeli hale getirebilirsin."
-        : "Bu noktayı ana durak olarak ya da çevredeki yerlerle birlikte kısa bir keşif molası olarak kullanabilirsin.";
-
-    return `${intro} ${detail} ${role} Bu durak için önerilen süre yaklaşık ${visitTime} dakikadır. Yol tarifi almak istersen navigasyon butonunu kullanabilirsin.`;
+    if (c === "restaurant") return "yemek molası, dinlenme ve çevreyi hissetmek için güzel bir durak";
+    if (c === "hotel") return "rotanı daha rahat planlamak ve konaklamayı kolaylaştırmak için uygun bir nokta";
+    if (s.includes("nature") || s.includes("beach") || s.includes("view")) return "açık hava, manzara ve sakin bir keşif için güzel bir seçenek";
+    if (s.includes("museum") || s.includes("historical") || s.includes("landmark")) return "tarih, kültür ve mimari dokuyu hissetmek için öne çıkan bir durak";
+    return "şehir rotana keyifli bir keşif molası ekleyebilecek bir nokta";
   }
 
   if (language === "de") {
-    const intro =
-      c === "hotel"
-        ? `Du siehst gerade ${place.name}, einen Unterkunftspunkt in ${city}${district ? " " + district : ""}.`
-        : c === "restaurant"
-        ? `Du siehst gerade ${place.name}, einen Essensstopp in ${city}${district ? " " + district : ""}.`
-        : `Du siehst gerade ${place.name}, einen Reisezielpunkt in ${city}${district ? " " + district : ""}.`;
-
-    const detail =
-      description && description.length > 12
-        ? `${description}.`
-        : c === "hotel"
-        ? "Dieser Ort eignet sich für Reisende, die ihre Stadterkundung mit einer komfortablen Unterkunft verbinden möchten."
-        : c === "restaurant"
-        ? "Dieser Ort eignet sich gut für eine Pause oder als angenehmer Essensstopp während der Route."
-        : "Dieser Ort kann deine Route interessanter machen, besonders wenn du ihn mit nahegelegenen Stopps kombinierst.";
-
-    const role =
-      c === "hotel"
-        ? "Besonders praktisch ist er, wenn du kurze Wege und eine entspannte Reiseplanung möchtest."
-        : c === "restaurant"
-        ? "Nach nahegelegenen Sehenswürdigkeiten kannst du hier eine Pause einlegen und die Route ausgleichen."
-        : "Du kannst diesen Ort als Hauptstopp oder als kurze Entdeckungspause nutzen.";
-
-    return `${intro} ${detail} ${role} Die empfohlene Aufenthaltsdauer beträgt etwa ${visitTime} Minuten. Für die Wegbeschreibung kannst du die Navigationstaste verwenden.`;
+    if (c === "restaurant") return "ein guter Stopp für eine Essenspause und eine kurze Erholung";
+    if (c === "hotel") return "ein praktischer Punkt, um deine Reise entspannter zu planen";
+    if (s.includes("nature") || s.includes("beach") || s.includes("view")) return "eine schöne Option für Natur, Aussicht und eine ruhige Entdeckung";
+    if (s.includes("museum") || s.includes("historical") || s.includes("landmark")) return "ein besonderer Stopp für Geschichte, Kultur und Architektur";
+    return "ein angenehmer Entdeckungspunkt für deine Route";
   }
 
   if (language === "ru") {
-    const intro =
-      c === "hotel"
-        ? `Сейчас вы смотрите ${place.name}, точку проживания в городе ${city}${district ? " " + district : ""}.`
-        : c === "restaurant"
-        ? `Сейчас вы смотрите ${place.name}, место для остановки на еду в городе ${city}${district ? " " + district : ""}.`
-        : `Сейчас вы смотрите ${place.name}, туристическую точку в городе ${city}${district ? " " + district : ""}.`;
-
-    const detail =
-      description && description.length > 12
-        ? `${description}.`
-        : c === "hotel"
-        ? "Это место подойдет тем, кто хочет совместить прогулку по городу с комфортным проживанием."
-        : c === "restaurant"
-        ? "Это место можно использовать как приятную паузу или остановку для еды во время маршрута."
-        : "Эта точка сделает маршрут интереснее, особенно если объединить ее с ближайшими местами.";
-
-    const role =
-      c === "hotel"
-        ? "Это удобно для тех, кто хочет легко перемещаться по городу и комфортно планировать поездку."
-        : c === "restaurant"
-        ? "После ближайших достопримечательностей здесь можно сделать перерыв и продолжить маршрут."
-        : "Ее можно использовать как основную остановку или короткую паузу для знакомства с районом.";
-
-    return `${intro} ${detail} ${role} Рекомендуемое время посещения — около ${visitTime} минут. Для маршрута используйте кнопку навигации.`;
+    if (c === "restaurant") return "хорошая остановка для еды, отдыха и небольшой паузы";
+    if (c === "hotel") return "удобная точка, чтобы сделать поездку спокойнее и комфортнее";
+    if (s.includes("nature") || s.includes("beach") || s.includes("view")) return "хороший вариант для природы, видов и спокойной прогулки";
+    if (s.includes("museum") || s.includes("historical") || s.includes("landmark")) return "интересная остановка для истории, культуры и архитектуры";
+    return "приятная точка для короткого знакомства с маршрутом";
   }
 
-  const intro =
-    c === "hotel"
-      ? `You are now viewing ${place.name}, a stay point in ${city}${district ? " " + district : ""}.`
-      : c === "restaurant"
-      ? `You are now viewing ${place.name}, a food stop in ${city}${district ? " " + district : ""}.`
-      : `You are now viewing ${place.name}, a sightseeing stop in ${city}${district ? " " + district : ""}.`;
+  if (c === "restaurant") return "a good stop for food, rest and a short break";
+  if (c === "hotel") return "a practical point for making your trip more comfortable";
+  if (s.includes("nature") || s.includes("beach") || s.includes("view")) return "a good option for nature, views and a calm discovery";
+  if (s.includes("museum") || s.includes("historical") || s.includes("landmark")) return "a strong stop for history, culture and architecture";
+  return "a pleasant discovery point for your route";
+}
 
-  const detail =
-    description && description.length > 12
-      ? `${description}.`
+function guideTextForPlace(place: Place, language: string) {
+  const city = place.city || (language === "tr" ? "Türkiye" : "Turkey");
+  const district = place.district
+    ? String(place.district).replace(/^\d{5}\s*/, "").split(/[\/,]/)[0].trim()
+    : "";
+  const visitTime = Number(place.estimated_visit_time || 45);
+  const description = cleanGuideDescription(String(place.description || ""), language);
+  const c = normalizeCategory(place.category);
+  const mood = placeMood(place.category, place.subcategory, language);
+
+  if (language === "tr") {
+    const placeType =
+      c === "hotel"
+        ? "konaklama noktası"
+        : c === "restaurant"
+        ? "yeme içme durağı"
+        : "gezi durağı";
+
+    const opening = `Sesli rehbere hoş geldin. Şu anda ${city}${district ? " " + district : ""} bölgesindeki ${place.name} adlı ${placeType} üzerindesin.`;
+
+    const detail = description
+      ? `Burası kısaca şöyle anlatılabilir: ${description}.`
+      : `Burası ${mood}.`;
+
+    const advice =
+      c === "restaurant"
+        ? "Yakındaki gezi noktalarından sonra burada mola vermek rotanı daha dengeli hale getirebilir."
+        : c === "hotel"
+        ? "Konumunu, ulaşım kolaylığını ve çevredeki gezi duraklarına yakınlığını değerlendirmeni öneririm."
+        : "Burayı tek başına ziyaret edebilir ya da çevredeki diğer duraklarla birlikte kısa ve keyifli bir rota oluşturabilirsin.";
+
+    return `${opening} ${detail} ${advice} Ortalama ziyaret süresi yaklaşık ${visitTime} dakika. Hazırsan yol tarifi butonuyla navigasyonu başlatabilirsin.`;
+  }
+
+  if (language === "de") {
+    const placeType = c === "hotel" ? "Unterkunftspunkt" : c === "restaurant" ? "Essensstopp" : "Reisestopp";
+    const opening = `Willkommen beim Audioguide. Du befindest dich gerade bei ${place.name}, einem ${placeType} in ${city}${district ? " " + district : ""}.`;
+    const detail = description ? `Kurz gesagt: ${description}.` : `Dieser Ort ist ${mood}.`;
+    const advice =
+      c === "restaurant"
+        ? "Nach nahegelegenen Sehenswürdigkeiten kann dieser Ort eine gute Pause sein."
+        : c === "hotel"
+        ? "Achte besonders auf die Lage, die Erreichbarkeit und die Nähe zu deinen geplanten Stopps."
+        : "Du kannst diesen Ort einzeln besuchen oder mit nahegelegenen Stopps zu einer angenehmen Route verbinden.";
+
+    return `${opening} ${detail} ${advice} Die empfohlene Aufenthaltsdauer beträgt ungefähr ${visitTime} Minuten. Wenn du bereit bist, kannst du über die Navigationstaste den Weg starten.`;
+  }
+
+  if (language === "ru") {
+    const placeType = c === "hotel" ? "место проживания" : c === "restaurant" ? "остановка для еды" : "туристическая точка";
+    const opening = `Добро пожаловать в аудиогид. Сейчас вы находитесь у места ${place.name}, это ${placeType} в городе ${city}${district ? " " + district : ""}.`;
+    const detail = description ? `Кратко об этом месте: ${description}.` : `Это ${mood}.`;
+    const advice =
+      c === "restaurant"
+        ? "После ближайших достопримечательностей здесь можно сделать хорошую паузу."
+        : c === "hotel"
+        ? "Оцените расположение, удобство транспорта и близость к точкам вашего маршрута."
+        : "Это место можно посетить отдельно или объединить с ближайшими точками в приятный маршрут.";
+
+    return `${opening} ${detail} ${advice} Рекомендуемое время посещения — около ${visitTime} минут. Когда будете готовы, нажмите кнопку навигации.`;
+  }
+
+  const placeType = c === "hotel" ? "stay point" : c === "restaurant" ? "food stop" : "sightseeing stop";
+  const opening = `Welcome to the voice guide. You are now at ${place.name}, a ${placeType} in ${city}${district ? " " + district : ""}.`;
+  const detail = description ? `In short: ${description}.` : `This place is ${mood}.`;
+  const advice =
+    c === "restaurant"
+      ? "It can be a good pause after visiting nearby attractions."
       : c === "hotel"
-      ? "This place can be useful for travelers who want to combine city exploration with a comfortable stay."
-      : c === "restaurant"
-      ? "This place can work well as a short break or a pleasant food stop during your route."
-      : "This stop can make your route more enjoyable, especially when planned together with nearby places.";
+      ? "Consider its location, transport access and distance to your planned stops."
+      : "You can visit it on its own or combine it with nearby stops for a smoother route.";
 
-  const role =
-    c === "hotel"
-      ? "It can be a good option if you want easier transportation and a more comfortable travel plan."
-      : c === "restaurant"
-      ? "After visiting nearby attractions, you can use this place as a balanced rest stop."
-      : "You can use this place as a main stop or as a short discovery point in the area.";
-
-  return `${intro} ${detail} ${role} The suggested visit time is around ${visitTime} minutes. Use the navigation button if you want directions.`;
+  return `${opening} ${detail} ${advice} The suggested visit time is around ${visitTime} minutes. When you are ready, use the navigation button to start directions.`;
 }
 
 function getMarkerColor(category?: string) {
@@ -725,6 +726,7 @@ export default function MapScreen() {
       }
 
       const text = guideTextForPlace(place, language);
+      console.log("Voice guide text:", text.slice(0, 180));
 
       const preferredLanguage =
         language === "tr"
@@ -760,8 +762,8 @@ export default function MapScreen() {
       setTimeout(() => {
         Speech.speak(text, {
           language: speechLanguage,
-          rate: Platform.OS === "ios" ? 0.72 : 0.78,
-          pitch: 1.0,
+          rate: Platform.OS === "ios" ? 0.68 : 0.74,
+          pitch: Platform.OS === "ios" ? 1.04 : 1.0,
           volume: 1.0,
           onStart: () => {
             console.log("Speech started:", speechLanguage);
