@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../services/api";
 import { router } from "expo-router";
 import {
   View,
@@ -45,7 +46,7 @@ export default function EventsScreen() {
 
     try {
       const res = await fetch(
-        `http://10.0.2.2:8000/events?city=${encodeURIComponent(finalCity)}`
+        `${API_BASE_URL}/events?city=${encodeURIComponent(finalCity)}`
       );
       const data = await res.json();
       setEvents(data.events || []);

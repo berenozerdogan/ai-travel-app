@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { API_BASE_URL } from "../../services/api";
 import {
   View,
   Text,
@@ -225,7 +226,7 @@ export default function Chat() {
     try {
       if (!places || places.length === 0) return;
 
-      const res = await fetch("http://10.0.2.2:8000/route", {
+      const res = await fetch(`${API_BASE_URL}/route`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -264,7 +265,7 @@ export default function Chat() {
     scrollToBottom();
 
     try {
-      const res = await fetch("http://10.0.2.2:8000/ai-chat", {
+      const res = await fetch(`${API_BASE_URL}/ai-chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

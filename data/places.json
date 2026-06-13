@@ -1534,7 +1534,7 @@
       "luxury",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJS2R8TuC5yhQRw3LxYafNe3I/photos/AU_ZVEG5WvPJhk5odWMSfCVbc3CkrC7Nnlprjld5CHBhov9rjb08bE5OK5ba3QhRdjnGBjZYmwwilZpy6EybyDEodoKUs0YGmbrSe0QOsMOrAn_q8yST4g--FRYNxXvq4w7Ae8aHBqZAXigGqPprdms3ALaIOr965IZ8xQe4Ox4k_EfGQWEHLLdmJWV0P69zy4gdERsJm0gl49v94KFtdlt3x6l-fcIAb9K56hbIig7zjybQqaxpKuG1mNeIvplYBj_dAIC8LeqMP3Oa2Of2wR7ZFRx7z1yBlDIG_WfXTd93wbX7Mw/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://images.odamax.com/imgproxy/img/1024x768/odamax/image/upload/ue3r8dlbhspqplhgnejv.jpg",
     "estimated_visit_time": 0,
     "reviews": []
   },
@@ -43334,29 +43334,7 @@
     "estimated_visit_time": 60,
     "reviews": []
   },
-  {
-    "id": 2071,
-    "name": "-Günbatımı Balık- Restoran “İbrahim Amca’nın yeri”",
-    "city": "Bartın",
-    "district": "",
-    "category": "restaurant",
-    "subcategory": "restaurant",
-    "latitude": 41.748895499999996,
-    "longitude": 32.385356099999996,
-    "rating": 4.3,
-    "review_count": 3287,
-    "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJMxVhGOYLm0ARQuNhzR9dEOI/photos/Ab43m-vmkUWnBlJDdz9MUTu6_G2QTWMGI_vfoNEgo2vpFgxrcoqdsDW9hrJLJ_ni52mnz2ZETdpmIQfiKah7liv4AvNndA56h-vQDkphcCyoV2l3Z7YLbP-HhtsqBaSdk6bAxLNCJE3g7dwGZInC1dxIIjMT9a4qWs0MCIvsPRXuSvsLRj61ltQqQM9Pie22QTZk8s5NaRSBRcsdGyhfB2UmBH6anVY7eW6idVpvIDpdrXE-vlKVqJ1qsxi6Ack229SRJiy0FY2J0YWNBVrpN7soBI2pCyG7Rd_Y-b3NO-ytp8ifXA/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
-    "description": "restaurant in Bartın",
-    "source": "google_places",
-    "tags": [
-      "food",
-      "restaurant",
-      "local"
-    ],
-    "estimated_visit_time": 60,
-    "reviews": []
-  },
+
   {
     "id": 2072,
     "name": "Urfa Beykonağı Ocakbaşı",
@@ -84193,29 +84171,7 @@
     "estimated_visit_time": 60,
     "reviews": []
   },
-  {
-    "id": 3860,
-    "name": ".",
-    "city": "Şırnak",
-    "district": "",
-    "category": "attraction",
-    "subcategory": "tourism",
-    "latitude": 37.4299637,
-    "longitude": 42.7888421,
-    "rating": 0,
-    "review_count": 0,
-    "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJB7rVrTFLCUARutAb-S4RVrY/photos/Ab43m-s5-EF2xxz3k2VBEJKA4UT_KiTj73L0iKSX_S1DIMb8mcqa3ZYi5jI3Sx-P1ME47vEtZ243WkH5h-Py155BT88MV7LtDUlDhbXn-sBNtHi-TMaW32pGxgG9TWMhk8rQvf-eRYstk9P94cEiS8SF2uWPj3pPqtTqeYUyHo0co-YXgZaPhNHwTxHLRnMGhlCYqZ8tLaBHWIKRPx-r4jLbX29hbLjekQmGJWthEgOudCr1mtN2KxwArsZUfwZ6BakP192LlTlG-iwRzNBHJS6J67MPcSvkdlARYWVZpfVeviC5CQ/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
-    "description": "tourism in Şırnak",
-    "source": "google_places",
-    "tags": [
-      "tourism",
-      "landmark",
-      "sightseeing"
-    ],
-    "estimated_visit_time": 60,
-    "reviews": []
-  },
+  
   {
     "id": 3861,
     "name": "Çevre Koruma Vakfı Aile Parkı",

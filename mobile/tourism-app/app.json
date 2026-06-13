@@ -27,7 +27,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.berenozerdogan.aitravel"
     },
     "web": {
       "output": "static",
@@ -51,6 +52,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "78951ea6-e75d-44e0-9492-8b0fb335fec6"
+      }
     }
   }
 }

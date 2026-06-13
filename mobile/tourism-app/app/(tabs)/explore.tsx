@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { API_BASE_URL } from "../../services/api";
 import {
   View,
   Text,
@@ -89,7 +90,7 @@ export default function Explore() {
 
   useEffect(() => {
   loadSavedIds();
-  fetch("http://10.0.2.2:8000/places")
+  fetch(`${API_BASE_URL}/places`)
     .then((res) => res.json())
     .then((data) => {
       setPlaces(Array.isArray(data) ? data : []);
@@ -181,7 +182,9 @@ export default function Explore() {
       filtered = filtered.filter((item) => cleanDistrict(item.district) === selectedDistrict);
     }
 
-    return [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    return [...filtered].sort((a, b) =>
+      String(a.name || "").localeCompare(String(b.name || ""))
+    );
   }, [places, selectedFilter, selectedCity, selectedDistrict, t]);
 
   const filterButtons = [
@@ -297,8 +300,17 @@ export default function Explore() {
     return value.startsWith("http://") || value.startsWith("https://");
   };
 
+
+  const getOnlineSearchImage = (item: any) => {
+    const query = encodeURIComponent(
+      `${item?.name || ""} ${item?.city || ""} Turkey tourism landmark`
+    );
+    return `https://source.unsplash.com/1200x800/?${query}`;
+  };
+
   const SmartPlaceImage = ({ item }: { item: any; index: number }) => {
     const [imageFailed, setImageFailed] = useState(false);
+    const [fallbackFailed, setFallbackFailed] = useState(false);
 
     const imageUri = String(item?.image || "").trim();
     const canShowImage = isUsablePlaceImage(imageUri) && !imageFailed;
@@ -310,6 +322,19 @@ export default function Explore() {
           style={styles.image}
           resizeMode="cover"
           onError={() => setImageFailed(true)}
+        />
+      );
+    }
+
+    const fallbackUri = getOnlineSearchImage(item);
+
+    if (!fallbackFailed) {
+      return (
+        <Image
+          source={{ uri: fallbackUri }}
+          style={styles.image}
+          resizeMode="cover"
+          onError={() => setFallbackFailed(true)}
         />
       );
     }
@@ -477,11 +502,7 @@ export default function Explore() {
 
               <View style={styles.info}>
                 <View style={styles.infoTop}>
-                  <View style={styles.ratingPill}>
-                    <Text style={styles.rating}>⭐ {item.rating || 0}</Text>
-                  </View>
-
-                  {item.category === "hotel" && item.price_level && item.price_level !== "unknown" && (
+{item.category === "hotel" && item.price_level && item.price_level !== "unknown" && (
                     <View style={styles.hotelBadge}>
                       <Text style={styles.hotelBadgeText}>{item.price_level.toUpperCase()}</Text>
                     </View>

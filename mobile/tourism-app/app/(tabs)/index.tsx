@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { API_BASE_URL } from "../../services/api";
 import {
   View,
   Text,
@@ -340,7 +341,7 @@ export default function Home() {
 
   useEffect(() => {
   loadSavedIds();
-  fetch("http://10.0.2.2:8000/places")
+  fetch(`${API_BASE_URL}/places`)
     .then((res) => res.json())
     .then((data) => {
       // Backend artık direkt liste dönüyor, o yüzden {data: ...} kısmını sildik
@@ -351,7 +352,7 @@ export default function Home() {
 }, []);
 
   useEffect(() => {
-    fetch("http://10.0.2.2:8000/hidden-gems?city=Istanbul")
+    fetch(`${API_BASE_URL}/hidden-gems?city=Istanbul`)
       .then((res) => res.json())
       .then((data) => setAiPicks(data.places || []))
       .catch((err) => console.log("AI picks error:", err));
@@ -365,7 +366,7 @@ export default function Home() {
     }
 
     const timeout = setTimeout(() => {
-      fetch(`http://10.0.2.2:8000/search?q=${encodeURIComponent(trimmed)}`)
+      fetch(`${API_BASE_URL}/search?q=${encodeURIComponent(trimmed)}`)
         .then((res) => res.json())
         .then((data) => setSearchResults(data))
         .catch((err) => console.log("Search error:", err));

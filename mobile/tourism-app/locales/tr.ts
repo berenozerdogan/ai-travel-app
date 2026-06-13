@@ -168,7 +168,7 @@ const tr = {
     aiPlanText: "Rotalar, oteller, restoranlar ve şehir önerileri için sor.",
     aiTripPlanner: "AI Gezi Planlayıcı",
     aiPowered: "YAPAY ZEKA DESTEKLİ",
-    planPerfectTrip: "Mükemmel seyahatini planla",
+    planPerfectTrip: "Seyahatini planla",
     planPerfectTripText: "Şehir, gün ve ilgi alanlarına göre kişisel rota oluştur.",
     planMyTrip: "Seyahatimi Planla",
     aiForYou: "Senin İçin",

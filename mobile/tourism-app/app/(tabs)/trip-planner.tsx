@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { API_BASE_URL } from "../../services/api";
 import {
   View,
   Text,
@@ -228,7 +229,7 @@ export default function TripPlanner() {
         return;
       }
 
-      const res = await fetch("http://10.0.2.2:8000/budget-estimate", {
+      const res = await fetch(`${API_BASE_URL}/budget-estimate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -265,7 +266,7 @@ export default function TripPlanner() {
       setPlan(null);
       setBudget(null);
 
-      const res = await fetch("http://10.0.2.2:8000/trip-plan", {
+      const res = await fetch(`${API_BASE_URL}/trip-plan`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

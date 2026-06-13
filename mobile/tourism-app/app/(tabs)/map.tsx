@@ -13,6 +13,7 @@ import {
   Share,
   TextInput,
   Image,
+  Platform,
 } from "react-native";
 import MapView, { Marker, Polyline, Region, PROVIDER_GOOGLE } from "react-native-maps";
 import { router, useLocalSearchParams } from "expo-router";
@@ -50,7 +51,7 @@ type Cluster = {
   city?: string;
 };
 
-const API_BASE_URL = "http://10.0.2.2:8000";
+const API_BASE_URL = "https://ai-travel-app-2zso.onrender.com";
 
 const COLORS = {
   bg: "#F7F4EF",
@@ -751,35 +752,41 @@ export default function MapScreen() {
         console.log("voice list error", voiceError);
       }
 
+      // iOS / Expo Go tarafında konuşma bazen çok hızlı tetiklenince ses çıkmayabiliyor.
+      // Önce aktif konuşmayı temizleyip kısa gecikmeyle başlatıyoruz.
+      await Speech.stop();
       setIsSpeaking(true);
 
-      Speech.speak(text, {
-        language: speechLanguage,
-        rate: 0.78,
-        pitch: 1.0,
-        onStart: () => {
-          console.log("Speech started:", speechLanguage);
-          setIsSpeaking(true);
-        },
-        onDone: () => {
-          console.log("Speech finished");
-          setIsSpeaking(false);
-        },
-        onStopped: () => {
-          console.log("Speech stopped");
-          setIsSpeaking(false);
-        },
-        onError: (error) => {
-          console.log("Speech error:", error);
-          setIsSpeaking(false);
-          Alert.alert(
-            safeT(t, "common.error", "Hata", language),
-            language === "tr"
-              ? "Sesli rehber başlatılamadı. Emülatörde Google Speech Services / Text-to-Speech ayarlarını kontrol et."
-              : "Voice guide could not start. Please check Text-to-Speech settings on the emulator."
-          );
-        },
-      });
+      setTimeout(() => {
+        Speech.speak(text, {
+          language: speechLanguage,
+          rate: Platform.OS === "ios" ? 0.72 : 0.78,
+          pitch: 1.0,
+          volume: 1.0,
+          onStart: () => {
+            console.log("Speech started:", speechLanguage);
+            setIsSpeaking(true);
+          },
+          onDone: () => {
+            console.log("Speech finished");
+            setIsSpeaking(false);
+          },
+          onStopped: () => {
+            console.log("Speech stopped");
+            setIsSpeaking(false);
+          },
+          onError: (error) => {
+            console.log("Speech error:", error);
+            setIsSpeaking(false);
+            Alert.alert(
+              safeT(t, "common.error", "Hata", language),
+              language === "tr"
+                ? "Sesli rehber başlatılamadı. Telefon sesinin açık olduğundan ve sessiz modun kapalı olduğundan emin ol."
+                : "Voice guide could not start. Please make sure device volume is on and silent mode is off."
+            );
+          },
+        });
+      }, 220);
     } catch (error) {
       console.log("speech general error", error);
       setIsSpeaking(false);
@@ -934,16 +941,7 @@ export default function MapScreen() {
   };
 
   const getRouteScore = () => {
-    if (!routePlaces.length) return 0;
-
-    const avgRating =
-      routePlaces.reduce((sum, p) => sum + Number(p.rating || 0), 0) /
-      routePlaces.length;
-
-    const distancePenalty = Math.min(getRouteDistanceKm(), 40) * 0.7;
-    const score = Math.round(avgRating * 20 - distancePenalty + 8);
-
-    return Math.max(55, Math.min(98, score));
+    return 0;
   };
 
   const getRouteBudget = () => {

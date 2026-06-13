@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../services/api";
 import {
   View,
   Text,
@@ -306,12 +307,12 @@ export default function Place() {
     }
 
     const url = safeId
-      ? `http://10.0.2.2:8000/place-by-id/${encodeURIComponent(
-          String(safeId)
-        )}?language=${encodeURIComponent(language)}`
-      : `http://10.0.2.2:8000/places/${encodeURIComponent(
-          String(safeName)
-        )}?language=${encodeURIComponent(language)}`;
+  ? `${API_BASE_URL}/place-by-id/${encodeURIComponent(
+      String(safeId)
+    )}?language=${encodeURIComponent(language)}`
+  : `${API_BASE_URL}/places/${encodeURIComponent(
+      String(safeName)
+    )}?language=${encodeURIComponent(language)}`;
 
     console.log("Fetcher URL:", url);
 
@@ -362,7 +363,7 @@ export default function Place() {
 
 
     fetch(
-      `http://10.0.2.2:8000/place-insight?place=${encodeURIComponent(
+      `${API_BASE_URL}/place-insight?place=${encodeURIComponent(
         place.name
       )}&city=${encodeURIComponent(place.city || "")}&language=${encodeURIComponent(
         language
@@ -388,7 +389,7 @@ export default function Place() {
     setLoadingWeather(true);
 
     fetch(
-      `http://10.0.2.2:8000/weather-advice?lat=${encodeURIComponent(
+      `${API_BASE_URL}/weather-advice?lat=${encodeURIComponent(
         String(place.latitude)
       )}&lng=${encodeURIComponent(String(place.longitude))}&language=${encodeURIComponent(
         language
