@@ -1275,7 +1275,49 @@ def budget_estimate(payload: dict = Body(...)):
             "ru": "Это примерная оценка; сумма зависит от транспорта, сезона и личных расходов."
         })
     }
+@app.post("/voice-guide")
+def voice_guide(payload: dict = Body(...)):
+    lang = get_lang(payload)
 
+    place_name = payload.get("name", "")
+    city = payload.get("city", "")
+    category = payload.get("category", "")
+    description = payload.get("description", "")
+
+    if not client:
+        return {
+            "guide": f"{place_name} hakkında sesli rehber şu anda oluşturulamıyor."
+        }
+
+    try:
+        system_prompt = {
+            "tr": "Sen profesyonel bir turist rehberisin. Verilen yer hakkında 4-5 cümlelik doğal ve ilgi çekici bir sesli rehber oluştur. Mekanı ziyaret eden kişiye bilgi ver. Robotik konuşma kullanma.",
+            "en": "You are a professional tourist guide. Create a natural and engaging audio guide in 4-5 sentences.",
+            "de": "Du bist ein professioneller Reiseführer. Erstelle einen natürlichen Audioguide in 4-5 Sätzen.",
+            "ru": "Вы профессиональный гид. Создайте естественный аудиогид из 4-5 предложений."
+        }.get(lang)
+
+        user_prompt = f"""
+Yer: {place_name}
+Şehir: {city}
+Kategori: {category}
+Açıklama: {description}
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ]
+        )
+
+        return {
+            "guide": response.choices[0].message.content
+        }
+
+    except Exception as e:
+        return {"guide": str(e)}
 @app.get("/weather-advice")
 def weather_advice(lat: float = Query(...), lng: float = Query(...), language: str = Query("tr")):
     lang = get_lang(language)
