@@ -1119,7 +1119,7 @@ def trip_plan(payload: dict = Body(...)):
     city = payload.get("city", "").strip()
     days_count = min(max(int(payload.get("days", 1) or 1), 1), 7)
     lang = get_lang(payload)
-
+    interests = normalize_text(payload.get("interests", ""))
     places_list = get_places_from_db(lang=lang)
 
     normalized_city = normalize_text(city)
@@ -1129,7 +1129,35 @@ def trip_plan(payload: dict = Body(...)):
         p for p in places_list
         if normalize_text(p.get("city", "")) in allowed_cities
     ]
+    if interests:
+    interest_filtered = []
 
+    for p in city_places:
+        text = " ".join([
+            str(p.get("category", "")),
+            str(p.get("subcategory", "")),
+            str(p.get("description", "")),
+            " ".join([str(t) for t in p.get("tags", [])]),
+        ]).lower()
+
+        if interests in ["doğa", "doga", "nature"]:
+            if any(x in text for x in ["nature", "park", "forest", "beach", "garden"]):
+                interest_filtered.append(p)
+
+        elif interests in ["tarih", "historical", "history"]:
+            if any(x in text for x in ["history", "historical", "museum", "mosque", "palace"]):
+                interest_filtered.append(p)
+
+        elif interests in ["yemek", "food", "restaurant"]:
+            if any(x in text for x in ["restaurant", "food", "cafe"]):
+                interest_filtered.append(p)
+
+        elif interests in ["alışveriş", "alisveris", "shopping"]:
+            if any(x in text for x in ["shopping", "mall", "market"]):
+                interest_filtered.append(p)
+
+    if interest_filtered:
+        city_places = interest_filtered
     if not city_places:
         return {
             "reply": tr_text(lang, {
