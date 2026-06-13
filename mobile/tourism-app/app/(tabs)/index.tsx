@@ -11,6 +11,7 @@ import {
   Dimensions,
   ScrollView,
   Alert,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import {
@@ -55,6 +56,113 @@ function isValidImageUrl(uri?: string) {
   }
 
   return value.startsWith("http://") || value.startsWith("https://");
+}
+
+
+function homeText(key: string, language: string) {
+  const texts: Record<string, Record<string, string>> = {
+    aiRecommended: {
+      tr: "AI tarafından önerildi",
+      en: "Recommended by AI",
+      de: "Von AI empfohlen",
+      ru: "Рекомендовано AI",
+    },
+    whyRecommended: {
+      tr: "Neden önerildi?",
+      en: "Why recommended?",
+      de: "Warum empfohlen?",
+      ru: "Почему рекомендовано?",
+    },
+    reasonHotel: {
+      tr: "Konaklama planlarına uygun",
+      en: "Fits stay planning",
+      de: "Passt zur Unterkunftsplanung",
+      ru: "Подходит для проживания",
+    },
+    reasonFood: {
+      tr: "Yemek molası için uygun",
+      en: "Good for a food stop",
+      de: "Gut für eine Essenspause",
+      ru: "Подходит для еды",
+    },
+    reasonAttraction: {
+      tr: "Rota için güçlü durak",
+      en: "Strong route stop",
+      de: "Starker Routenstopp",
+      ru: "Хорошая точка маршрута",
+    },
+    reasonCity: {
+      tr: "İstanbul rotalarıyla uyumlu",
+      en: "Fits Istanbul routes",
+      de: "Passt zu Istanbul-Routen",
+      ru: "Подходит к маршрутам Стамбула",
+    },
+    todayIstanbul: {
+      tr: "İstanbul",
+      en: "Istanbul",
+      de: "Istanbul",
+      ru: "Стамбул",
+    },
+    sunny: {
+      tr: "Güneşli",
+      en: "Sunny",
+      de: "Sonnig",
+      ru: "Солнечно",
+    },
+    todaySuggestions: {
+      tr: "Bugün senin için öneriler",
+      en: "Suggestions for today",
+      de: "Vorschläge für heute",
+      ru: "Рекомендации на сегодня",
+    },
+    weatherBased: {
+      tr: "Hava Durumuna Göre Öneriler",
+      en: "Weather-based Suggestions",
+      de: "Wetterbasierte Empfehlungen",
+      ru: "Рекомендации по погоде",
+    },
+    weatherBasedDesc: {
+      tr: "Bugün açık alanlar ve sahil rotaları için uygun görünüyor.",
+      en: "Today looks suitable for outdoor places and seaside routes.",
+      de: "Heute eignen sich Außenbereiche und Küstenrouten.",
+      ru: "Сегодня подходит для прогулок и маршрутов у воды.",
+    },
+    seeSuggestions: {
+      tr: "Tüm önerileri gör",
+      en: "See all suggestions",
+      de: "Alle Vorschläge ansehen",
+      ru: "Показать все",
+    },
+  };
+
+  const lang = String(language || "en").toLowerCase();
+  return texts[key]?.[lang] || texts[key]?.en || key;
+}
+
+function categoryDisplay(category: string | undefined, language: string) {
+  const c = String(category || "").toLowerCase();
+
+  if (c.includes("hotel")) {
+    return language === "tr" ? "Otel" : language === "de" ? "Hotel" : language === "ru" ? "Отель" : "Hotel";
+  }
+
+  if (c.includes("restaurant") || c.includes("food") || c.includes("cafe")) {
+    return language === "tr" ? "Restoran" : language === "de" ? "Restaurant" : language === "ru" ? "Ресторан" : "Restaurant";
+  }
+
+  if (c.includes("museum")) {
+    return language === "tr" ? "Müze" : language === "de" ? "Museum" : language === "ru" ? "Музей" : "Museum";
+  }
+
+  return language === "tr" ? "Gezilecek Yer" : language === "de" ? "Sehenswürdigkeit" : language === "ru" ? "Достопримечательность" : "Attraction";
+}
+
+function recommendationReason(item: any, language: string) {
+  const c = String(item?.category || "").toLowerCase();
+
+  if (c.includes("hotel")) return homeText("reasonHotel", language);
+  if (c.includes("restaurant") || c.includes("food") || c.includes("cafe")) return homeText("reasonFood", language);
+  return homeText("reasonAttraction", language);
 }
 
 function getPlaceholderIcon(category?: string) {
@@ -134,7 +242,7 @@ function SmartImageBackground({
 
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const categories = [
     {
       key: "attractions",
@@ -493,8 +601,8 @@ export default function Home() {
                     <View style={{ flex: 1 }}>
                       <Text style={styles.searchCardTitle}>{item.name}</Text>
                       <Text style={styles.searchCardMeta}>
-                        {item.city} • {item.category} • ⭐ {item.rating}
-                      </Text>
+  {item.city} • {categoryDisplay(item.category, language)}
+</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color={COLORS.textSoft} />
                   </TouchableOpacity>
@@ -531,6 +639,41 @@ export default function Home() {
                   </TouchableOpacity>
                 ))}
               </ScrollView>
+
+
+              <TouchableOpacity
+                style={styles.todayWeatherCard}
+                activeOpacity={0.88}
+                onPress={() => router.push("/(tabs)/explore")}
+              >
+                <View style={styles.weatherLeft}>
+                  <Ionicons name="sunny" size={34} color="#F59E0B" />
+                  <View>
+                    <Text style={styles.weatherCity}>{homeText("todayIstanbul", language)}</Text>
+                    <Text style={styles.weatherTemp}>28°C</Text>
+                    <Text style={styles.weatherStatus}>{homeText("sunny", language)}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.weatherDivider} />
+
+                <View style={{ flex: 1 }}>
+                  <View style={styles.weatherTopRow}>
+                    <Text style={styles.weatherSuggestionTitle}>
+                      {homeText("todaySuggestions", language)}
+                    </Text>
+                    <Ionicons name="chevron-forward" size={17} color={COLORS.text} />
+                  </View>
+
+                  <View style={styles.weatherChipsRow}>
+                    {["Ortaköy", "Emirgan Korusu", "Galata Kulesi"].map((item) => (
+                      <View key={item} style={styles.weatherChip}>
+                        <Text style={styles.weatherChipText}>{item}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </TouchableOpacity>
 
               {/* Planlayıcı Kartı - Köprü Kırmızısı Esintili Degradeli Yeni Görünüm */}
               <Animated.View style={{ transform: [{ scale: plannerScale }] }}>
@@ -635,11 +778,18 @@ export default function Home() {
                                 {item.name}
                               </Text>
                               <Text style={styles.aiPickMeta}>
-                                {item.city} • {item.category}
+                                {item.city} • {categoryDisplay(item.category, language)}
                               </Text>
-                              <View style={styles.aiPickBottom}>
-                                <Text style={styles.aiPickScore}>⭐ {item.rating || "-"}</Text>
-                                <Text style={styles.aiPickSmart}>🧠 {item.hidden_gem_score || "-"} match</Text>
+                              <View style={styles.recommendationBox}>
+                                <Text style={styles.recommendationTitle}>
+                                  {homeText("whyRecommended", language)}
+                                </Text>
+                                <Text style={styles.recommendationText}>
+                                  ✓ {recommendationReason(item, language)}
+                                </Text>
+                                <Text style={styles.recommendationText}>
+                                  ✓ {homeText("reasonCity", language)}
+                                </Text>
                               </View>
                             </View>
                           </LinearGradient>
@@ -731,6 +881,40 @@ export default function Home() {
                 </TouchableOpacity>
               </Animated.View>
 
+
+              <View style={styles.featureGrid}>
+                <TouchableOpacity style={styles.featureSmallCard} activeOpacity={0.88} onPress={() => router.push("/(tabs)/explore")}>
+                  <Ionicons name="partly-sunny-outline" size={26} color={COLORS.accent} />
+                  <Text style={styles.featureCardTitle}>{homeText("weatherBased", language)}</Text>
+                  <Text style={styles.featureCardText}>{homeText("weatherBasedDesc", language)}</Text>
+                  <View style={styles.featureButton}>
+                    <Text style={styles.featureButtonText}>{homeText("seeSuggestions", language)}</Text>
+                    <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.featureSmallCard} activeOpacity={0.88} onPress={() => router.push("/travel-journal" as any)}>
+                  <View style={styles.journalPhotoPreview}>
+                    <Image
+                      source={{ uri: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=600" }}
+                      style={[styles.journalPhoto, styles.journalPhotoOne]}
+                    />
+                    <Image
+                      source={{ uri: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?q=80&w=600" }}
+                      style={[styles.journalPhoto, styles.journalPhotoTwo]}
+                    />
+                    <View style={styles.journalCameraBadge}>
+                      <Ionicons name="camera" size={20} color={COLORS.white} />
+                    </View>
+                  </View>
+                  <Text style={styles.featureCardTitle}>Gezi Günlüğüne Fotoğraf</Text>
+                  <Text style={styles.featureCardText}>Anılarını fotoğraf ve notlarla birlikte kaydet.</Text>
+                  <View style={styles.featureOutlineButton}>
+                    <Text style={styles.featureOutlineButtonText}>Fotoğraf Ekle</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
               <Text style={styles.subSectionTitle}>{t("home.topHotels")}</Text>
               {featuredHotels.map((hotel, index) => (
                 <TouchableOpacity
@@ -744,8 +928,8 @@ export default function Home() {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.infoCardTitle}>{hotel.name}</Text>
                     <Text style={styles.infoCardText}>
-                      {hotel.city} • {hotel.subcategory} • ⭐ {hotel.rating}
-                    </Text>
+  {hotel.city} • {categoryDisplay(hotel.category, language)}
+</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={COLORS.textSoft} />
                 </TouchableOpacity>
@@ -764,8 +948,8 @@ export default function Home() {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.infoCardTitle}>{restaurant.name}</Text>
                     <Text style={styles.infoCardText}>
-                      {restaurant.city} • {restaurant.subcategory} • ⭐ {restaurant.rating}
-                    </Text>
+  {restaurant.city} • {categoryDisplay(restaurant.category, language)}
+</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={COLORS.textSoft} />
                 </TouchableOpacity>
@@ -970,6 +1154,180 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+
+  todayWeatherCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 22,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(31,41,55,0.08)",
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
+    marginBottom: 18,
+  },
+  weatherLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: 122,
+    gap: 10,
+  },
+  weatherCity: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "900",
+  },
+  weatherTemp: {
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 2,
+  },
+  weatherStatus: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  weatherDivider: {
+    width: 1,
+    height: 56,
+    backgroundColor: "rgba(31,41,55,0.08)",
+    marginHorizontal: 14,
+  },
+  weatherTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  weatherSuggestionTitle: {
+    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: "900",
+    flex: 1,
+  },
+  weatherChipsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 10,
+  },
+  weatherChip: {
+    backgroundColor: COLORS.surfaceSoft,
+    borderRadius: 999,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: "rgba(31,41,55,0.06)",
+  },
+  weatherChipText: {
+    color: COLORS.text,
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  featureGrid: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 18,
+  },
+  featureSmallCard: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: 22,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: "rgba(31,41,55,0.08)",
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+  featureCardTitle: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "900",
+    marginTop: 10,
+  },
+  featureCardText: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 6,
+    minHeight: 50,
+  },
+
+  journalPhotoPreview: {
+    height: 78,
+    marginBottom: 8,
+    position: "relative",
+  },
+  journalPhoto: {
+    position: "absolute",
+    width: 82,
+    height: 62,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: COLORS.surface,
+    backgroundColor: COLORS.surfaceSoft,
+  },
+  journalPhotoOne: {
+    left: 6,
+    top: 8,
+    transform: [{ rotate: "-8deg" }],
+  },
+  journalPhotoTwo: {
+    right: 8,
+    top: 2,
+    transform: [{ rotate: "7deg" }],
+  },
+  journalCameraBadge: {
+    position: "absolute",
+    left: "50%",
+    top: 26,
+    marginLeft: -22,
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: COLORS.surface,
+  },
+  featureButton: {
+    height: 36,
+    borderRadius: 999,
+    backgroundColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 5,
+    marginTop: 10,
+  },
+  featureButtonText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  featureOutlineButton: {
+    height: 36,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  featureOutlineButtonText: {
+    color: COLORS.accent,
+    fontSize: 12,
+    fontWeight: "900",
+  },
   plannerHeroCard: {
     marginBottom: 24,
     borderRadius: 24,
@@ -1138,6 +1496,31 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
   },
+
+  recommendationBox: {
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.16)",
+    borderRadius: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    marginTop: 4,
+  },
+
+  recommendationTitle: {
+    color: COLORS.white,
+    fontSize: 11,
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+
+  recommendationText: {
+    color: "rgba(255,255,255,0.82)",
+    fontSize: 10,
+    fontWeight: "600",
+    lineHeight: 14,
+  },
+
   featuredCard: {
     width: width * 0.74,
     height: 250,

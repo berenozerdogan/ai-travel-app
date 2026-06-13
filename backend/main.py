@@ -694,7 +694,6 @@ def optimize_route(payload: dict = Body(...)):
 
     return {"route": route}
 
-
 @app.post("/ai-chat")
 def ai_chat(payload: dict = Body(...)):
     message = payload.get("message", "")
@@ -705,6 +704,43 @@ def ai_chat(payload: dict = Body(...)):
     detected_city = detect_city(message)
     detected_category = detect_category(message)
     detected_district = detect_district(message)
+
+    msg_norm = normalize_text(message)
+
+    # Persona / gezi tipi algılama
+    persona = "general"
+    if any(w in msg_norm for w in ["romantik", "romantic", "sevgili", "couple", "partner"]):
+        persona = "romantic"
+    elif any(w in msg_norm for w in ["aile", "family", "çocuk", "cocuk", "kids", "children"]):
+        persona = "family"
+    elif any(w in msg_norm for w in ["öğrenci", "ogrenci", "student", "ucuz", "cheap", "budget"]):
+        persona = "student"
+    elif any(w in msg_norm for w in ["lüks", "luxury", "premium", "konfor"]):
+        persona = "luxury"
+    elif any(w in msg_norm for w in ["yağmur", "yagmur", "rain", "rainy"]):
+        persona = "rainy"
+
+    # Gün sayısı algılama
+    days_count = 1
+    for n in range(1, 8):
+        if (
+            f"{n} gün" in msg_norm
+            or f"{n} gun" in msg_norm
+            or f"{n} day" in msg_norm
+            or f"{n}-day" in msg_norm
+        ):
+            days_count = n
+            break
+
+    # Bütçe algılama
+    budget = None
+    import re
+    budget_match = re.search(r"(\d{3,6})\s*(tl|try|₺)?", msg_norm)
+    if budget_match:
+        try:
+            budget = int(budget_match.group(1))
+        except Exception:
+            budget = None
 
     filtered_places = places_list
 
@@ -728,106 +764,200 @@ def ai_chat(payload: dict = Body(...)):
             or normalize_text(p.get("subcategory", "")) == detected_category
         ]
 
+    # Persona bazlı filtre/öncelik
+    def persona_score(place):
+        score = float(place.get("rating") or 0) * 10
+        category = normalize_text(place.get("category", ""))
+        subcategory = normalize_text(place.get("subcategory", ""))
+        desc = normalize_text(place.get("description", ""))
+        tags = " ".join([normalize_text(x) for x in place.get("tags", [])])
+
+        text = f"{category} {subcategory} {desc} {tags}"
+
+        if persona == "romantic":
+            if any(w in text for w in ["view", "manzara", "bosphorus", "deniz", "restaurant", "cafe"]):
+                score += 20
+        elif persona == "family":
+            if any(w in text for w in ["park", "museum", "nature", "aquarium", "family", "çocuk", "cocuk"]):
+                score += 20
+        elif persona == "student":
+            if category in ["museum", "park", "attraction", "cafe"]:
+                score += 18
+            if category == "hotel":
+                score -= 15
+        elif persona == "luxury":
+            if category in ["hotel", "restaurant"]:
+                score += 25
+            if float(place.get("rating") or 0) >= 4.6:
+                score += 10
+        elif persona == "rainy":
+            if category in ["museum", "shopping", "cafe", "restaurant", "hotel"]:
+                score += 25
+            if any(w in text for w in ["indoor", "kapalı", "kapali", "museum", "mall"]):
+                score += 15
+
+        return score
+
     if not filtered_places:
         return {
             "reply": tr_text(lang, {
-                "tr": "Bu kritere uygun mekan bulamadım.",
-                "en": "I couldn't find any places matching this criteria.",
-                "de": "Ich konnte keine passenden Orte finden.",
-                "ru": "Я не нашел подходящих мест.",
+                "tr": "Bu kritere uygun mekan bulamadım. Şehir veya kategori bilgisini biraz daha net yazabilir misin?",
+                "en": "I couldn't find any places matching this criteria. Could you specify the city or category more clearly?",
+                "de": "Ich konnte keine passenden Orte finden. Kannst du Stadt oder Kategorie genauer angeben?",
+                "ru": "Я не нашел подходящих мест. Можете точнее указать город или категорию?",
             }),
             "places": [],
             "days": [],
+            "persona": persona,
+            "budget": budget,
         }
 
-    # OpenAI yoksa güvenli fallback.
-    if not client:
-        selected = sorted(filtered_places, key=lambda p: p.get("rating") or 0, reverse=True)[:5]
-        return {
-            "reply": tr_text(lang, {
-                "tr": "API anahtarı olmadığı için en yüksek puanlı mekanları listeledim.",
-                "en": "No API key found, so I listed the top-rated places.",
-                "de": "Kein API-Schlüssel gefunden, daher liste ich die bestbewerteten Orte auf.",
-                "ru": "API-ключ не найден, поэтому я показал места с высоким рейтингом.",
-            }),
-            "places": selected,
-            "days": [{"day": 1, "places": selected}],
-        }
+    sorted_places = sorted(filtered_places, key=persona_score, reverse=True)
 
-    places_text = "\n".join([
-        f"{p.get('name', '')} | category={p.get('category', '')} | rating={p.get('rating', '')}"
-        for p in filtered_places[:100]
-    ])
+    max_places = min(days_count * 4, 12)
+    selected_places = sorted_places[:max_places]
 
-    language_rule = {
-        "tr": "Cevabını Türkçe ver.",
-        "en": "Respond in English.",
-        "de": "Antworte auf Deutsch.",
-        "ru": "Ответьте на русском.",
-    }.get(lang, "Respond in English.")
+    # Günlere böl
+    days = []
+    per_day = max(1, math.ceil(len(selected_places) / days_count))
 
-    prompt = f"""
-Sen bir Türkiye turizm asistanısın. Sadece aşağıdaki veri setindeki yerleri kullan.
-{language_rule}
+    for i in range(days_count):
+        day_places = selected_places[i * per_day:(i + 1) * per_day]
+        if day_places:
+            days.append({
+                "day": i + 1,
+                "places": [p.get("name") for p in day_places],
+            })
 
-Kullanıcı isteği: {message}
+    # Basit bütçe tahmini
+    estimated_budget = 0
+    for p in selected_places:
+        cat = normalize_text(p.get("category", ""))
+        if cat == "hotel":
+            estimated_budget += 3500
+        elif cat in ["restaurant", "cafe"]:
+            estimated_budget += 700
+        elif cat == "shopping":
+            estimated_budget += 1000
+        else:
+            estimated_budget += 300
 
-Mekanlar:
-{places_text}
+    persona_labels = {
+        "tr": {
+            "general": "genel",
+            "romantic": "romantik",
+            "family": "aile dostu",
+            "student": "öğrenci bütçesine uygun",
+            "luxury": "lüks",
+            "rainy": "yağmurlu havaya uygun",
+        },
+        "en": {
+            "general": "general",
+            "romantic": "romantic",
+            "family": "family-friendly",
+            "student": "student-budget",
+            "luxury": "luxury",
+            "rainy": "rainy-day",
+        },
+        "de": {
+            "general": "allgemeinen",
+            "romantic": "romantischen",
+            "family": "familienfreundlichen",
+            "student": "studentischen Budget",
+            "luxury": "luxuriösen",
+            "rainy": "regnerischen Tag",
+        },
+        "ru": {
+            "general": "общий",
+            "romantic": "романтический",
+            "family": "семейный",
+            "student": "студенческий бюджет",
+            "luxury": "люкс",
+            "rainy": "для дождливой погоды",
+        },
+    }
 
-Kurallar:
-Sadece JSON formatında yanıt ver:
-{{"reply": "...", "days": [{{"day": 1, "places": ["..."]}}]}}
-"""
+    persona_text = persona_labels.get(lang, persona_labels["en"]).get(persona, persona)
 
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "Sen yardımsever bir turizm asistanısın."},
-                {"role": "user", "content": prompt},
-            ],
-        )
+    if lang == "tr":
+        reply = f"{days_count} günlük {persona_text} gezi planı hazırladım."
+        if detected_city:
+            reply += f" Şehir: {detected_city.title()}."
+        if budget:
+            reply += f" Belirttiğin bütçe: yaklaşık {budget} TL."
+        reply += f" Tahmini toplam harcama: {estimated_budget} TL civarı."
+        reply += "\n\nPlan:"
+        for d in days:
+            reply += f"\n\nGün {d['day']}:\n"
+            for idx, place_name in enumerate(d["places"], 1):
+                reply += f"{idx}. {place_name}\n"
 
-        raw_text = response.choices[0].message.content.strip()
-        cleaned = raw_text.replace("```json", "").replace("```", "").strip()
-        parsed = json.loads(cleaned)
+    elif lang == "de":
+        reply = f"Ich habe einen {days_count}-Tage-Reiseplan für einen {persona_text} vorbereitet."
+        if budget:
+            reply += f" Dein Budget: ca. {budget} TL."
+        reply += f" Geschätzte Gesamtkosten: etwa {estimated_budget} TL."
+        reply += "\n\nPlan:"
+        for d in days:
+            reply += f"\n\nTag {d['day']}:\n"
+            for idx, place_name in enumerate(d["places"], 1):
+                reply += f"{idx}. {place_name}\n"
 
-        days = parsed.get("days", [])
-        flat_names = []
-        for day in days:
-            for name in day.get("places", []):
-                if name not in flat_names:
-                    flat_names.append(name)
+    elif lang == "ru":
+        reply = f"Я подготовил маршрут на {days_count} дн. Тип поездки: {persona_text}."
+        if budget:
+            reply += f" Ваш бюджет: около {budget} TL."
+        reply += f" Примерная стоимость: около {estimated_budget} TL."
+        reply += "\n\nПлан:"
+        for d in days:
+            reply += f"\n\nДень {d['day']}:\n"
+            for idx, place_name in enumerate(d["places"], 1):
+                reply += f"{idx}. {place_name}\n"
 
-        enriched_places = []
-        for name in flat_names:
-            found = next(
-                (p for p in filtered_places if normalize_text(p["name"]) == normalize_text(name)),
-                None,
+    else:
+        reply = f"I prepared a {days_count}-day {persona_text} trip plan."
+        if budget:
+            reply += f" Your budget: around {budget} TL."
+        reply += f" Estimated total cost: around {estimated_budget} TL."
+        reply += "\n\nPlan:"
+        for d in days:
+            reply += f"\n\nDay {d['day']}:\n"
+            for idx, place_name in enumerate(d["places"], 1):
+                reply += f"{idx}. {place_name}\n"
+
+    # OpenAI varsa cevabı daha doğal hale getirsin ama rota verisi yine bizim dataset'ten gelsin
+    if client:
+        try:
+            system_text = {
+                "tr": "Sen profesyonel bir Türkiye seyahat danışmanısın. Verilen planı daha doğal, kısa ve anlaşılır hale getir. Mekan isimlerini değiştirme.",
+                "en": "You are a professional Turkey travel advisor. Make the given plan natural, short and clear. Do not change place names.",
+                "de": "Du bist ein professioneller Türkei-Reiseberater. Formuliere den Plan natürlich, kurz und klar. Ändere keine Ortsnamen.",
+                "ru": "Вы профессиональный туристический консультант по Турции. Сделайте план естественным, кратким и понятным. Не меняйте названия мест.",
+            }.get(lang, "You are a professional travel advisor.")
+
+            ai_response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": system_text},
+                    {"role": "user", "content": reply},
+                ],
             )
-            if found:
-                enriched_places.append(found)
 
-        return {
-            "reply": parsed.get("reply", ""),
-            "places": enriched_places[:10],
-            "days": days,
-        }
+            polished = ai_response.choices[0].message.content.strip()
+            if polished:
+                reply = polished
 
-    except Exception as e:
-        logging.error(f"AI chat hata: {e}")
-        selected = sorted(filtered_places, key=lambda p: p.get("rating") or 0, reverse=True)[:5]
-        return {
-            "reply": tr_text(lang, {
-                "tr": "Yapay zeka yanıtı alınamadı, en iyi mekanları listeledim.",
-                "en": "AI response failed, so I listed the best places.",
-                "de": "KI-Antwort fehlgeschlagen, daher liste ich die besten Orte auf.",
-                "ru": "Ответ ИИ не получен, поэтому я показал лучшие места.",
-            }),
-            "places": selected,
-            "days": [{"day": 1, "places": selected}],
-        }
+        except Exception as e:
+            logging.error(f"AI polish hata: {e}")
+
+    return {
+        "reply": reply,
+        "places": selected_places,
+        "days": days,
+        "persona": persona,
+        "budget": budget,
+        "estimated_budget": estimated_budget,
+    }
 
 
 @app.get("/events")

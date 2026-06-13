@@ -147,6 +147,25 @@ function safeT(
   return SAVED_FALLBACKS[key]?.[lang] || SAVED_FALLBACKS[key]?.en || fallback;
 }
 
+
+function categoryDisplay(category: string | undefined, language: string) {
+  const c = String(category || "").toLowerCase();
+
+  if (c.includes("hotel")) {
+    return language === "tr" ? "Otel" : language === "de" ? "Hotel" : language === "ru" ? "Отель" : "Hotel";
+  }
+
+  if (c.includes("restaurant") || c.includes("food") || c.includes("cafe")) {
+    return language === "tr" ? "Restoran" : language === "de" ? "Restaurant" : language === "ru" ? "Ресторан" : "Restaurant";
+  }
+
+  if (c.includes("museum")) {
+    return language === "tr" ? "Müze" : language === "de" ? "Museum" : language === "ru" ? "Музей" : "Museum";
+  }
+
+  return language === "tr" ? "Gezilecek Yer" : language === "de" ? "Sehenswürdigkeit" : language === "ru" ? "Достопримечательность" : "Attraction";
+}
+
 type TabKey = "places" | "visited" | "routes" | "journal";
 
 export default function Saved() {
@@ -162,24 +181,26 @@ export default function Saved() {
       const placesRaw = await AsyncStorage.getItem("saved_places");
       const routesRaw = await AsyncStorage.getItem("saved_routes");
       const notesRaw = await AsyncStorage.getItem("user_place_notes");
+      const journalRaw = await AsyncStorage.getItem("travel_journal");
       const visitedRaw = await AsyncStorage.getItem("visited_places");
 
       const places = placesRaw ? JSON.parse(placesRaw) : [];
       const routes = routesRaw ? JSON.parse(routesRaw) : [];
       const notes = notesRaw ? JSON.parse(notesRaw) : {};
+      const travelJournal = journalRaw ? JSON.parse(journalRaw) : [];
       const visited = visitedRaw ? JSON.parse(visitedRaw) : [];
 
       setSavedPlaces(Array.isArray(places) ? places : []);
       setSavedRoutes(Array.isArray(routes) ? routes : []);
       setVisitedPlaces(Array.isArray(visited) ? visited : []);
 
-      const noteList = Object.keys(notes || {})
+      const oldNoteList = Object.keys(notes || {})
         .map((id) => {
           const place = Array.isArray(places)
             ? places.find((p: any) => String(p.id) === String(id))
             : null;
           return {
-            id,
+            id: `old-${id}`,
             note: notes[id],
             placeName: place?.name || `Mekan #${id}`,
             city: place?.city || "",
@@ -188,7 +209,22 @@ export default function Saved() {
         })
         .filter((item) => String(item.note || "").trim().length > 0);
 
-      setJournalItems(noteList);
+      const journalList = Array.isArray(travelJournal)
+        ? travelJournal.map((item: any) => ({
+            id: String(item.id),
+            note: item.note,
+            placeName: item.placeName || item.name || "Gezi Notu",
+            city: item.city || "",
+            place: item.placeId && item.placeId !== "route" ? { id: item.placeId } : null,
+          }))
+        : [];
+
+      const mergedJournal = [...journalList, ...oldNoteList].filter(
+        (item, index, self) =>
+          index === self.findIndex((x) => String(x.id) === String(item.id))
+      );
+
+      setJournalItems(mergedJournal);
     } catch (error) {
       console.log(error);
       setSavedPlaces([]);
@@ -245,6 +281,14 @@ export default function Saved() {
       const notes = raw ? JSON.parse(raw) : {};
       delete notes[id];
       await AsyncStorage.setItem("user_place_notes", JSON.stringify(notes));
+
+      const journalRaw = await AsyncStorage.getItem("travel_journal");
+      const journal = journalRaw ? JSON.parse(journalRaw) : [];
+      const updatedJournal = Array.isArray(journal)
+        ? journal.filter((item: any) => String(item.id) !== String(id))
+        : [];
+      await AsyncStorage.setItem("travel_journal", JSON.stringify(updatedJournal));
+
       loadAllSavedData();
     } catch (error) {
       console.log(error);
@@ -311,7 +355,7 @@ export default function Saved() {
           <View style={styles.card}>
             <TouchableOpacity activeOpacity={0.88} style={{ flex: 1, paddingRight: 8 }} onPress={() => openPlace(item)}>
               <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-              <Text style={styles.meta} numberOfLines={1}>{item.city} • {item.category} • ⭐ {item.rating}</Text>
+              <Text style={styles.meta} numberOfLines={1}>{item.city} • {categoryDisplay(item.category, language)}</Text>
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={0.85} onPress={() => removePlace(item.id)} style={styles.removeButton}>
               <Ionicons name="trash-outline" size={16} color={COLORS.white} />
@@ -336,7 +380,7 @@ export default function Saved() {
           <View style={styles.card}>
             <TouchableOpacity activeOpacity={0.88} style={{ flex: 1, paddingRight: 8 }} onPress={() => openPlace(item)}>
               <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-              <Text style={styles.meta} numberOfLines={1}>{item.city} • {item.category} • ⭐ {item.rating}</Text>
+              <Text style={styles.meta} numberOfLines={1}>{item.city} • {categoryDisplay(item.category, language)}</Text>
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={0.85} onPress={() => removeVisited(item.id)} style={styles.removeButton}>
               <Ionicons name="trash-outline" size={16} color={COLORS.white} />

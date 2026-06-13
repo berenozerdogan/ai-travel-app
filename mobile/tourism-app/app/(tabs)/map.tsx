@@ -12,6 +12,7 @@ import {
   Linking,
   Share,
   TextInput,
+  Image,
 } from "react-native";
 import MapView, { Marker, Polyline, Region, PROVIDER_GOOGLE } from "react-native-maps";
 import { router, useLocalSearchParams } from "expo-router";
@@ -179,6 +180,9 @@ const MAP_FALLBACKS: Record<string, Record<string, string>> = {
   "map.journalAddedMessage": { tr: "Bu rota seyahat günlüğüne kaydedildi.", en: "This route was saved to your travel journal.", de: "Diese Route wurde in deinem Reisetagebuch gespeichert.", ru: "Этот маршрут сохранён в дневник путешествий." },
   "map.journalAddError": { tr: "Rota günlüğe eklenemedi.", en: "Could not add route to journal.", de: "Route konnte nicht zum Tagebuch hinzugefügt werden.", ru: "Не удалось добавить маршрут в дневник." },
   "map.myLocation": { tr: "Konumum", en: "My location", de: "Mein Standort", ru: "Моя геолокация" },
+  "map.nearMeTitle": { tr: "Yakınımdaki Yerler", en: "Nearby Places", de: "Orte in der Nähe", ru: "Места рядом" },
+  "map.nearMeSubtitle": { tr: "Konumuna en yakın gezi noktaları", en: "Closest places to your location", de: "Nächste Orte zu deinem Standort", ru: "Ближайшие места к вам" },
+  "map.showNearMe": { tr: "Yakınımda Ne Var?", en: "What is nearby?", de: "Was ist in der Nähe?", ru: "Что рядом?" },
 };
 
 function safeT(
@@ -200,6 +204,165 @@ function normalizeCategory(category?: string) {
   if (c.includes("hotel")) return "hotel";
   if (c.includes("attraction") || c.includes("tourism") || c.includes("museum") || c.includes("park")) return "attraction";
   return c || "attraction";
+}
+
+function categoryDisplay(category: string | undefined, language: string) {
+  const c = normalizeCategory(category);
+
+  if (c === "restaurant") {
+    if (language === "tr") return "Restoran";
+    if (language === "de") return "Restaurant";
+    if (language === "ru") return "Ресторан";
+    return "Restaurant";
+  }
+
+  if (c === "hotel") {
+    if (language === "tr") return "Otel";
+    if (language === "de") return "Hotel";
+    if (language === "ru") return "Отель";
+    return "Hotel";
+  }
+
+  if (c === "attraction") {
+    if (language === "tr") return "Gezilecek Yer";
+    if (language === "de") return "Sehenswürdigkeit";
+    if (language === "ru") return "Достопримечательность";
+    return "Attraction";
+  }
+
+  return category || "";
+}
+
+
+function cleanGuideDescription(description: string, language: string) {
+  const raw = String(description || "").trim();
+  const lower = raw.toLowerCase();
+
+  if (!raw) return "";
+
+  if (language === "tr") {
+    if (lower.includes("landmark in")) return "Şehir rotalarında kısa keşif durağı olarak öne çıkan bir noktadır";
+    if (lower.includes("restaurant in")) return "Şehir gezisi sırasında yemek molası için değerlendirilebilecek bir restorandır";
+    if (lower.includes("hotel on") || lower.includes("hotel in")) return "Konaklama planı için değerlendirilebilecek bir oteldir";
+    if (lower.includes("cafe in")) return "Kısa mola ve dinlenme için değerlendirilebilecek bir kafedir";
+  }
+
+  return raw;
+}
+
+function guideTextForPlace(place: Place, language: string) {
+  const category = categoryDisplay(place.category, language);
+  const city = place.city || (language === "tr" ? "Türkiye" : "Turkey");
+  const district = place.district ? String(place.district).replace(/^\d{5}\s*/, "").split(/[\/,]/)[0].trim() : "";
+  const visitTime = Number(place.estimated_visit_time || 45);
+  const description = cleanGuideDescription(String(place.description || ""), language);
+  const c = normalizeCategory(place.category);
+
+  if (language === "tr") {
+    const intro =
+      c === "hotel"
+        ? `Şu anda ${city}${district ? " " + district : ""} bölgesindeki ${place.name} adlı konaklama noktasını görüntülüyorsun.`
+        : c === "restaurant"
+        ? `Şu anda ${city}${district ? " " + district : ""} bölgesindeki ${place.name} adlı yemek durağını görüntülüyorsun.`
+        : `Şu anda ${city}${district ? " " + district : ""} bölgesindeki ${place.name} adlı gezi noktasını görüntülüyorsun.`;
+
+    const detail =
+      description && description.length > 12
+        ? `${description}.`
+        : c === "hotel"
+        ? "Bu yer, şehir gezisini konforlu bir konaklama noktasıyla birleştirmek isteyen ziyaretçiler için değerlendirilebilir."
+        : c === "restaurant"
+        ? "Burası, gezi sırasında kısa bir mola vermek veya rotaya keyifli bir yemek durağı eklemek için uygun olabilir."
+        : "Burası, çevredeki diğer duraklarla birlikte planlandığında rotanı daha keyifli ve verimli hale getirebilir.";
+
+    const role =
+      c === "hotel"
+        ? "Özellikle şehir merkezine yakın kalmak, ulaşımı kolaylaştırmak ve gezi planını daha rahat yönetmek isteyenler için iyi bir seçenek olabilir."
+        : c === "restaurant"
+        ? "Yakındaki turistik noktaları gezdikten sonra burada mola vererek rotanı daha dengeli hale getirebilirsin."
+        : "Bu noktayı ana durak olarak ya da çevredeki yerlerle birlikte kısa bir keşif molası olarak kullanabilirsin.";
+
+    return `${intro} ${detail} ${role} Bu durak için önerilen süre yaklaşık ${visitTime} dakikadır. Yol tarifi almak istersen navigasyon butonunu kullanabilirsin.`;
+  }
+
+  if (language === "de") {
+    const intro =
+      c === "hotel"
+        ? `Du siehst gerade ${place.name}, einen Unterkunftspunkt in ${city}${district ? " " + district : ""}.`
+        : c === "restaurant"
+        ? `Du siehst gerade ${place.name}, einen Essensstopp in ${city}${district ? " " + district : ""}.`
+        : `Du siehst gerade ${place.name}, einen Reisezielpunkt in ${city}${district ? " " + district : ""}.`;
+
+    const detail =
+      description && description.length > 12
+        ? `${description}.`
+        : c === "hotel"
+        ? "Dieser Ort eignet sich für Reisende, die ihre Stadterkundung mit einer komfortablen Unterkunft verbinden möchten."
+        : c === "restaurant"
+        ? "Dieser Ort eignet sich gut für eine Pause oder als angenehmer Essensstopp während der Route."
+        : "Dieser Ort kann deine Route interessanter machen, besonders wenn du ihn mit nahegelegenen Stopps kombinierst.";
+
+    const role =
+      c === "hotel"
+        ? "Besonders praktisch ist er, wenn du kurze Wege und eine entspannte Reiseplanung möchtest."
+        : c === "restaurant"
+        ? "Nach nahegelegenen Sehenswürdigkeiten kannst du hier eine Pause einlegen und die Route ausgleichen."
+        : "Du kannst diesen Ort als Hauptstopp oder als kurze Entdeckungspause nutzen.";
+
+    return `${intro} ${detail} ${role} Die empfohlene Aufenthaltsdauer beträgt etwa ${visitTime} Minuten. Für die Wegbeschreibung kannst du die Navigationstaste verwenden.`;
+  }
+
+  if (language === "ru") {
+    const intro =
+      c === "hotel"
+        ? `Сейчас вы смотрите ${place.name}, точку проживания в городе ${city}${district ? " " + district : ""}.`
+        : c === "restaurant"
+        ? `Сейчас вы смотрите ${place.name}, место для остановки на еду в городе ${city}${district ? " " + district : ""}.`
+        : `Сейчас вы смотрите ${place.name}, туристическую точку в городе ${city}${district ? " " + district : ""}.`;
+
+    const detail =
+      description && description.length > 12
+        ? `${description}.`
+        : c === "hotel"
+        ? "Это место подойдет тем, кто хочет совместить прогулку по городу с комфортным проживанием."
+        : c === "restaurant"
+        ? "Это место можно использовать как приятную паузу или остановку для еды во время маршрута."
+        : "Эта точка сделает маршрут интереснее, особенно если объединить ее с ближайшими местами.";
+
+    const role =
+      c === "hotel"
+        ? "Это удобно для тех, кто хочет легко перемещаться по городу и комфортно планировать поездку."
+        : c === "restaurant"
+        ? "После ближайших достопримечательностей здесь можно сделать перерыв и продолжить маршрут."
+        : "Ее можно использовать как основную остановку или короткую паузу для знакомства с районом.";
+
+    return `${intro} ${detail} ${role} Рекомендуемое время посещения — около ${visitTime} минут. Для маршрута используйте кнопку навигации.`;
+  }
+
+  const intro =
+    c === "hotel"
+      ? `You are now viewing ${place.name}, a stay point in ${city}${district ? " " + district : ""}.`
+      : c === "restaurant"
+      ? `You are now viewing ${place.name}, a food stop in ${city}${district ? " " + district : ""}.`
+      : `You are now viewing ${place.name}, a sightseeing stop in ${city}${district ? " " + district : ""}.`;
+
+  const detail =
+    description && description.length > 12
+      ? `${description}.`
+      : c === "hotel"
+      ? "This place can be useful for travelers who want to combine city exploration with a comfortable stay."
+      : c === "restaurant"
+      ? "This place can work well as a short break or a pleasant food stop during your route."
+      : "This stop can make your route more enjoyable, especially when planned together with nearby places.";
+
+  const role =
+    c === "hotel"
+      ? "It can be a good option if you want easier transportation and a more comfortable travel plan."
+      : c === "restaurant"
+      ? "After visiting nearby attractions, you can use this place as a balanced rest stop."
+      : "You can use this place as a main stop or as a short discovery point in the area.";
+
+  return `${intro} ${detail} ${role} The suggested visit time is around ${visitTime} minutes. Use the navigation button if you want directions.`;
 }
 
 function getMarkerColor(category?: string) {
@@ -240,6 +403,13 @@ export default function MapScreen() {
   const [userLocation, setUserLocation] = useState<Location.LocationObjectCoords | null>(null);
   const [loading, setLoading] = useState(false);
   const [showHelp, setShowHelp] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+    };
+  }, []);
 
   const isCloseZoom = region.latitudeDelta < 2.2;
   const isMediumZoom = region.latitudeDelta < 5.0;
@@ -325,6 +495,26 @@ export default function MapScreen() {
       (p) => p.latitude && p.longitude && normalizeCategory(p.category) === selectedCategory
     );
   }, [places, savedPlaces, selectedCategory, routePlaces]);
+
+
+  const nearbyPlaces = useMemo(() => {
+    if (!userLocation) return [];
+
+    return places
+      .filter((p) => p.latitude && p.longitude)
+      .map((p) => ({
+        ...p,
+        distance_km: distanceKm(
+          userLocation.latitude,
+          userLocation.longitude,
+          Number(p.latitude),
+          Number(p.longitude)
+        ),
+      }))
+      .filter((p) => Number(p.distance_km) <= 10)
+      .sort((a, b) => Number(a.distance_km || 0) - Number(b.distance_km || 0))
+      .slice(0, 8);
+  }, [places, userLocation]);
 
   const stats = useMemo(() => {
     const attractions = places.filter((p) => normalizeCategory(p.category) === "attraction").length;
@@ -514,18 +704,92 @@ export default function MapScreen() {
     }
   };
 
-  const speakPlace = (place: Place) => {
-    Speech.stop();
+  const stopSpeech = async () => {
+    try {
+      await Speech.stop();
+      setIsSpeaking(false);
+    } catch (error) {
+      console.log("speech stop error", error);
+      setIsSpeaking(false);
+    }
+  };
 
-    const text =
-      language === "tr"
-        ? `${place.name}. ${place.city} şehrinde yer alır. Kategorisi ${place.category}. Puanı ${place.rating || 0}. ${place.description || ""}`
-        : `${place.name}. Located in ${place.city}. Category: ${place.category}. Rating: ${place.rating || 0}. ${place.description || ""}`;
+  const speakPlace = async (place: Place) => {
+    try {
+      const currentlySpeaking = await Speech.isSpeakingAsync();
 
-    Speech.speak(text, {
-      language: language === "tr" ? "tr-TR" : language === "de" ? "de-DE" : language === "ru" ? "ru-RU" : "en-US",
-      rate: 0.9,
-    });
+      if (currentlySpeaking || isSpeaking) {
+        await stopSpeech();
+        return;
+      }
+
+      const text = guideTextForPlace(place, language);
+
+      const preferredLanguage =
+        language === "tr"
+          ? "tr-TR"
+          : language === "de"
+          ? "de-DE"
+          : language === "ru"
+          ? "ru-RU"
+          : "en-US";
+
+      let speechLanguage = preferredLanguage;
+
+      try {
+        const voices = await Speech.getAvailableVoicesAsync();
+        const hasPreferredVoice = voices.some((voice: any) =>
+          String(voice.language || "").toLowerCase().startsWith(
+            preferredLanguage.toLowerCase().slice(0, 2)
+          )
+        );
+
+        if (!hasPreferredVoice) {
+          speechLanguage = "en-US";
+        }
+      } catch (voiceError) {
+        console.log("voice list error", voiceError);
+      }
+
+      setIsSpeaking(true);
+
+      Speech.speak(text, {
+        language: speechLanguage,
+        rate: 0.78,
+        pitch: 1.0,
+        onStart: () => {
+          console.log("Speech started:", speechLanguage);
+          setIsSpeaking(true);
+        },
+        onDone: () => {
+          console.log("Speech finished");
+          setIsSpeaking(false);
+        },
+        onStopped: () => {
+          console.log("Speech stopped");
+          setIsSpeaking(false);
+        },
+        onError: (error) => {
+          console.log("Speech error:", error);
+          setIsSpeaking(false);
+          Alert.alert(
+            safeT(t, "common.error", "Hata", language),
+            language === "tr"
+              ? "Sesli rehber başlatılamadı. Emülatörde Google Speech Services / Text-to-Speech ayarlarını kontrol et."
+              : "Voice guide could not start. Please check Text-to-Speech settings on the emulator."
+          );
+        },
+      });
+    } catch (error) {
+      console.log("speech general error", error);
+      setIsSpeaking(false);
+      Alert.alert(
+        safeT(t, "common.error", "Hata", language),
+        language === "tr"
+          ? "Sesli rehber çalıştırılamadı."
+          : "Voice guide could not be started."
+      );
+    }
   };
 
   const saveNote = async () => {
@@ -736,24 +1000,53 @@ export default function MapScreen() {
   const routeBudget = getRouteBudget();
 
   const openFullRouteDirections = () => {
-    if (!routePlaces.length) return;
+    openRouteNavigationApp("google");
+  };
 
-    const valid = routePlaces.filter((p) => p.latitude && p.longitude);
-    const destination = valid[valid.length - 1];
+  const openRouteNavigationApp = async (type: "google" | "apple" | "yandex") => {
+    try {
+      if (!routePlaces.length) return;
 
-    if (!destination) return;
+      const valid = routePlaces.filter((p) => p.latitude && p.longitude);
+      const destination = valid[valid.length - 1];
 
-    const waypoints = valid
-      .slice(0, -1)
-      .map((p) => `${p.latitude},${p.longitude}`)
-      .join("|");
+      if (!destination) return;
 
-    const url =
-      `https://www.google.com/maps/dir/?api=1` +
-      `&destination=${destination.latitude},${destination.longitude}` +
-      (waypoints ? `&waypoints=${encodeURIComponent(waypoints)}` : "");
+      const waypoints = valid
+        .slice(0, -1)
+        .map((p) => `${p.latitude},${p.longitude}`)
+        .join("|");
 
-    Linking.openURL(url);
+      const appleWaypoints = valid
+        .slice(0, -1)
+        .map((p) => `${p.latitude},${p.longitude}`)
+        .join("+to:");
+
+      const yandexRoute = valid.map((p) => `${p.latitude},${p.longitude}`).join("~");
+
+      const urls = {
+        google:
+          `https://www.google.com/maps/dir/?api=1` +
+          `&destination=${destination.latitude},${destination.longitude}` +
+          (waypoints ? `&waypoints=${encodeURIComponent(waypoints)}` : ""),
+        apple:
+          `http://maps.apple.com/?daddr=${destination.latitude},${destination.longitude}` +
+          (appleWaypoints ? `&saddr=${appleWaypoints}` : ""),
+        yandex: `yandexmaps://maps.yandex.com/?rtext=${yandexRoute}&rtt=auto`,
+      };
+
+      const fallbackYandex = `https://yandex.com/maps/?rtext=${yandexRoute}&rtt=auto`;
+
+      if (type === "yandex") {
+        const supported = await Linking.canOpenURL(urls.yandex);
+        await Linking.openURL(supported ? urls.yandex : fallbackYandex);
+        return;
+      }
+
+      await Linking.openURL(urls[type]);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
 
@@ -915,6 +1208,17 @@ export default function MapScreen() {
           <Ionicons name="navigate-outline" size={22} color={COLORS.text} />
           <Text style={styles.roundButtonText}>{safeT(t, "map.myLocation", "Konumum", language)}</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.roundButtonLarge}
+          onPress={async () => {
+            await focusUserLocation();
+            setListVisible(true);
+          }}
+        >
+          <Ionicons name="walk-outline" size={22} color={COLORS.text} />
+          <Text style={styles.roundButtonText}>{safeT(t, "map.showNearMe", "Yakınımda Ne Var?", language)}</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.bottomSheet}>
@@ -1008,6 +1312,27 @@ export default function MapScreen() {
               </Text>
             </View>
 
+            <View style={styles.navigationAppsCard}>
+              <Text style={styles.navigationAppsTitle}>Navigasyon Uygulaması</Text>
+
+              <View style={styles.navigationAppsRow}>
+                <TouchableOpacity style={styles.navigationAppButton} onPress={() => openRouteNavigationApp("google")}>
+                  <Ionicons name="logo-google" size={16} color={COLORS.accent} />
+                  <Text style={styles.navigationAppText}>Google</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.navigationAppButton} onPress={() => openRouteNavigationApp("apple")}>
+                  <Ionicons name="map-outline" size={16} color={COLORS.accent} />
+                  <Text style={styles.navigationAppText}>Apple</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.navigationAppButton} onPress={() => openRouteNavigationApp("yandex")}>
+                  <Ionicons name="navigate-circle-outline" size={16} color={COLORS.accent} />
+                  <Text style={styles.navigationAppText}>Yandex</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             <View style={styles.nextStopCard}>
               <View style={styles.nextStopIcon}>
                 <Ionicons name="flag-outline" size={20} color={COLORS.white} />
@@ -1051,7 +1376,7 @@ export default function MapScreen() {
                       {stop.name}
                     </Text>
                     <Text style={styles.routeStopMeta} numberOfLines={1}>
-                      {stop.city} • {stop.category} • ⭐ {stop.rating || "-"}
+                      {stop.city} • {categoryDisplay(stop.category, language)}
                     </Text>
                   </View>
 
@@ -1127,12 +1452,19 @@ export default function MapScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.previewName} numberOfLines={1}>{selectedPlace.name}</Text>
             <Text style={styles.previewMeta} numberOfLines={1}>
-              {selectedPlace.city} • {selectedPlace.category} • ⭐ {selectedPlace.rating || 0}
+              {selectedPlace.city} • {categoryDisplay(selectedPlace.category, language)}
             </Text>
           </View>
 
-          <TouchableOpacity style={styles.previewIconButton} onPress={() => speakPlace(selectedPlace)}>
-            <Ionicons name="volume-high-outline" size={19} color={COLORS.white} />
+          <TouchableOpacity
+            style={[styles.previewIconButton, isSpeaking && styles.previewStopButton]}
+            onPress={() => speakPlace(selectedPlace)}
+          >
+            <Ionicons
+              name={isSpeaking ? "stop-outline" : "volume-high-outline"}
+              size={19}
+              color={COLORS.white}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -1191,7 +1523,7 @@ export default function MapScreen() {
 
                   <View style={{ flex: 1 }}>
                     <Text style={styles.listName} numberOfLines={1}>{item.name}</Text>
-                    <Text style={styles.listMeta} numberOfLines={1}>{item.city} • {item.category} • ⭐ {item.rating || 0}</Text>
+                    <Text style={styles.listMeta} numberOfLines={1}>{item.city} • {categoryDisplay(item.category, language)}</Text>
                   </View>
 
                   <Ionicons name="chevron-forward" size={20} color={COLORS.textSoft} />
@@ -1201,6 +1533,65 @@ export default function MapScreen() {
           </View>
         </View>
       </Modal>
+
+      {userLocation && nearbyPlaces.length > 0 && routePlaces.length === 0 && (
+        <View style={styles.nearbyCard}>
+          <View style={styles.nearbyHeader}>
+            <View>
+              <Text style={styles.nearbyTitle}>
+                {safeT(t, "map.nearMeTitle", "Yakınımdaki Yerler", language)}
+              </Text>
+              <Text style={styles.nearbySubtitle}>
+                {safeT(t, "map.nearMeSubtitle", "Konumuna en yakın gezi noktaları", language)}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={() => setListVisible(true)}>
+              <Text style={styles.nearbySeeAll}>{safeT(t, "home.seeAll", "Tümünü Gör", language)}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {nearbyPlaces.slice(0, 5).map((place) => (
+              <TouchableOpacity
+                key={`nearby-${place.id}`}
+                style={styles.nearbyMiniCard}
+                activeOpacity={0.88}
+                onPress={() => {
+                  setSelectedPlace(place);
+                  mapRef.current?.animateToRegion(
+                    {
+                      latitude: Number(place.latitude),
+                      longitude: Number(place.longitude),
+                      latitudeDelta: 0.035,
+                      longitudeDelta: 0.035,
+                    },
+                    650
+                  );
+                }}
+              >
+                {place.image ? (
+                  <Image source={{ uri: String(place.image) }} style={styles.nearbyThumb} />
+                ) : (
+                  <View style={styles.nearbyThumbPlaceholder}>
+                    <Ionicons name="image-outline" size={22} color={COLORS.accent} />
+                  </View>
+                )}
+
+                <View style={styles.nearbyDistancePill}>
+                  <Ionicons name="walk-outline" size={12} color={COLORS.accent} />
+                  <Text style={styles.nearbyDistanceText}>
+                    {Number(place.distance_km || 0).toFixed(1)} km
+                  </Text>
+                </View>
+                <Text style={styles.nearbyPlaceName} numberOfLines={1}>{place.name}</Text>
+                <Text style={styles.nearbyPlaceMeta} numberOfLines={1}>
+                  {place.city} • {categoryDisplay(place.category, language)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       <Modal visible={usefulVisible} transparent animationType="slide" onRequestClose={() => setUsefulVisible(false)}>
         <View style={styles.modalOverlay}>
@@ -1635,6 +2026,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
+  previewStopButton: {
+    backgroundColor: "#EF4444",
+  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(31,41,55,0.22)",
@@ -1986,4 +2381,138 @@ const styles = StyleSheet.create({
   },
 
 
+  navigationAppsCard: {
+    marginTop: 8,
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  navigationAppsTitle: {
+    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: "900",
+    marginBottom: 10,
+  },
+
+  navigationAppsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+
+  navigationAppButton: {
+    flex: 1,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 5,
+  },
+
+  navigationAppText: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+
+
+
+  nearbyCard: {
+    position: "absolute",
+    left: 18,
+    right: 18,
+    bottom: 112,
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  nearbyHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 10,
+  },
+  nearbyTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "900",
+  },
+  nearbySubtitle: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  nearbySeeAll: {
+    color: COLORS.accent,
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  nearbyMiniCard: {
+    width: 150,
+    backgroundColor: COLORS.surfaceSoft,
+    borderRadius: 18,
+    padding: 12,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  nearbyThumb: {
+    width: "100%",
+    height: 76,
+    borderRadius: 14,
+    marginBottom: 8,
+    backgroundColor: COLORS.surface,
+  },
+  nearbyThumbPlaceholder: {
+    width: "100%",
+    height: 76,
+    borderRadius: 14,
+    marginBottom: 8,
+    backgroundColor: "#FFF1F4",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  nearbyDistancePill: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF1F4",
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  nearbyDistanceText: {
+    color: COLORS.accent,
+    fontSize: 11,
+    fontWeight: "900",
+    marginLeft: 4,
+  },
+  nearbyPlaceName: {
+    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  nearbyPlaceMeta: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 4,
+  },
 });

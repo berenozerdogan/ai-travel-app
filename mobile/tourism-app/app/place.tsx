@@ -29,6 +29,248 @@ const COLORS = {
   shadow: "#D6CEC2",
 };
 
+
+const WEATHER_TEXTS: Record<string, Record<string, string>> = {
+  title: {
+    tr: "Hava Durumu Önerisi",
+    en: "Weather Advice",
+    de: "Wetterempfehlung",
+    ru: "Совет по погоде",
+  },
+  loading: {
+    tr: "Hava durumu önerisi hazırlanıyor...",
+    en: "Preparing weather advice...",
+    de: "Wetterempfehlung wird vorbereitet...",
+    ru: "Готовится совет по погоде...",
+  },
+  unavailable: {
+    tr: "Bu mekan için hava durumu önerisi alınamadı.",
+    en: "Weather advice is not available for this place.",
+    de: "Für diesen Ort ist keine Wetterempfehlung verfügbar.",
+    ru: "Совет по погоде для этого места недоступен.",
+  },
+};
+
+function weatherText(key: string, language: string) {
+  const lang = String(language || "en").toLowerCase();
+  return WEATHER_TEXTS[key]?.[lang] || WEATHER_TEXTS[key]?.en || "";
+}
+
+const PLACE_UI: Record<string, Record<string, string>> = {
+  routeRole: {
+    tr: "Rota Rolü",
+    en: "Route Role",
+    de: "Routenrolle",
+    ru: "Роль в маршруте",
+  },
+  routeRoleRestaurant: {
+    tr: "Yemek Molası",
+    en: "Food Stop",
+    de: "Essenspause",
+    ru: "Остановка для еды",
+  },
+  routeRoleHotel: {
+    tr: "Konaklama",
+    en: "Stay Point",
+    de: "Unterkunft",
+    ru: "Проживание",
+  },
+  routeRoleDefault: {
+    tr: "Gezi Durağı",
+    en: "Sightseeing Stop",
+    de: "Besichtigungsstopp",
+    ru: "Туристическая остановка",
+  },
+  aiRouteSuggestion: {
+    tr: "AI Rota Önerisi",
+    en: "AI Route Suggestion",
+    de: "AI-Routenempfehlung",
+    ru: "AI-рекомендация маршрута",
+  },
+  restaurantSuggestion: {
+    tr: "Bu mekanı gezi rotana yemek molası olarak ekleyebilirsin. Yakındaki turistik duraklardan sonra kısa bir dinlenme noktası olabilir.",
+    en: "You can add this place to your route as a food stop. It may work well as a short break after nearby attractions.",
+    de: "Du kannst diesen Ort als Essenspause in deine Route aufnehmen. Er eignet sich gut als kurze Pause nach nahegelegenen Sehenswürdigkeiten.",
+    ru: "Это место можно добавить в маршрут как остановку для еды. Оно подойдет для короткого отдыха после ближайших достопримечательностей.",
+  },
+  hotelSuggestion: {
+    tr: "Bu mekanı konaklama noktası olarak değerlendirebilirsin. Rota planını şehir merkezi ve ulaşım kolaylığına göre şekillendirmek iyi olur.",
+    en: "You can consider this place as a stay point. It is useful to plan your route around city access and transportation convenience.",
+    de: "Du kannst diesen Ort als Unterkunftspunkt betrachten. Plane deine Route am besten nach Stadtlage und Verkehrsanbindung.",
+    ru: "Это место можно рассмотреть для проживания. Маршрут лучше планировать с учетом центра города и удобства транспорта.",
+  },
+  defaultSuggestion: {
+    tr: "Bu mekanı rotanda ana durak veya kısa keşif noktası olarak kullanabilirsin. Yakındaki yerlerle birlikte planlandığında rota daha verimli olur.",
+    en: "You can use this place as a main stop or a short discovery point. Planning it together with nearby places makes the route more efficient.",
+    de: "Du kannst diesen Ort als Hauptstopp oder kurzen Entdeckungspunkt nutzen. Mit nahegelegenen Orten wird die Route effizienter.",
+    ru: "Это место можно использовать как основную или короткую остановку. Вместе с ближайшими местами маршрут будет удобнее.",
+  },
+  practicalInfo: {
+    tr: "Pratik Bilgiler",
+    en: "Practical Info",
+    de: "Praktische Infos",
+    ru: "Практическая информация",
+  },
+  city: {
+    tr: "Şehir",
+    en: "City",
+    de: "Stadt",
+    ru: "Город",
+  },
+  district: {
+    tr: "İlçe",
+    en: "District",
+    de: "Bezirk",
+    ru: "Район",
+  },
+  category: {
+    tr: "Kategori",
+    en: "Category",
+    de: "Kategorie",
+    ru: "Категория",
+  },
+  subcategory: {
+    tr: "Alt Kategori",
+    en: "Subcategory",
+    de: "Unterkategorie",
+    ru: "Подкатегория",
+  },
+  price: {
+    tr: "Fiyat Seviyesi",
+    en: "Price Level",
+    de: "Preisniveau",
+    ru: "Уровень цен",
+  },
+  visitTime: {
+    tr: "Ziyaret Süresi",
+    en: "Visit Time",
+    de: "Besuchszeit",
+    ru: "Время посещения",
+  },
+  navigation: {
+    tr: "Navigasyon",
+    en: "Navigation",
+    de: "Navigation",
+    ru: "Навигация",
+  },
+  navigationSubtitle: {
+    tr: "Yol tarifi almak için harita uygulaması seç.",
+    en: "Choose a map app to get directions.",
+    de: "Wähle eine Karten-App für die Wegbeschreibung.",
+    ru: "Выберите приложение карты для маршрута.",
+  },
+  description: {
+    tr: "Açıklama",
+    en: "Description",
+    de: "Beschreibung",
+    ru: "Описание",
+  },
+  hotel: {
+    tr: "Otel",
+    en: "Hotel",
+    de: "Hotel",
+    ru: "Отель",
+  },
+  restaurant: {
+    tr: "Restoran",
+    en: "Restaurant",
+    de: "Restaurant",
+    ru: "Ресторан",
+  },
+  cafe: {
+    tr: "Kafe",
+    en: "Cafe",
+    de: "Café",
+    ru: "Кафе",
+  },
+  attraction: {
+    tr: "Gezilecek Yer",
+    en: "Attraction",
+    de: "Sehenswürdigkeit",
+    ru: "Достопримечательность",
+  },
+  museum: {
+    tr: "Müze",
+    en: "Museum",
+    de: "Museum",
+    ru: "Музей",
+  },
+  shopping: {
+    tr: "Alışveriş",
+    en: "Shopping",
+    de: "Shopping",
+    ru: "Шопинг",
+  },
+  expensive: {
+    tr: "Yüksek",
+    en: "Expensive",
+    de: "Teuer",
+    ru: "Дорого",
+  },
+  moderate: {
+    tr: "Orta",
+    en: "Moderate",
+    de: "Mittel",
+    ru: "Средний",
+  },
+  cheap: {
+    tr: "Uygun",
+    en: "Affordable",
+    de: "Günstig",
+    ru: "Доступно",
+  },
+};
+
+function placeText(key: string, language: string) {
+  const lang = String(language || "en").toLowerCase();
+  return PLACE_UI[key]?.[lang] || PLACE_UI[key]?.en || key;
+}
+
+function readablePrice(value: string | undefined, language: string) {
+  const raw = String(value || "").toLowerCase();
+  if (!raw || raw === "unknown") return "-";
+  if (raw.includes("expensive")) return placeText("expensive", language);
+  if (raw.includes("moderate")) return placeText("moderate", language);
+  if (raw.includes("cheap") || raw.includes("low")) return placeText("cheap", language);
+  return value || "-";
+}
+
+function visitedText(language: string, isVisited: boolean) {
+  if (isVisited) {
+    if (language === "tr") return "Ziyaret Edildi";
+    if (language === "de") return "Besucht";
+    if (language === "ru") return "Посещено";
+    return "Visited";
+  }
+
+  if (language === "tr") return "Ziyaret Edildi";
+  if (language === "de") return "Besucht";
+  if (language === "ru") return "Посещено";
+  return "Visited";
+}
+
+function visitedAlertTitle(language: string) {
+  if (language === "tr") return "Kaydedildi";
+  if (language === "de") return "Gespeichert";
+  if (language === "ru") return "Сохранено";
+  return "Saved";
+}
+
+function visitedAlertMessage(language: string, removed: boolean) {
+  if (removed) {
+    if (language === "tr") return "Bu yer ziyaret edildi listesinden kaldırıldı.";
+    if (language === "de") return "Dieser Ort wurde aus der Besuchsliste entfernt.";
+    if (language === "ru") return "Это место удалено из списка посещённых.";
+    return "This place was removed from visited places.";
+  }
+
+  if (language === "tr") return "Bu yer ziyaret edildi olarak işaretlendi.";
+  if (language === "de") return "Dieser Ort wurde als besucht markiert.";
+  if (language === "ru") return "Это место отмечено как посещённое.";
+  return "This place was marked as visited.";
+}
+
+
 export default function Place() {
   const { id, name, from } = useLocalSearchParams();
   const { t, language } = useLanguage();
@@ -36,11 +278,11 @@ export default function Place() {
   const [place, setPlace] = useState<any>(null);
   const [analysis, setAnalysis] = useState<any>(null);
   const [summary, setSummary] = useState<any>(null);
-  const [reviewsData, setReviewsData] = useState<any>(null);
   const [insightData, setInsightData] = useState<any>(null);
-  const [loadingReviews, setLoadingReviews] = useState(true);
   const [loadingInsight, setLoadingInsight] = useState(true);
   const [isVisited, setIsVisited] = useState(false);
+  const [weatherAdvice, setWeatherAdvice] = useState("");
+  const [loadingWeather, setLoadingWeather] = useState(false);
 
   useEffect(() => {
     const safeId = Array.isArray(id) ? id[0] : id;
@@ -116,23 +358,8 @@ export default function Place() {
   useEffect(() => {
     if (!place?.name || place?.error) return;
 
-    setLoadingReviews(true);
     setLoadingInsight(true);
 
-    fetch(
-      `http://10.0.2.2:8000/reviews?place=${encodeURIComponent(
-        `${place.name} ${place.city || ""}`
-      )}&language=${encodeURIComponent(language)}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setReviewsData(data);
-        setLoadingReviews(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoadingReviews(false);
-      });
 
     fetch(
       `http://10.0.2.2:8000/place-insight?place=${encodeURIComponent(
@@ -151,6 +378,34 @@ export default function Place() {
         setLoadingInsight(false);
       });
   }, [place, language]);
+
+  useEffect(() => {
+    if (!place?.latitude || !place?.longitude || place?.error) {
+      setWeatherAdvice("");
+      return;
+    }
+
+    setLoadingWeather(true);
+
+    fetch(
+      `http://10.0.2.2:8000/weather-advice?lat=${encodeURIComponent(
+        String(place.latitude)
+      )}&lng=${encodeURIComponent(String(place.longitude))}&language=${encodeURIComponent(
+        language
+      )}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setWeatherAdvice(data?.advice || "");
+      })
+      .catch((err) => {
+        console.log("weather advice error", err);
+        setWeatherAdvice("");
+      })
+      .finally(() => {
+        setLoadingWeather(false);
+      });
+  }, [place?.latitude, place?.longitude, place?.error, language]);
 
   const savePlace = async () => {
     try {
@@ -191,7 +446,10 @@ export default function Place() {
         : [place, ...safeList];
       await AsyncStorage.setItem("visited_places", JSON.stringify(updated));
       setIsVisited(!exists);
-      Alert.alert(t("place.visitedSavedTitle"), exists ? t("place.unmarkVisited") : t("place.visitedSavedMessage"));
+      Alert.alert(
+        visitedAlertTitle(language),
+        visitedAlertMessage(language, exists)
+      );
     } catch (error) {
       console.log(error);
       Alert.alert(t("place.errorTitle"), t("place.saveError"));
@@ -211,6 +469,34 @@ export default function Place() {
     } catch (error) {
       console.log(error);
       Alert.alert(t("place.errorTitle"), t("place.mapError"));
+    }
+  };
+
+  const openNavigationApp = async (type: "google" | "apple" | "yandex") => {
+    try {
+      if (!place?.latitude || !place?.longitude) return;
+
+      const lat = Number(place.latitude);
+      const lng = Number(place.longitude);
+      const label = encodeURIComponent(place.name || "Destination");
+
+      const urls = {
+        google: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+        apple: `http://maps.apple.com/?daddr=${lat},${lng}&q=${label}`,
+        yandex: `yandexmaps://maps.yandex.com/?rtext=~${lat},${lng}&rtt=auto`,
+      };
+
+      const fallbackYandex = `https://yandex.com/maps/?rtext=~${lat},${lng}&rtt=auto`;
+
+      if (type === "yandex") {
+        const supported = await Linking.canOpenURL(urls.yandex);
+        await Linking.openURL(supported ? urls.yandex : fallbackYandex);
+        return;
+      }
+
+      await Linking.openURL(urls[type]);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -241,12 +527,13 @@ export default function Place() {
 
   const categoryLabel = (category?: string) => {
     if (!category) return "";
-    if (category === "attraction") return t("categories.attraction");
-    if (category === "restaurant") return t("categories.restaurant");
-    if (category === "hotel") return t("categories.hotel");
-    if (category === "cafe") return t("categories.cafe");
-    if (category === "museum") return t("categories.museum");
-    if (category === "shopping") return t("home.shopping");
+    const key = String(category).toLowerCase();
+    if (key === "attraction") return placeText("attraction", language);
+    if (key === "restaurant") return placeText("restaurant", language);
+    if (key === "hotel") return placeText("hotel", language);
+    if (key === "cafe") return placeText("cafe", language);
+    if (key === "museum") return placeText("museum", language);
+    if (key === "shopping") return placeText("shopping", language);
     return category;
   };
 
@@ -254,15 +541,16 @@ export default function Place() {
     if (!subcategory) return "";
     const key = String(subcategory).toLowerCase();
     const map: any = {
-      beach: "🏖️ Beach",
-      nature: "🌿 Nature",
-      shopping: "🛍️ Shopping",
-      historical: "🏛️ Historical",
-      museum: t("categories.museum"),
-      cafe: t("categories.cafe"),
-      hotel: t("categories.hotel"),
-      restaurant: t("categories.restaurant"),
-      attraction: t("categories.attraction"),
+      beach: language === "tr" ? "🏖️ Plaj" : language === "de" ? "🏖️ Strand" : language === "ru" ? "🏖️ Пляж" : "🏖️ Beach",
+      nature: language === "tr" ? "🌿 Doğa" : language === "de" ? "🌿 Natur" : language === "ru" ? "🌿 Природа" : "🌿 Nature",
+      shopping: placeText("shopping", language),
+      historical: language === "tr" ? "🏛️ Tarihi" : language === "de" ? "🏛️ Historisch" : language === "ru" ? "🏛️ Историческое" : "🏛️ Historical",
+      luxury: language === "tr" ? "Lüks" : language === "de" ? "Luxus" : language === "ru" ? "Люкс" : "Luxury",
+      museum: placeText("museum", language),
+      cafe: placeText("cafe", language),
+      hotel: placeText("hotel", language),
+      restaurant: placeText("restaurant", language),
+      attraction: placeText("attraction", language),
     };
     return map[key] || subcategory;
   };
@@ -292,12 +580,6 @@ export default function Place() {
     summary.summary.trim() !== "" &&
     !summary.summary.toLowerCase().includes("no reviews") &&
     !summary.summary.toLowerCase().includes("yorum bulunamadı")
-  );
-  const hasGoogleReviews = !!(
-    reviewsData &&
-    reviewsData.found &&
-    reviewsData.reviews &&
-    reviewsData.reviews.length > 0
   );
 
   return (
@@ -359,7 +641,7 @@ export default function Place() {
           >
             <Ionicons name={isVisited ? "checkmark-done" : "checkmark-done-outline"} size={18} color={isVisited ? COLORS.white : COLORS.text} />
             <Text style={[styles.mapButtonText, isVisited && styles.visitedButtonText]}>
-              {isVisited ? t("place.unmarkVisited") : t("place.markVisited")}
+              {visitedText(language, isVisited)}
             </Text>
           </TouchableOpacity>
 
@@ -377,22 +659,23 @@ export default function Place() {
       </View>
 
       <View style={styles.content}>
+        <View style={styles.weatherBox}>
+          <View style={styles.weatherIconBox}>
+            <Ionicons name="partly-sunny-outline" size={24} color={COLORS.accent} />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text style={styles.weatherTitle}>{weatherText("title", language)}</Text>
+            <Text style={styles.weatherText}>
+              {loadingWeather
+                ? weatherText("loading", language)
+                : weatherAdvice || weatherText("unavailable", language)}
+            </Text>
+          </View>
+        </View>
+
         {!loadingInsight && insightData ? (
           <>
-            <View style={styles.smartScoreBox}>
-              <Text style={styles.smartScoreLabel}>{t("place.smartScore")}</Text>
-              <Text style={styles.smartScoreValue}>
-                ⭐ {insightData.smart_score ?? "-"} / 5
-              </Text>
-              {insightData.score_breakdown ? (
-                <Text style={styles.smartScoreSub}>
-                  Google: {insightData.score_breakdown.google_rating || 0} • Dataset:{" "}
-                  {insightData.score_breakdown.dataset_rating || 0} • Reviews:{" "}
-                  {insightData.score_breakdown.review_count || 0}
-                </Text>
-              ) : null}
-            </View>
-
             {insightData.ai_insight ? (
               <View style={styles.insightBox}>
                 <Text style={styles.mainInsightTitle}>{t("place.aiInsight")}</Text>
@@ -443,31 +726,57 @@ export default function Place() {
           </>
         ) : null}
 
+
+        <View style={styles.practicalBox}>
+          <View style={styles.practicalHeader}>
+            <View style={styles.practicalIconBox}>
+              <Ionicons name="sparkles-outline" size={22} color={COLORS.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.practicalTitle}>{placeText("aiRouteSuggestion", language)}</Text>
+              <Text style={styles.practicalText}>
+                {place.category === "restaurant"
+                  ? placeText("restaurantSuggestion", language)
+                  : place.category === "hotel"
+                  ? placeText("hotelSuggestion", language)
+                  : placeText("defaultSuggestion", language)}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitleCompact}>{placeText("practicalInfo", language)}</Text>
         <View style={styles.infoGrid}>
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>{t("place.datasetRating")}</Text>
-            <Text style={styles.infoValue}>⭐ {place.rating}</Text>
+            <Text style={styles.infoLabel}>{placeText("routeRole", language)}</Text>
+            <Text style={styles.infoValue}>
+              {place.category === "restaurant"
+                ? placeText("routeRoleRestaurant", language)
+                : place.category === "hotel"
+                ? placeText("routeRoleHotel", language)
+                : placeText("routeRoleDefault", language)}
+            </Text>
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>{t("place.city")}</Text>
+            <Text style={styles.infoLabel}>{placeText("city", language)}</Text>
             <Text style={styles.infoValue}>{place.city}</Text>
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>{t("place.district")}</Text>
+            <Text style={styles.infoLabel}>{placeText("district", language)}</Text>
             <Text style={styles.infoValue}>
               {cleanDistrict(place.district) || "-"}
             </Text>
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>{t("place.category")}</Text>
+            <Text style={styles.infoLabel}>{placeText("category", language)}</Text>
             <Text style={styles.infoValue}>{categoryLabel(place.category)}</Text>
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>{t("place.subcategory")}</Text>
+            <Text style={styles.infoLabel}>{placeText("subcategory", language)}</Text>
             <Text style={styles.infoValue}>
               {subcategoryLabel(place.subcategory) || "-"}
             </Text>
@@ -475,90 +784,49 @@ export default function Place() {
 
           {shouldShowPrice && (
             <View style={styles.infoCard}>
-              <Text style={styles.infoLabel}>{t("place.price")}</Text>
-              <Text style={styles.infoValue}>{place.price_level}</Text>
+              <Text style={styles.infoLabel}>{placeText("price", language)}</Text>
+              <Text style={styles.infoValue}>{readablePrice(place.price_level, language)}</Text>
             </View>
           )}
 
           <View style={styles.infoCardWide}>
-            <Text style={styles.infoLabel}>{t("place.visitTime")}</Text>
+            <Text style={styles.infoLabel}>{placeText("visitTime", language)}</Text>
             <Text style={styles.infoValue}>
               ⏱ {place.estimated_visit_time} min
             </Text>
           </View>
         </View>
 
-        {reviewsData && reviewsData.found && (
-          <View style={styles.ratingBox}>
-            <Text style={styles.ratingTitle}>
-              ⭐ {t("place.googleRating")}: {reviewsData.rating} / 5
-            </Text>
-            <Text style={styles.reviewCount}>
-              {reviewsData.review_count} Google reviews
-            </Text>
-            {reviewsData.address ? (
-              <Text style={styles.googleAddress}>{reviewsData.address}</Text>
-            ) : null}
+        <View style={styles.navigationBox}>
+          <View style={styles.navigationHeader}>
+            <View style={styles.navigationIconBox}>
+              <Ionicons name="navigate-outline" size={22} color={COLORS.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.navigationTitle}>{placeText("navigation", language)}</Text>
+              <Text style={styles.navigationSubtitle}>{placeText("navigationSubtitle", language)}</Text>
+            </View>
           </View>
-        )}
 
-        <Text style={styles.sectionTitle}>{t("place.description")}</Text>
-        <View style={styles.sectionCard}>
-          <Text style={styles.description}>{place.description}</Text>
+          <View style={styles.navigationButtons}>
+            <TouchableOpacity style={styles.navigationButton} onPress={() => openNavigationApp("google")}>
+              <Ionicons name="logo-google" size={17} color={COLORS.accent} />
+              <Text style={styles.navigationButtonText}>Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.navigationButton} onPress={() => openNavigationApp("apple")}>
+              <Ionicons name="map-outline" size={17} color={COLORS.accent} />
+              <Text style={styles.navigationButtonText}>Apple</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.navigationButton} onPress={() => openNavigationApp("yandex")}>
+              <Ionicons name="navigate-circle-outline" size={17} color={COLORS.accent} />
+              <Text style={styles.navigationButtonText}>Yandex</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {hasGoogleReviews && (
-          <>
-            <View style={styles.reviewHeaderRow}>
-              <View>
-                <Text style={styles.sectionTitle}>{t("place.googleReviews")}</Text>
-                <Text style={styles.reviewSectionSubtitle}>
-                  {reviewsData.review_count} Google reviews • ⭐ {reviewsData.rating}
-                </Text>
-              </View>
-            </View>
 
-            {reviewsData.reviews.slice(0, 3).map((review: any, index: number) => (
-              <View key={index} style={styles.reviewCard}>
-                <View style={styles.reviewTopRow}>
-                  <View style={styles.reviewAvatar}>
-                    <Text style={styles.reviewAvatarText}>
-                      {(review.author || "?").charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.reviewAuthor}>{review.author}</Text>
-                    <Text style={styles.reviewTime}>
-                      ⭐ {review.rating} {review.publish_time ? `• ${review.publish_time}` : ""}
-                    </Text>
-                  </View>
-                </View>
-
-                <Text style={styles.reviewText} numberOfLines={5}>
-                  {review.text}
-                </Text>
-              </View>
-            ))}
-
-            <TouchableOpacity
-              activeOpacity={0.9}
-              style={styles.moreReviewsButton}
-              onPress={() =>
-                openLink(
-                  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                    `${place.name} ${place.city || ""}`
-                  )}`
-                )
-              }
-            >
-              <Ionicons name="logo-google" size={18} color={COLORS.white} />
-              <Text style={styles.moreReviewsButtonText}>
-                Google Maps'te daha fazla yorum gör
-              </Text>
-            </TouchableOpacity>
-          </>
-        )}
 
         {hasWebMentions && (
           <>
@@ -766,8 +1034,10 @@ const styles = StyleSheet.create({
 
   mapButtonText: {
     color: COLORS.text,
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 12,
+    fontWeight: "800",
+    textAlign: "center",
+    flexShrink: 1,
   },
 
   visitedButton: {
@@ -782,6 +1052,46 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 18,
     paddingTop: 10,
+  },
+
+  weatherBox: {
+    backgroundColor: "#EAF5FF",
+    borderWidth: 1,
+    borderColor: "rgba(56,189,248,0.18)",
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+
+  weatherIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: "rgba(232,93,117,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  weatherTitle: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+
+  weatherText: {
+    color: "#3F4A66",
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600",
   },
 
   smartScoreBox: {
@@ -865,12 +1175,66 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
+
+  practicalBox: {
+    backgroundColor: "#FFF1F4",
+    borderWidth: 1,
+    borderColor: "rgba(232,93,117,0.18)",
+    borderRadius: 24,
+    padding: 16,
+    marginTop: 4,
+    marginBottom: 16,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+
+  practicalHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+
+  practicalIconBox: {
+    width: 46,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: "rgba(232,93,117,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  practicalTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "800",
+    marginBottom: 5,
+  },
+
+  practicalText: {
+    color: COLORS.textSoft,
+    fontSize: 14,
+    lineHeight: 21,
+    fontWeight: "600",
+  },
+
+  sectionTitleCompact: {
+    fontSize: 20,
+    fontWeight: "800",
+    marginTop: 6,
+    marginBottom: 12,
+    color: COLORS.text,
+    letterSpacing: -0.3,
+  },
+
   infoGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginTop: 6,
-    marginBottom: 8,
+    marginTop: 0,
+    marginBottom: 12,
   },
 
   infoCard: {
@@ -878,9 +1242,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 18,
-    padding: 14,
-    marginBottom: 10,
+    borderRadius: 20,
+    padding: 16,
+    minHeight: 92,
+    marginBottom: 12,
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.14,
     shadowRadius: 8,
@@ -893,9 +1258,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 18,
-    padding: 14,
-    marginBottom: 10,
+    borderRadius: 20,
+    padding: 16,
+    minHeight: 86,
+    marginBottom: 12,
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.14,
     shadowRadius: 8,
@@ -904,16 +1270,85 @@ const styles = StyleSheet.create({
   },
 
   infoLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: COLORS.textSoft,
-    fontWeight: "700",
-    marginBottom: 6,
+    fontWeight: "800",
+    marginBottom: 8,
   },
 
   infoValue: {
-    fontSize: 15,
+    fontSize: 17,
     color: COLORS.text,
-    fontWeight: "700",
+    fontWeight: "900",
+    lineHeight: 23,
+  },
+
+  navigationBox: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 24,
+    padding: 16,
+    marginTop: 6,
+    marginBottom: 14,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+
+  navigationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 12,
+  },
+
+  navigationIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: "rgba(232,93,117,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  navigationTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "800",
+  },
+
+  navigationSubtitle: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 3,
+  },
+
+  navigationButtons: {
+    flexDirection: "row",
+    gap: 8,
+  },
+
+  navigationButton: {
+    flex: 1,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
+
+  navigationButtonText: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "800",
   },
 
   ratingBox: {
@@ -961,10 +1396,10 @@ const styles = StyleSheet.create({
 
   sectionCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: COLORS.border,
-    padding: 14,
+    padding: 16,
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.14,
     shadowRadius: 8,

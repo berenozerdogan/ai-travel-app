@@ -124,6 +124,12 @@ const CHAT_FALLBACKS: Record<string, Record<string, string>> = {
     de: "Route anzeigen",
     ru: "Показать маршрут",
   },
+  "chat.showFullRoute": {
+    tr: "Tüm Rotayı Haritada Aç",
+    en: "Open Full Route on Map",
+    de: "Gesamte Route auf Karte öffnen",
+    ru: "Открыть весь маршрут на карте",
+  },
   "common.showOnMap": {
     tr: "Haritada Göster",
     en: "Show on Map",
@@ -331,6 +337,11 @@ export default function Chat() {
       item.places &&
       item.places.length > 0;
 
+    const fullRoutePlaces =
+      hasDays && item.days
+        ? item.days.flatMap((dayItem: DayPlan) => dayItem.places || [])
+        : [];
+
     return (
       <View style={styles.messageBlock}>
         <View
@@ -375,6 +386,18 @@ export default function Chat() {
                 )}
               </View>
             ))}
+
+            {fullRoutePlaces.length > 1 && (
+              <TouchableOpacity
+                style={styles.fullRouteButton}
+                onPress={() => showRoute(fullRoutePlaces)}
+              >
+                <Ionicons name="map-outline" size={17} color={COLORS.white} />
+                <Text style={styles.fullRouteButtonText}>
+                  {safeT(t, "chat.showFullRoute", "Tüm Rotayı Haritada Aç", language)}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
@@ -776,6 +799,30 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 13,
     fontWeight: "700",
+  },
+
+  fullRouteButton: {
+    alignSelf: "stretch",
+    backgroundColor: COLORS.accent,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
+  },
+
+  fullRouteButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "800",
   },
 
   loadingBubble: {

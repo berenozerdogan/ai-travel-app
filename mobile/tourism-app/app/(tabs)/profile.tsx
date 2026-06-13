@@ -159,11 +159,107 @@ const PROFILE_FALLBACKS: Record<string, Record<string, string>> = {
     de: "Food Lover",
     ru: "Любитель еды",
   },
+  "settings.smartSummary": {
+    tr: "AI Seyahat Özeti",
+    en: "AI Travel Summary",
+    de: "AI-Reiseübersicht",
+    ru: "AI-сводка поездок",
+  },
+  "settings.summaryEmpty": {
+    tr: "Henüz yeterli veri yok. Favori ekledikçe, rota oluşturdukça ve not tuttukça profilin kişiselleşir.",
+    en: "Not enough data yet. Your profile becomes more personalized as you save places, create routes and add notes.",
+    de: "Noch nicht genug Daten. Dein Profil wird persönlicher, wenn du Orte speicherst, Routen erstellst und Notizen hinzufügst.",
+    ru: "Пока недостаточно данных. Профиль станет персональнее, когда вы сохраните места, маршруты и заметки.",
+  },
+  "settings.summaryActive": {
+    tr: "Seyahat profilin oluşmaya başladı. Kaydettiğin yerler, ziyaretlerin ve rotaların uygulamanın sana daha iyi öneriler sunmasına yardımcı olur.",
+    en: "Your travel profile has started to form. Saved places, visits and routes help the app make better recommendations.",
+    de: "Dein Reiseprofil entsteht. Gespeicherte Orte, Besuche und Routen helfen der App, bessere Empfehlungen zu geben.",
+    ru: "Ваш профиль путешествий начал формироваться. Сохранённые места, посещения и маршруты помогают приложению давать лучшие рекомендации.",
+  },
   "settings.museumHunterBadge": {
     tr: "Müze Gezgini",
     en: "Museum Hunter",
     de: "Museumsjäger",
     ru: "Охотник за музеями",
+  },
+  "settings.travelPersonality": {
+    tr: "Seyahat Kişiliğin",
+    en: "Your Travel Personality",
+    de: "Deine Reisepersönlichkeit",
+    ru: "Ваш стиль путешествий",
+  },
+  "settings.cultureExplorer": {
+    tr: "Kültür Kaşifi",
+    en: "Culture Explorer",
+    de: "Kulturentdecker",
+    ru: "Исследователь культуры",
+  },
+  "settings.foodHunter": {
+    tr: "Lezzet Avcısı",
+    en: "Food Hunter",
+    de: "Genussentdecker",
+    ru: "Охотник за вкусами",
+  },
+  "settings.cityExplorer": {
+    tr: "Şehir Kaşifi",
+    en: "City Explorer",
+    de: "Stadtentdecker",
+    ru: "Городской исследователь",
+  },
+  "settings.routePlanner": {
+    tr: "Rota Planlayıcı",
+    en: "Route Planner",
+    de: "Routenplaner",
+    ru: "Планировщик маршрутов",
+  },
+  "settings.personalityCultureText": {
+    tr: "Müze, tarihi mekan ve kültürel duraklara ilgin yüksek görünüyor.",
+    en: "You seem interested in museums, historical places and cultural stops.",
+    de: "Du interessierst dich offenbar für Museen, historische Orte und kulturelle Stopps.",
+    ru: "Похоже, вам интересны музеи, исторические места и культурные точки.",
+  },
+  "settings.personalityFoodText": {
+    tr: "Restoran, kafe ve yemek duraklarını keşfetmeyi seviyorsun.",
+    en: "You enjoy exploring restaurants, cafés and food stops.",
+    de: "Du erkundest gerne Restaurants, Cafés und Essensstopps.",
+    ru: "Вам нравится открывать рестораны, кафе и гастрономические точки.",
+  },
+  "settings.personalityCityText": {
+    tr: "Farklı şehirleri kaydetmeyi ve şehir bazlı keşif yapmayı seviyorsun.",
+    en: "You like saving different cities and exploring by location.",
+    de: "Du speicherst gerne verschiedene Städte und erkundest Orte nach Stadt.",
+    ru: "Вам нравится сохранять разные города и исследовать места по локации.",
+  },
+  "settings.personalityRouteText": {
+    tr: "Rota oluşturmayı ve gezilerini planlı ilerletmeyi seviyorsun.",
+    en: "You like building routes and keeping your trips organized.",
+    de: "Du erstellst gerne Routen und planst deine Reisen strukturiert.",
+    ru: "Вам нравится строить маршруты и планировать поездки.",
+  },
+  "settings.travelProgress": {
+    tr: "Seyahat İlerlemen",
+    en: "Travel Progress",
+    de: "Reisefortschritt",
+    ru: "Прогресс путешествий",
+  },
+  "settings.savedPlaces": {
+    tr: "Kaydedilen Yerler",
+    en: "Saved Places",
+    de: "Gespeicherte Orte",
+    ru: "Сохранённые места",
+  },
+  "settings.visitedPlaces": {
+    tr: "Ziyaretler",
+    en: "Visits",
+    de: "Besuche",
+    ru: "Посещения",
+  },
+  "settings.travelNotes": {
+    tr: "Gezi Notları",
+    en: "Travel Notes",
+    de: "Reisenotizen",
+    ru: "Заметки",
   },
 };
 
@@ -189,6 +285,20 @@ type Stats = {
   restaurants: number;
   museums: number;
 };
+
+
+function badgeEmoji(key: string) {
+  const map: Record<string, string> = {
+    explorer: "🧭",
+    routeMaster: "🗺️",
+    journalKeeper: "📖",
+    cityCollector: "🏙️",
+    foodLover: "🍽️",
+    museumHunter: "🏛️",
+  };
+
+  return map[key] || "🏅";
+}
 
 export default function Profile() {
   const { language, setLanguage, t } = useLanguage();
@@ -300,6 +410,68 @@ export default function Profile() {
     [stats, t]
   );
 
+  const travelPersonality = useMemo(() => {
+    if (stats.museums >= Math.max(stats.restaurants, stats.routes, 1)) {
+      return {
+        icon: "business-outline",
+        title: safeT(t, "settings.cultureExplorer", "Kültür Kaşifi", language),
+        text: safeT(t, "settings.personalityCultureText", "Müze, tarihi mekan ve kültürel duraklara ilgin yüksek görünüyor.", language),
+      };
+    }
+
+    if (stats.restaurants >= Math.max(stats.museums, stats.routes, 1)) {
+      return {
+        icon: "restaurant-outline",
+        title: safeT(t, "settings.foodHunter", "Lezzet Avcısı", language),
+        text: safeT(t, "settings.personalityFoodText", "Restoran, kafe ve yemek duraklarını keşfetmeyi seviyorsun.", language),
+      };
+    }
+
+    if (stats.routes >= 2) {
+      return {
+        icon: "map-outline",
+        title: safeT(t, "settings.routePlanner", "Rota Planlayıcı", language),
+        text: safeT(t, "settings.personalityRouteText", "Rota oluşturmayı ve gezilerini planlı ilerletmeyi seviyorsun.", language),
+      };
+    }
+
+    return {
+      icon: "compass-outline",
+      title: safeT(t, "settings.cityExplorer", "Şehir Kaşifi", language),
+      text: safeT(t, "settings.personalityCityText", "Farklı şehirleri kaydetmeyi ve şehir bazlı keşif yapmayı seviyorsun.", language),
+    };
+  }, [stats, t, language]);
+
+  const progressItems = useMemo(
+    () => [
+      {
+        key: "places",
+        label: safeT(t, "settings.savedPlaces", "Kaydedilen Yerler", language),
+        value: Math.min(stats.places, 10),
+        total: 10,
+      },
+      {
+        key: "visited",
+        label: safeT(t, "settings.visitedPlaces", "Ziyaretler", language),
+        value: Math.min(stats.visited, 10),
+        total: 10,
+      },
+      {
+        key: "routes",
+        label: safeT(t, "settings.route", "Rota", language),
+        value: Math.min(stats.routes, 5),
+        total: 5,
+      },
+      {
+        key: "notes",
+        label: safeT(t, "settings.travelNotes", "Gezi Notları", language),
+        value: Math.min(stats.notes, 5),
+        total: 5,
+      },
+    ],
+    [stats, t, language]
+  );
+
   return (
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content" />
@@ -348,6 +520,63 @@ export default function Profile() {
           </View>
         </View>
 
+
+        <View style={styles.smartSummaryCard}>
+          <View style={styles.smartSummaryIcon}>
+            <Ionicons name="sparkles-outline" size={22} color={COLORS.accent} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.smartSummaryTitle}>
+              {safeT(t, "settings.smartSummary", "AI Seyahat Özeti", language)}
+            </Text>
+            <Text style={styles.smartSummaryText}>
+              {stats.places + stats.routes + stats.notes + stats.visited > 0
+                ? safeT(t, "settings.summaryActive", "Seyahat profilin oluşmaya başladı. Kaydettiğin yerler, ziyaretlerin ve rotaların uygulamanın sana daha iyi öneriler sunmasına yardımcı olur.", language)
+                : safeT(t, "settings.summaryEmpty", "Henüz yeterli veri yok. Favori ekledikçe, rota oluşturdukça ve not tuttukça profilin kişiselleşir.", language)}
+            </Text>
+          </View>
+        </View>
+
+
+        <View style={styles.personalityCard}>
+          <View style={styles.personalityTop}>
+            <View style={styles.personalityIcon}>
+              <Ionicons name={travelPersonality.icon as any} size={23} color={COLORS.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.personalitySectionTitle}>
+                {safeT(t, "settings.travelPersonality", "Seyahat Kişiliğin", language)}
+              </Text>
+              <View style={styles.personalityPill}>
+                <Text style={styles.personalityPillText}>{travelPersonality.title}</Text>
+              </View>
+            </View>
+          </View>
+          <Text style={styles.personalityText}>{travelPersonality.text}</Text>
+        </View>
+
+        <View style={styles.progressCard}>
+          <Text style={styles.progressTitle}>
+            {safeT(t, "settings.travelProgress", "Seyahat İlerlemen", language)}
+          </Text>
+
+          {progressItems.map((item) => {
+            const percent = Math.min(100, Math.round((item.value / item.total) * 100));
+
+            return (
+              <View key={item.key} style={styles.progressItem}>
+                <View style={styles.progressRow}>
+                  <Text style={styles.progressLabel}>{item.label}</Text>
+                  <Text style={styles.progressValue}>{item.value}/{item.total}</Text>
+                </View>
+                <View style={styles.progressTrack}>
+                  <View style={[styles.progressFill, { width: `${percent}%` }]} />
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
         <TouchableOpacity style={styles.journalShortcut} onPress={() => router.push("/(tabs)/saved" as any)}>
           <View style={styles.shortcutIcon}>
             <Ionicons name="book-outline" size={23} color={COLORS.white} />
@@ -365,15 +594,15 @@ export default function Profile() {
           <View style={styles.badgeGrid}>
             {achievements.map((badge) => (
               <View key={badge.key} style={[styles.badgeBox, badge.unlocked && styles.badgeUnlocked]}>
-                <Ionicons
-                  name={badge.icon as any}
-                  size={22}
-                  color={badge.unlocked ? COLORS.white : COLORS.textSoft}
-                />
-                <Text style={[styles.badgeText, badge.unlocked && styles.badgeTextUnlocked]} numberOfLines={1}>
+                <View style={[styles.badgeMedal, badge.unlocked && styles.badgeMedalUnlocked]}>
+                  <Text style={styles.badgeEmoji}>{badgeEmoji(badge.key)}</Text>
+                </View>
+                <Text style={[styles.badgeText, badge.unlocked && styles.badgeTextUnlocked]} numberOfLines={2}>
                   {badge.label}
                 </Text>
-                <Text style={styles.badgeProgress}>{badge.progress}</Text>
+                <Text style={[styles.badgeProgress, badge.unlocked && styles.badgeProgressUnlocked]}>
+                  {badge.progress}
+                </Text>
               </View>
             ))}
           </View>
@@ -434,6 +663,143 @@ const styles = StyleSheet.create({
   statBox: { width: "48%", backgroundColor: COLORS.surface, borderRadius: 22, alignItems: "center", paddingVertical: 16, borderWidth: 1, borderColor: COLORS.border, marginBottom: 10, shadowColor: COLORS.shadow, shadowOpacity: 0.20, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 3 },
   statValue: { color: COLORS.text, fontSize: 25, fontWeight: "800", marginTop: 6 },
   statLabel: { color: COLORS.textSoft, fontSize: 12, fontWeight: "700", marginTop: 2 },
+
+  smartSummaryCard: {
+    backgroundColor: "#FFF1F4",
+    borderRadius: 22,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    borderWidth: 1,
+    borderColor: "rgba(232,93,117,0.18)",
+    marginBottom: 14,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+  smartSummaryIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: "rgba(232,93,117,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  smartSummaryTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "900",
+    marginBottom: 5,
+  },
+  smartSummaryText: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600",
+  },
+
+  personalityCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 14,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+  personalityTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  personalityIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: "#FFF1F4",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  personalitySectionTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "900",
+    marginBottom: 7,
+  },
+  personalityPill: {
+    alignSelf: "flex-start",
+    backgroundColor: COLORS.accent,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  personalityPillText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  personalityText: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: "600",
+  },
+  progressCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 14,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+  progressTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "900",
+    marginBottom: 12,
+  },
+  progressItem: {
+    marginBottom: 12,
+  },
+  progressRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 7,
+  },
+  progressLabel: {
+    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  progressValue: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  progressTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: COLORS.surfaceSoft,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: COLORS.accent,
+  },
   journalShortcut: { backgroundColor: COLORS.surface, borderRadius: 22, padding: 16, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: COLORS.border, marginBottom: 14, shadowColor: COLORS.shadow, shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 2 },
   shortcutIcon: { width: 48, height: 48, borderRadius: 16, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center", marginRight: 12 },
   shortcutTitle: { color: COLORS.text, fontSize: 18, fontWeight: "800", marginBottom: 4 },
@@ -441,11 +807,54 @@ const styles = StyleSheet.create({
   achievementCard: { backgroundColor: COLORS.surface, borderRadius: 24, padding: 16, borderWidth: 1, borderColor: COLORS.border, marginBottom: 14, shadowColor: COLORS.shadow, shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 2 },
   achievementSubtitle: { color: COLORS.textSoft, fontSize: 13, lineHeight: 19, marginBottom: 12 },
   badgeGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  badgeBox: { width: "48%", backgroundColor: COLORS.surfaceSoft, borderRadius: 18, padding: 12, alignItems: "center", marginBottom: 10, opacity: 0.55 },
-  badgeUnlocked: { backgroundColor: COLORS.accent, opacity: 1 },
-  badgeText: { color: COLORS.textSoft, fontSize: 12, fontWeight: "700", marginTop: 8, textAlign: "center" },
-  badgeTextUnlocked: { color: COLORS.white },
-  badgeProgress: { color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: "700", marginTop: 4 },
+  badgeBox: {
+    width: "31%",
+    backgroundColor: COLORS.surfaceSoft,
+    borderRadius: 20,
+    padding: 10,
+    alignItems: "center",
+    marginBottom: 10,
+    opacity: 0.72,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  badgeUnlocked: {
+    backgroundColor: "#FFF7ED",
+    opacity: 1,
+    borderColor: "rgba(232,93,117,0.18)",
+  },
+  badgeMedal: {
+    width: 48,
+    height: 48,
+    borderRadius: 18,
+    backgroundColor: "rgba(107,114,128,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeMedalUnlocked: {
+    backgroundColor: "#FFE4EC",
+  },
+  badgeEmoji: {
+    fontSize: 25,
+  },
+  badgeText: {
+    color: COLORS.textSoft,
+    fontSize: 11,
+    fontWeight: "800",
+    marginTop: 8,
+    textAlign: "center",
+    minHeight: 28,
+  },
+  badgeTextUnlocked: { color: COLORS.text },
+  badgeProgress: {
+    color: COLORS.textSoft,
+    fontSize: 10,
+    fontWeight: "800",
+    marginTop: 4,
+  },
+  badgeProgressUnlocked: {
+    color: COLORS.accent,
+  },
   sectionCard: { backgroundColor: COLORS.surface, borderRadius: 24, padding: 16, borderWidth: 1, borderColor: COLORS.border, shadowColor: COLORS.shadow, shadowOpacity: 0.25, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 3 },
   section: { color: COLORS.text, fontSize: 15, fontWeight: "700", marginBottom: 8, letterSpacing: 0.3 },
   grid: { gap: 12 },
