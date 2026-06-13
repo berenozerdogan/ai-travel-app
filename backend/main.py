@@ -774,7 +774,7 @@ def ai_chat(payload: dict = Body(...)):
 
     # Persona / gezi tipi ve gün sayısı algılama
     persona = detect_persona_from_message(message)
-    detected_intents = list(dict.fromkeys(detected_intents + detect_interest_words(message)))
+    detected_intents = detect_interest_words(message)
     days_count = detect_days_count(message)
 
     # Bütçe algılama
@@ -970,52 +970,67 @@ def ai_chat(payload: dict = Body(...)):
             for idx, place_name in enumerate(d["places"], 1):
                 reply += f"{idx}. {place_name}\n"
 
-    # OpenAI varsa cevabı daha doğal hale getirsin ama rota verisi yine bizim dataset'ten gelsin
-    
-if client:
-    try:
-        system_text = {
-            "tr": (
-                "Sen profesyonel bir Türkiye seyahat danışmanısın. "
-                "Sana verilen gezi planını daha doğal ve anlaşılır hale getir. "
-                "KESİNLİKLE gün sayısını değiştirme. "
-                "KESİNLİKLE mekan isimlerini değiştirme, silme veya yeni mekan ekleme. "
-                "Kullanıcı kaç gün istediyse cevapta tam olarak o kadar gün olmalı."
-            ),
-            "en": (
-                "You are a professional Turkey travel advisor. "
-                "Polish the given trip plan naturally. "
-                "Do not change the number of days. "
-                "Do not change, remove, or add place names."
-            ),
-        }.get(lang, "Polish the plan without changing days or place names.")
+    # OpenAI varsa cevabı daha doğal hale getirsin ama rota verisi yine bizim dataset'ten gelsin.
+    # Önemli: AI sadece metni güzelleştirir; gün sayısını ve mekan listesini değiştirmemesi istenir.
+    if client:
+        try:
+            system_text = {
+                "tr": (
+                    "Sen profesyonel bir Türkiye seyahat danışmanısın. "
+                    "Sana verilen gezi planını daha doğal ve anlaşılır hale getir. "
+                    "KESİNLİKLE gün sayısını değiştirme. "
+                    "KESİNLİKLE mekan isimlerini değiştirme, silme veya yeni mekan ekleme. "
+                    "Cevapta verilen JSON içindeki requested_days kadar gün başlığı olmalı. "
+                    "Planı kısa ve sunuma uygun yaz."
+                ),
+                "en": (
+                    "You are a professional Turkey travel advisor. "
+                    "Polish the given trip plan naturally. "
+                    "Do not change the number of days. "
+                    "Do not change, remove, or add place names."
+                ),
+                "de": (
+                    "Du bist ein professioneller Türkei-Reiseberater. "
+                    "Formuliere den Plan natürlich, aber ändere weder Tagesanzahl noch Ortsnamen."
+                ),
+                "ru": (
+                    "Вы профессиональный консультант по Турции. "
+                    "Сделайте план естественным, но не меняйте количество дней и названия мест."
+                ),
+            }.get(lang, "Polish the plan without changing days or place names.")
 
-        locked_plan = {
-            "requested_days": days_count,
-            "days": days,
-            "place_names": [p.get("name") for p in selected_places],
-            "draft_reply": reply,
-        }
+            locked_plan = {
+                "requested_days": days_count,
+                "persona": persona,
+                "days": days,
+                "place_names": [p.get("name") for p in selected_places],
+                "draft_reply": reply,
+            }
 
-        ai_response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_text},
-                {
-                    "role": "user",
-                    "content": json.dumps(locked_plan, ensure_ascii=False),
-                },
-            ],
-        )
+            ai_response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": system_text},
+                    {"role": "user", "content": json.dumps(locked_plan, ensure_ascii=False)},
+                ],
+            )
 
-        polished = ai_response.choices[0].message.content.strip()
+            polished = ai_response.choices[0].message.content.strip()
+            if polished:
+                reply = polished
 
-        if polished:
-            reply = polished
+        except Exception as e:
+            logging.error(f"AI polish hata: {e}")
 
-    except Exception as e:
-        logging.error(f"AI polish hata: {e}")
-
+    return {
+        "reply": reply,
+        "places": selected_places,
+        "days": days,
+        "persona": persona,
+        "budget": budget,
+        "estimated_budget": estimated_budget,
+        "requested_days": days_count,
+    }
 
 @app.get("/events")
 def events(city: str = Query("Istanbul"), limit: int = Query(20), language: str = Query("en")):
