@@ -694,6 +694,71 @@ def optimize_route(payload: dict = Body(...)):
 
     return {"route": route}
 
+
+def detect_days_count(message: str) -> int:
+    msg = normalize_text(message)
+    import re
+
+    digit_match = re.search(r"(\d+)\s*(gun|gün|day|days|gunluk|günlük)", msg)
+    if digit_match:
+        return min(max(int(digit_match.group(1)), 1), 7)
+
+    word_numbers = {
+        "bir": 1,
+        "iki": 2,
+        "uc": 3,
+        "üç": 3,
+        "dort": 4,
+        "dört": 4,
+        "bes": 5,
+        "beş": 5,
+        "alti": 6,
+        "altı": 6,
+        "yedi": 7,
+    }
+
+    for word, number in word_numbers.items():
+        if re.search(rf"\b{word}\b\s*(gun|gün|gunluk|günlük|day|days)", msg):
+            return number
+
+    return 1
+
+
+def detect_persona_from_message(message: str) -> str:
+    msg = normalize_text(message)
+
+    if any(w in msg for w in ["cocuklu", "çocuklu", "cocuk", "çocuk", "aile", "family", "kids", "children"]):
+        return "family"
+    if any(w in msg for w in ["romantik", "romantic", "sevgili", "couple", "partner"]):
+        return "romantic"
+    if any(w in msg for w in ["ogrenci", "öğrenci", "student", "ucuz", "cheap", "budget", "ekonomik"]):
+        return "student"
+    if any(w in msg for w in ["luks", "lüks", "luxury", "premium", "konfor"]):
+        return "luxury"
+    if any(w in msg for w in ["yagmur", "yağmur", "rain", "rainy", "kapali", "kapalı"]):
+        return "rainy"
+    return "general"
+
+
+def detect_interest_words(message: str):
+    msg = normalize_text(message)
+    intents = []
+
+    groups = {
+        "history": ["tarih", "tarihi", "historical", "history", "kultur", "kültür", "culture", "museum", "muze", "müze", "saray", "mosque", "cami"],
+        "nature": ["doga", "doğa", "nature", "park", "orman", "forest", "sahil", "beach", "manzara", "view"],
+        "food": ["yemek", "food", "restaurant", "restoran", "cafe", "kafe", "lezzet"],
+        "shopping": ["alisveris", "alışveriş", "shopping", "avm", "mall", "market", "bazaar", "çarşı", "carsi"],
+        "hotel": ["hotel", "otel", "konaklama"],
+    }
+
+    for intent, words in groups.items():
+        if any(w in msg for w in words):
+            intents.append(intent)
+
+    return intents
+
+
 @app.post("/ai-chat")
 def ai_chat(payload: dict = Body(...)):
     message = payload.get("message", "")
@@ -707,30 +772,10 @@ def ai_chat(payload: dict = Body(...)):
 
     msg_norm = normalize_text(message)
 
-    # Persona / gezi tipi algılama
-    persona = "general"
-    if any(w in msg_norm for w in ["romantik", "romantic", "sevgili", "couple", "partner"]):
-        persona = "romantic"
-    elif any(w in msg_norm for w in ["aile", "family", "çocuk", "cocuk", "kids", "children"]):
-        persona = "family"
-    elif any(w in msg_norm for w in ["öğrenci", "ogrenci", "student", "ucuz", "cheap", "budget"]):
-        persona = "student"
-    elif any(w in msg_norm for w in ["lüks", "luxury", "premium", "konfor"]):
-        persona = "luxury"
-    elif any(w in msg_norm for w in ["yağmur", "yagmur", "rain", "rainy"]):
-        persona = "rainy"
-
-    # Gün sayısı algılama
-    days_count = 1
-    for n in range(1, 8):
-        if (
-            f"{n} gün" in msg_norm
-            or f"{n} gun" in msg_norm
-            or f"{n} day" in msg_norm
-            or f"{n}-day" in msg_norm
-        ):
-            days_count = n
-            break
+    # Persona / gezi tipi ve gün sayısı algılama
+    persona = detect_persona_from_message(message)
+    detected_intents = list(dict.fromkeys(detected_intents + detect_interest_words(message)))
+    days_count = detect_days_count(message)
 
     # Bütçe algılama
     budget = None
@@ -814,7 +859,7 @@ def ai_chat(payload: dict = Body(...)):
 
     sorted_places = sorted(filtered_places, key=persona_score, reverse=True)
 
-    max_places = min(days_count * 4, 12)
+    max_places = min(max(days_count * 4, days_count), 16)
     selected_places = sorted_places[:max_places]
 
     # Günlere böl
@@ -926,38 +971,50 @@ def ai_chat(payload: dict = Body(...)):
                 reply += f"{idx}. {place_name}\n"
 
     # OpenAI varsa cevabı daha doğal hale getirsin ama rota verisi yine bizim dataset'ten gelsin
-    if client:
-        try:
-            system_text = {
-                "tr": "Sen profesyonel bir Türkiye seyahat danışmanısın. Verilen planı daha doğal, kısa ve anlaşılır hale getir. Mekan isimlerini değiştirme.",
-                "en": "You are a professional Turkey travel advisor. Make the given plan natural, short and clear. Do not change place names.",
-                "de": "Du bist ein professioneller Türkei-Reiseberater. Formuliere den Plan natürlich, kurz und klar. Ändere keine Ortsnamen.",
-                "ru": "Вы профессиональный туристический консультант по Турции. Сделайте план естественным, кратким и понятным. Не меняйте названия мест.",
-            }.get(lang, "You are a professional travel advisor.")
+    
+if client:
+    try:
+        system_text = {
+            "tr": (
+                "Sen profesyonel bir Türkiye seyahat danışmanısın. "
+                "Sana verilen gezi planını daha doğal ve anlaşılır hale getir. "
+                "KESİNLİKLE gün sayısını değiştirme. "
+                "KESİNLİKLE mekan isimlerini değiştirme, silme veya yeni mekan ekleme. "
+                "Kullanıcı kaç gün istediyse cevapta tam olarak o kadar gün olmalı."
+            ),
+            "en": (
+                "You are a professional Turkey travel advisor. "
+                "Polish the given trip plan naturally. "
+                "Do not change the number of days. "
+                "Do not change, remove, or add place names."
+            ),
+        }.get(lang, "Polish the plan without changing days or place names.")
 
-            ai_response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": system_text},
-                    {"role": "user", "content": reply},
-                ],
-            )
+        locked_plan = {
+            "requested_days": days_count,
+            "days": days,
+            "place_names": [p.get("name") for p in selected_places],
+            "draft_reply": reply,
+        }
 
-            polished = ai_response.choices[0].message.content.strip()
-            if polished:
-                reply = polished
+        ai_response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_text},
+                {
+                    "role": "user",
+                    "content": json.dumps(locked_plan, ensure_ascii=False),
+                },
+            ],
+        )
 
-        except Exception as e:
-            logging.error(f"AI polish hata: {e}")
+        polished = ai_response.choices[0].message.content.strip()
 
-    return {
-        "reply": reply,
-        "places": selected_places,
-        "days": days,
-        "persona": persona,
-        "budget": budget,
-        "estimated_budget": estimated_budget,
-    }
+        if polished:
+            reply = polished
+
+    except Exception as e:
+        logging.error(f"AI polish hata: {e}")
 
 
 @app.get("/events")
