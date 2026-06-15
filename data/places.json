@@ -519,7 +519,7 @@
   },
   {
     "id": 25,
-    "name": "Maiden Tower",
+    "name": "Kız Kulesi",
     "city": "Istanbul",
     "district": "Uskudar",
     "category": "attraction",
@@ -534,7 +534,7 @@
       "history",
       "landmark"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJX0SZ6iu4yhQRbEe0zrr0124/photos/AU_ZVEH_jpFHdQ3d9NlUiIj28OsmVyfHwnabWaQuRnrzHt2hANdqU1eryY2F6fABs2jIdpqoyVn87EwRxBOqrYYcaJS_nwBwAWCnOa3Wib-3rENQ23NLsw419DteE_NOplIsHbVQVYNsNJjtfaviu_laUACV49YeeSbValxydIeYpi5o4qmZAkX-yxQNkkZ7xgnWq0fEG3DoFPGr7S3rQvN3rTEjMVJcyCSFmZY4l65_P6C-FoosR3XrgQa-qfh1ADw1wr76SeSmVCAdy4dQfDZ4ZhTLKmWa3nVXCWHcZHrTaDfVxbJtdT1jiEkjOYUPUKrnySD1nXLMIRzIEgjN4JTomcPcznzy6omvaVny3b5-pUXIHzFziZ2ylId8XOdKLwTUTPF8-wYSQHJ9EBu62hybu6GYmqrM4e4wD7Xv6DYwdowuoQ/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFAa4Epm0oOA5qy0uDFCFZhBqb9sw7LxDik7-XrIrMXWeBUXAa2hW0wBZUVWDWwn9CCnCH5gyuyRZN34_VTD0s94oxEbXeqYTemLPXsNP7uQWJt9h9n9wxegKFZ-Gxw3kTIrlw=s1360-w1360-h1020-rw",
     "estimated_visit_time": 45,
     "reviews": []
   },
@@ -878,7 +878,7 @@
       "turkish",
       "anatolian"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJhToLome4yhQRE1EMuLSuqlg/photos/AU_ZVEExk99UUPOz65ebjGdzsIdqlVYF09wMTjB9ckA0p8nzE1km36l-YM_hEBkO6ygaWTupRthHgnON4areJiAJZCSgpz8suJwJHIayhrK4XMjnvuz4Z7XItuMGdRckKUHqBuWdVWhNqt8LRW6cTd3tPEBwJoxIKsw32q1DvzUggoxcfnGIPU_LGaig8iISBWuJYMtUGkO6da07etpm3EVhduTd2ukiFshC4Bia0G9sJQ86w1MQ7o29Goa49SzOXPGJLxqBeXblLzPwfttdNtiyVz-S7gFGxiCA4vsYg5cIssu26oDx5ESVl6sbmccc_uh6jMYRAVU_A3ViFg1xFGDsN4M0ynGP5L4vQzd_ys1umA1nQRLzJKNnyBxTb00-OQSboOilROukyRWcqL4EIR9Educsmcpu3oWhsq9xfZH2uGF0ncA9wRfZojcE59cMNfrF/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFUQFGbKnK40efnkn37MLtJNJGtyxXeJARvnfsicAQF89zmXngIcs6SCrUCcEt9qlh2KbwzEn2h_GmAvqjTbY16VYCQbrL_HuaZziWMzslzgmDjiCOlDWBh-kKa-ACvS75WrVGmaIg1R48x=s1360-w1360-h1020-rw",
     "estimated_visit_time": 90,
     "reviews": []
   },
@@ -921,8 +921,7 @@
       "restaurant",
       "modern"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJr6PRGd25yhQR2VYidbg9zyQ/photos/AU_ZVEHu8JVaKecPSmH06shM4wcbr5c2l7sHHLodUsqymlQM61UVnGEHdcmFPaep1Y6D4OryW_y_id0-9d8M_uk3VGrvVOnf4gKlP9-oHbeO0LabKTOt4LiETNmiELjSdJyVhmDKVjUFtjhpy4N0IyBOBeH7sPMBUlKCv8hpP_uEj-MnbrKeiACu7h9s-_E67-WdzE_BFJeLVC2-8FdONIsVi_sA-cxqOLxcoSJImTLzh5xwuKTB5w2e_zJb4gOT6UGJ9t4nN32_MFITVVnaizgVh7aq5aBIPTfTO1GmMFoyrJs7aw/media?maxHeightPx=800&maxWidthPx=1200",
-    "estimated_visit_time": 90,
+    "image": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFxk23kCuyR_ETKXJW_LOOv-1OO191SALyq_0eBhdgVmRRch4A0BLl9z-One1Ja1hZhNYA6pR0RpeZ5af-9q0oTI66BLniystliTSR-vPlgAeIgnFEOsdCeZiVDYmty0XVjc1dg=s1360-w1360-h1020-rw",
     "reviews": []
   },
   {
@@ -1195,7 +1194,7 @@
       "fine dining",
       "view"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJReR3RuC5yhQR_t7o9KL5qYQ/photos/AU_ZVEGjmXj9Yd3cBYwZ5OQ_n8PCvgQvypQHqW6_OrCWDURkqdewtGB1U8vzqmuVoQhXpLWVlMxeLhPhk_Zd3BDw0dGx9LQf4LjG34tGJwacI6Ze6bJhAwBppkRYAgxGGrwHnwvEGglLmL64RCGRvBmc5P5PIgZkmT1f_Y7n0jJoQEVP4_28Vn9HMmvJHhiHOcgQrA3L9l6zRwpv4EOSo_I_Ji9NTEC2sMi3FAY4s8NXji7d0Slui0F8QT3wQm8TYUH87wLAx3sOHmuNOBQQyqXPfiMNv2473Uol6lAMYW_ezGw2n5Fj9R-1tc9OwFgKtXEtYUehCSWviYoePafmDUYgGv9-LVS_2R_-EyW7DlmRF6jhs85kVCI6mm7W0_hdvBJ-xiQjEAdeEGlnmDLPRsssbzx1xFWnGcsYUwXlIMPOiqrJf9Qa/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEGLJ8TOB8hDa8bdTmbyuiIDBbOSdP05uOsIVphQIwoaNilt_smlLLj6xUOZExNrwT8XSw7uDmoKgn8yXhGK-iPqy0u8HA5ogsqFJ2i2H28IUPD1sVh4-Jn-MTgQl52bSj90EdRcA=s1360-w1360-h1020-rw",
     "estimated_visit_time": 90,
     "reviews": []
   },
@@ -56994,7 +56993,7 @@
     "rating": 4.3,
     "review_count": 250,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJu2sF-VDhMRURQJqRgdvNvfk/photos/Ab43m-svU3gVbhHYQ_UJ8AB5GB6B1U3aqCNkw58SrdNFOKIUBV1ZYgE9pVfGQtIpfWTMmzg142b9ldPHltOAPiM786OSqv9P9nXsUbzdIhnxQyFvk8M0KglGaT1-fLZdFeGHsoZXXTzFp-Eta93HxhBgLJgyiI1qUNvqx7PblBqGCPq9IgZXub66o7l_RIxtq8kQhqOn4lqTLunl_BSuPRuj2VPZa83L6M_GA1B_wCTwr2DEmvN_KlHUu-3kgQKJSR-bd4fdLG8kX-D7LgticAs87bd_KcgOTjRn_IFhtwb8Cjjj4WqaqWnQpmkjqBeSJuEBixQlmxMWcL_ORxGD6x4RpUHmPoBJ2Plke-whSe1mDwh1QKzCPtDMArb-sUai-FcPbdWXc0IyH1y5H_MAi6Ev1xy5Ewu5dqb_CnUM6FtvYGTBwA/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://www.kulturportali.gov.tr/repoKulturPortali/large/SehirRehberi//GezilecekYer/20220301135607245_100.Yil%20Ataturk%20Kultur%20Parki3.jpeg?format=jpg&quality=50",
     "description": "tourism in Gaziantep",
     "source": "google_places",
     "tags": [

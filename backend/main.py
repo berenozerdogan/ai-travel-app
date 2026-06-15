@@ -1186,87 +1186,326 @@ def get_nearby(
         return {"count": 0, "places": [], "error": str(e)}
 
 
+
+def _place_search_text(p: dict) -> str:
+    return normalize_text(" ".join([
+        str(p.get("name", "")),
+        str(p.get("city", "")),
+        str(p.get("district", "")),
+        str(p.get("category", "")),
+        str(p.get("subcategory", "")),
+        str(p.get("description", "")),
+        " ".join([str(t) for t in p.get("tags", [])]),
+    ]))
+
+
+def _matches_any_place_text(p: dict, words: list[str]) -> bool:
+    text = _place_search_text(p)
+    return any(normalize_text(w) in text for w in words)
+
+
+def _category_filtered_places(places: list, category: str, interests: str = "") -> list:
+    category = normalize_text(category or "")
+    interests = normalize_text(interests or "")
+
+    # Frontend category values:
+    # mixed, nature, culture, food, shopping
+    # Eğer kategori seçilmediyse ilgi alanından tahmin etmeyi dene.
+    if not category or category == "mixed":
+        if any(w in interests for w in ["tarih", "tarihi", "history", "historical", "museum", "muze", "müze", "culture", "kultur", "kültür"]):
+            category = "culture"
+        elif any(w in interests for w in ["doga", "doğa", "nature", "park", "orman", "forest", "sahil", "beach", "manzara", "view"]):
+            category = "nature"
+        elif any(w in interests for w in ["yemek", "food", "restaurant", "restoran", "cafe", "kafe"]):
+            category = "food"
+        elif any(w in interests for w in ["alisveris", "alışveriş", "shopping", "avm", "mall", "market", "bazaar", "çarşı", "carsi"]):
+            category = "shopping"
+        else:
+            return places
+
+    allowed_words = {
+        "culture": [
+            "museum", "müze", "muze", "historical", "history", "tarihi", "tarih",
+            "palace", "saray", "mosque", "cami", "church", "kilise",
+            "gallery", "galeri", "culture", "kultur", "kültür",
+            "monument", "anıt", "anit", "opera", "theatre", "tiyatro",
+            "station", "gar", "library", "kütüphane", "kutuphane",
+        ],
+        "nature": [
+            "nature", "doğa", "doga", "park", "forest", "orman",
+            "beach", "plaj", "sahil", "garden", "bahçe", "bahce",
+            "view", "manzara", "sea", "deniz", "lake", "göl", "gol",
+            "valley", "vadi", "coast", "waterfront",
+        ],
+        "food": [
+            "restaurant", "restoran", "cafe", "kafe", "food", "yemek",
+            "bakery", "pastane", "dessert", "tatlı", "tatli",
+        ],
+        "shopping": [
+            "shopping", "alışveriş", "alisveris", "mall", "avm",
+            "market", "bazaar", "çarşı", "carsi", "store", "mağaza", "magaza",
+        ],
+    }
+
+    # Kategori seçiliyken alakasız otelleri/restoranları kesin çıkar.
+    def is_bad_for_selected_category(p: dict) -> bool:
+        c = normalize_text(p.get("category", ""))
+        s = normalize_text(p.get("subcategory", ""))
+        text = _place_search_text(p)
+
+        is_hotel = c == "hotel" or s == "hotel" or " hotel " in f" {text} " or " otel " in f" {text} "
+        is_food = c in ["restaurant", "cafe"] or s in ["restaurant", "cafe"] or any(w in text for w in ["restaurant", "restoran", "cafe", "kafe"])
+
+        if category in ["culture", "nature", "shopping"] and is_hotel:
+            return True
+
+        if category in ["culture", "nature", "shopping"] and is_food:
+            return True
+
+        return False
+
+    words = allowed_words.get(category)
+    if not words:
+        return places
+
+    strict = [
+        p for p in places
+        if not is_bad_for_selected_category(p) and _matches_any_place_text(p, words)
+    ]
+
+    # Eğer strict filtre tamamen boş kalırsa, en azından otel/restoranları çıkarılmış sonuçları döndür.
+    if strict:
+        return strict
+
+    relaxed = [p for p in places if not is_bad_for_selected_category(p)]
+    return relaxed if relaxed else places
+
+
+def _sort_places_for_trip(places: list, category: str, district: str = "") -> list:
+    category = normalize_text(category or "")
+    district = normalize_text(district or "")
+
+    def score(p: dict) -> float:
+        base = float(p.get("rating") or 0) * 10
+        text = _place_search_text(p)
+        c = normalize_text(p.get("category", ""))
+        s = normalize_text(p.get("subcategory", ""))
+
+        value = base
+
+        if district and district in normalize_text(p.get("district", "")):
+            value += 40
+
+        # kategoriye göre güçlü öncelik
+        if category == "culture":
+            if c in ["museum", "historical", "attraction"] or s in ["museum", "historical"]:
+                value += 35
+            if any(w in text for w in ["museum", "müze", "muze", "historical", "tarihi", "palace", "saray", "opera", "gar"]):
+                value += 25
+            if c in ["hotel", "restaurant", "cafe"]:
+                value -= 100
+
+        elif category == "nature":
+            if c in ["park", "nature", "beach", "attraction"]:
+                value += 35
+            if any(w in text for w in ["park", "nature", "doğa", "doga", "sahil", "beach", "garden", "bahçe", "manzara", "view"]):
+                value += 25
+            if c in ["hotel", "restaurant", "cafe"]:
+                value -= 100
+
+        elif category == "food":
+            if c in ["restaurant", "cafe"]:
+                value += 45
+            if any(w in text for w in ["restaurant", "restoran", "cafe", "kafe", "food", "yemek"]):
+                value += 25
+            if c == "hotel":
+                value -= 50
+
+        elif category == "shopping":
+            if c == "shopping":
+                value += 45
+            if any(w in text for w in ["shopping", "alışveriş", "alisveris", "mall", "avm", "bazaar", "çarşı", "carsi"]):
+                value += 25
+            if c in ["hotel", "restaurant", "cafe"]:
+                value -= 100
+
+        else:
+            if c == "hotel":
+                value -= 30
+
+        return value
+
+    return sorted(places, key=score, reverse=True)
+
+
+def _fallback_relax_district(all_city_places: list, district_places: list) -> list:
+    # ÖNEMLİ:
+    # Kullanıcı ilçe seçtiyse şehir geneline düşmek yanlış sonuç üretir.
+    # Örneğin Kadıköy seçiliyken Fatih/Beşiktaş oteli gelmemeli.
+    # Bu yüzden sadece ilçe sonuçları döndürülür.
+    return district_places
+
 @app.post("/trip-plan")
 def trip_plan(payload: dict = Body(...)):
     city = payload.get("city", "").strip()
+    district_raw = payload.get("district", "").strip()
+    category_raw = payload.get("category", "").strip()
+
     days_count = min(max(int(payload.get("days", 1) or 1), 1), 7)
     lang = get_lang(payload)
     interests = normalize_text(payload.get("interests", ""))
-    places_list = get_places_from_db(lang=lang)
 
     normalized_city = normalize_text(city)
+    normalized_district = normalize_text(district_raw)
+    normalized_category = normalize_text(category_raw)
+
+    places_list = get_places_from_db(lang=lang)
     allowed_cities = get_city_aliases(normalized_city)
 
-    city_places = [
+    city_places_all = [
         p for p in places_list
         if normalize_text(p.get("city", "")) in allowed_cities
     ]
 
-    if interests:
-        interest_filtered = []
+    if normalized_district:
+        district_places = [
+            p for p in city_places_all
+            if normalized_district in normalize_text(p.get("district", ""))
+        ]
+        city_places = _fallback_relax_district(city_places_all, district_places)
+    else:
+        city_places = city_places_all
 
-        for p in city_places:
-            text = " ".join([
-                str(p.get("category", "")),
-                str(p.get("subcategory", "")),
-                str(p.get("description", "")),
-                " ".join([str(t) for t in p.get("tags", [])]),
-            ]).lower()
-
-            if interests in ["doğa", "doga", "nature"]:
-                if any(x in text for x in ["nature", "park", "forest", "beach", "garden", "viewpoint", "sea", "lake", "valley"]):
-                    interest_filtered.append(p)
-
-            elif interests in ["tarih", "tarihi", "historical", "history", "kültür", "kultur", "culture"]:
-                if any(x in text for x in ["history", "historical", "museum", "mosque", "palace", "castle", "ottoman", "ancient", "ruins"]):
-                    interest_filtered.append(p)
-
-            elif interests in ["yemek", "food", "restaurant", "restoran", "cafe", "kafe"]:
-                if any(x in text for x in ["restaurant", "food", "cafe", "kafe"]):
-                    interest_filtered.append(p)
-
-            elif interests in ["alışveriş", "alisveris", "shopping", "avm"]:
-                if any(x in text for x in ["shopping", "mall", "market", "bazaar"]):
-                    interest_filtered.append(p)
-
-        if interest_filtered:
-            city_places = interest_filtered
-
-    if not city_places:
+    if normalized_district and not city_places:
         return {
             "reply": tr_text(lang, {
-                "tr": f"{city} için veri yok.",
-                "en": f"No data for {city}.",
-                "de": f"Keine Daten für {city}.",
-                "ru": f"Нет данных для {city}.",
+                "tr": f"{city} içinde {district_raw} için veri bulunamadı. Lütfen başka bir ilçe seç veya ilçe alanını boş bırak.",
+                "en": f"No data found for {district_raw} in {city}. Please choose another district or leave the district empty.",
+                "de": f"Keine Daten für {district_raw} in {city} gefunden. Bitte wähle einen anderen Bezirk oder lasse das Feld leer.",
+                "ru": f"Нет данных для {district_raw} в {city}. Выберите другой район или оставьте поле пустым.",
             }),
             "days": [],
             "places": [],
+            "district": district_raw,
+            "category": category_raw,
+            "requested_days": days_count,
         }
 
-    sorted_places = sorted(city_places, key=lambda p: p.get("rating") or 0, reverse=True)
-    per_day = max(1, min(4, math.ceil(len(sorted_places[:days_count * 4]) / days_count)))
+    # Önce frontend'den gelen kategoriye göre kesin filtrele.
+    category_places = _category_filtered_places(city_places, normalized_category, interests)
+
+    sorted_places = _sort_places_for_trip(
+        category_places,
+        normalized_category,
+        normalized_district
+    )
+
+    if not sorted_places:
+        return {
+            "reply": tr_text(lang, {
+                "tr": f"{city} içinde {district_raw or 'seçilen bölge'} için bu kategoriye uygun yer bulunamadı. Otel/restoran önermemek için sonuç döndürmedim.",
+                "en": f"No matching places found for this category in {district_raw or city}. I did not return hotels/restaurants to avoid irrelevant results.",
+                "de": f"Keine passenden Orte für diese Kategorie in {district_raw or city} gefunden.",
+                "ru": f"Подходящие места для этой категории в {district_raw or city} не найдены.",
+            }),
+            "days": [],
+            "places": [],
+            "district": district_raw,
+            "category": category_raw,
+            "requested_days": days_count,
+        }
+
+    # Her gün için en fazla 4 durak.
+    max_total_places = min(days_count * 4, len(sorted_places))
+    selected_places = sorted_places[:max_total_places]
+
+    # Eğer seçilen kategori food değilse, son güvenlik filtresi:
+    # otel/restoran/kafe kesinlikle çıkmalı.
+    if normalized_category in ["culture", "nature", "shopping"]:
+        selected_places = [
+            p for p in selected_places
+            if normalize_text(p.get("category", "")) not in ["hotel", "restaurant", "cafe"]
+        ][:max_total_places]
+
+        if not selected_places:
+            return {
+                "reply": tr_text(lang, {
+                    "tr": f"{city} içinde {district_raw or 'seçilen bölge'} için uygun {category_label_tr} rotası bulunamadı. Otel/restoran önermemek için boş sonuç döndürdüm.",
+                    "en": f"No suitable {category_label_en} route found for {district_raw or city}. I returned an empty result to avoid hotels/restaurants.",
+                    "de": f"Keine passende Route gefunden.",
+                    "ru": f"Подходящий маршрут не найден.",
+                }),
+                "days": [],
+                "places": [],
+                "district": district_raw,
+                "category": category_raw,
+                "requested_days": days_count,
+            }
 
     plan_days = []
     used_places = []
 
+    per_day = max(1, min(4, math.ceil(len(selected_places) / days_count)))
+
     for i in range(days_count):
-        day_places = sorted_places[i * per_day:(i + 1) * per_day]
+        day_places = selected_places[i * per_day:(i + 1) * per_day]
+        if not day_places and selected_places:
+            day_places = selected_places[:min(4, len(selected_places))]
+
         used_places.extend(day_places)
         plan_days.append({
             "day": i + 1,
             "places": day_places,
         })
 
+    category_label_tr = {
+        "culture": "tarih/müze",
+        "nature": "doğa",
+        "food": "yeme-içme",
+        "shopping": "alışveriş",
+        "mixed": "karma",
+    }.get(normalized_category, normalized_category or "karma")
+
+    category_label_en = {
+        "culture": "history/museum",
+        "nature": "nature",
+        "food": "food",
+        "shopping": "shopping",
+        "mixed": "mixed",
+    }.get(normalized_category, normalized_category or "mixed")
+
+    if lang == "tr":
+        reply = f"{city} için {days_count} günlük gezi planı hazır."
+        if district_raw:
+            reply += f" İlçe/bölge: {district_raw}."
+        if category_raw and category_raw != "mixed":
+            reply += f" Kategori: {category_label_tr}."
+    elif lang == "de":
+        reply = f"Der {days_count}-Tage-Reiseplan für {city} ist bereit."
+        if district_raw:
+            reply += f" Bezirk/Gebiet: {district_raw}."
+        if category_raw and category_raw != "mixed":
+            reply += f" Kategorie: {category_label_en}."
+    elif lang == "ru":
+        reply = f"План поездки на {days_count} дн. для {city} готов."
+        if district_raw:
+            reply += f" Район: {district_raw}."
+        if category_raw and category_raw != "mixed":
+            reply += f" Категория: {category_label_en}."
+    else:
+        reply = f"{days_count}-day trip plan for {city} is ready."
+        if district_raw:
+            reply += f" District/area: {district_raw}."
+        if category_raw and category_raw != "mixed":
+            reply += f" Category: {category_label_en}."
+
     return {
-        "reply": tr_text(lang, {
-            "tr": f"{city} için {days_count} günlük gezi planı hazır.",
-            "en": f"{days_count}-day trip plan for {city} is ready.",
-            "de": f"{days_count}-Tage-Reiseplan für {city} ist bereit.",
-            "ru": f"План поездки на {days_count} дней для {city} готов.",
-        }),
+        "reply": reply,
         "days": plan_days,
         "places": used_places,
+        "district": district_raw,
+        "category": category_raw,
+        "requested_days": days_count,
     }
 
 # --- EK ÖZELLİKLER: BÜTÇE, HAVA DURUMU, ACİL BİLGİ ---
