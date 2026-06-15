@@ -14,15 +14,81 @@ import {
   Alert,
   Share,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useLanguage } from "../../context/LanguageContext";
+import { readJson, writeJson, STORAGE_KEYS } from "../../services/storageService";
 
 
 const PLANNER_UI: Record<string, Record<string, string>> = {
+  editPlan: {
+    tr: "Düzenle",
+    en: "Edit",
+    de: "Bearbeiten",
+    ru: "Редактировать",
+  },
+  newPlan: {
+    tr: "Yeni Plan Yaz",
+    en: "Write New Plan",
+    de: "Neuen Plan schreiben",
+    ru: "Написать новый план",
+  },
+  district: {
+    tr: "İlçe / Bölge",
+    en: "District / Area",
+    de: "Bezirk / Gebiet",
+    ru: "Район / Зона",
+  },
+  districtPlaceholder: {
+    tr: "Örn: Kadıköy, Beşiktaş, Fatih",
+    en: "Ex: Kadıköy, Beşiktaş, Fatih",
+    de: "z. B. Kadıköy, Beşiktaş, Fatih",
+    ru: "Напр: Kadıköy, Beşiktaş, Fatih",
+  },
+  planCategory: {
+    tr: "Gezi Kategorisi",
+    en: "Trip Category",
+    de: "Reisekategorie",
+    ru: "Категория поездки",
+  },
+  categoryNature: {
+    tr: "Doğa",
+    en: "Nature",
+    de: "Natur",
+    ru: "Природа",
+  },
+  categoryCulture: {
+    tr: "Tarih / Müze",
+    en: "History / Museum",
+    de: "Geschichte / Museum",
+    ru: "История / Музеи",
+  },
+  categoryFood: {
+    tr: "Yeme İçme",
+    en: "Food",
+    de: "Essen",
+    ru: "Еда",
+  },
+  categoryMixed: {
+    tr: "Karma",
+    en: "Mixed",
+    de: "Gemischt",
+    ru: "Смешанный",
+  },
+  categoryShopping: {
+    tr: "Alışveriş",
+    en: "Shopping",
+    de: "Shopping",
+    ru: "Шопинг",
+  },
+  categoryHint: {
+    tr: "Seçtiğin kategoriye uymayan otel/restoran gibi yerler otomatik azaltılır.",
+    en: "Hotels/restaurants that do not match your category are automatically reduced.",
+    de: "Nicht passende Hotels/Restaurants werden automatisch reduziert.",
+    ru: "Отели/рестораны вне выбранной категории автоматически уменьшаются.",
+  },
   budgetPreference: {
     tr: "Bütçe Tercihi",
     en: "Budget Preference",
@@ -128,12 +194,224 @@ function categoryDisplay(category: string | undefined, language: string) {
   return language === "tr" ? "Gezilecek Yer" : language === "de" ? "Sehenswürdigkeit" : language === "ru" ? "Достопримечательность" : "Attraction";
 }
 
+
+type PlanCategory = "nature" | "culture" | "food" | "shopping" | "mixed";
+
+function preferredCategoryText(category: PlanCategory, language: string) {
+  return plannerText(
+    category === "nature"
+      ? "categoryNature"
+      : category === "culture"
+      ? "categoryCulture"
+      : category === "food"
+      ? "categoryFood"
+      : category === "shopping"
+      ? "categoryShopping"
+      : "categoryMixed",
+    language
+  );
+}
+
+function getPlaceCategoryScore(place: any, selectedCategory: PlanCategory) {
+  if (selectedCategory === "mixed") return 1;
+
+  const text = [
+    place?.name,
+    place?.category,
+    place?.subcategory,
+    place?.description,
+    place?.district,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const isHotel = text.includes("hotel") || text.includes("otel");
+  const isFood =
+    text.includes("restaurant") ||
+    text.includes("restoran") ||
+    text.includes("cafe") ||
+    text.includes("kafe") ||
+    text.includes("food") ||
+    text.includes("yemek");
+
+  if (selectedCategory !== "food" && (isHotel || isFood)) return -10;
+
+  if (selectedCategory === "nature") {
+    const words = ["nature", "doğa", "park", "forest", "orman", "garden", "bahçe", "beach", "plaj", "sahil", "view", "manzara", "lake", "göl"];
+    return words.some((word) => text.includes(word)) ? 10 : -2;
+  }
+
+  if (selectedCategory === "culture") {
+    const words = ["museum", "müze", "historical", "tarihi", "palace", "saray", "mosque", "cami", "church", "kilise", "gallery", "galeri", "culture", "kültür"];
+    return words.some((word) => text.includes(word)) ? 10 : -2;
+  }
+
+  if (selectedCategory === "food") {
+    return isFood ? 10 : -5;
+  }
+
+  if (selectedCategory === "shopping") {
+    const words = ["shopping", "alışveriş", "mall", "avm", "bazaar", "çarşı", "market"];
+    return words.some((word) => text.includes(word)) ? 10 : -3;
+  }
+
+  return 0;
+}
+
+function applyCategoryAndDistrictToPlan(planData: any, selectedCategory: PlanCategory, selectedDistrict: string) {
+  if (!planData) return planData;
+
+  const cleanDistrict = selectedDistrict.trim().toLowerCase();
+
+  const processPlaces = (places: any[] = []) => {
+    const scored = places
+      .map((place) => {
+        const districtText = String(place?.district || place?.area || "").toLowerCase();
+        const districtScore = cleanDistrict && districtText.includes(cleanDistrict) ? 6 : 0;
+        return {
+          ...place,
+          _clientScore: getPlaceCategoryScore(place, selectedCategory) + districtScore,
+        };
+      })
+      .filter((place) => selectedCategory === "mixed" || place._clientScore > -5)
+      .sort((a, b) => b._clientScore - a._clientScore);
+
+    return scored.length > 0 ? scored : places;
+  };
+
+  if (Array.isArray(planData.days)) {
+    return {
+      ...planData,
+      days: planData.days.map((day: any) => ({
+        ...day,
+        places: processPlaces(day.places || []),
+        note:
+          day.note ||
+          (cleanDistrict
+            ? `Plan ${selectedDistrict} bölgesi ve ${selectedCategory} kategorisi dikkate alınarak sıralandı.`
+            : `Plan ${selectedCategory} kategorisi dikkate alınarak sıralandı.`),
+      })),
+    };
+  }
+
+  if (Array.isArray(planData.places)) {
+    return {
+      ...planData,
+      places: processPlaces(planData.places),
+    };
+  }
+
+  return planData;
+}
+
+
 function escapeHtml(value: any) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
+
+
+function isIndoorRainyPlace(place: any) {
+  const text = [
+    place?.name,
+    place?.category,
+    place?.subcategory,
+    place?.description,
+    place?.district,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const indoorKeywords = [
+    "museum",
+    "müze",
+    "palace",
+    "saray",
+    "indoor",
+    "mall",
+    "avm",
+    "shopping",
+    "cafe",
+    "restaurant",
+    "gallery",
+    "galeri",
+    "mosque",
+    "cami",
+    "church",
+    "kilise",
+    "library",
+    "kütüphane",
+    "bazaar",
+    "çarşı",
+    "market",
+  ];
+
+  const outdoorKeywords = [
+    "park",
+    "beach",
+    "plaj",
+    "forest",
+    "orman",
+    "garden",
+    "bahçe",
+    "nature",
+    "doğa",
+    "trail",
+    "hiking",
+    "walking",
+    "sahil",
+    "square",
+    "meydan",
+  ];
+
+  const indoorScore = indoorKeywords.filter((word) => text.includes(word)).length;
+  const outdoorScore = outdoorKeywords.filter((word) => text.includes(word)).length;
+
+  return indoorScore >= outdoorScore;
+}
+
+function applyRainyModeToPlan(planData: any) {
+  if (!planData) return planData;
+
+  const sortPlaces = (places: any[] = []) => {
+    return [...places].sort((a, b) => {
+      const aIndoor = isIndoorRainyPlace(a) ? 1 : 0;
+      const bIndoor = isIndoorRainyPlace(b) ? 1 : 0;
+      return bIndoor - aIndoor;
+    });
+  };
+
+  if (Array.isArray(planData.days)) {
+    return {
+      ...planData,
+      rainy_mode_applied: true,
+      reply: planData.reply,
+      days: planData.days.map((day: any) => ({
+        ...day,
+        title: day.title || "Rainy Day Route",
+        note:
+          day.note ||
+          "Yağmurlu gün modu aktif: kapalı mekanlar, müzeler, kafeler ve daha az yürüyüş içeren duraklar önceliklendirildi.",
+        places: sortPlaces(day.places || []),
+      })),
+    };
+  }
+
+  if (Array.isArray(planData.places)) {
+    return {
+      ...planData,
+      rainy_mode_applied: true,
+      places: sortPlaces(planData.places),
+    };
+  }
+
+  return planData;
+}
+
 
 const COLORS = {
   bg: "#F7F4EF",
@@ -153,6 +431,8 @@ export default function TripPlanner() {
   const [city, setCity] = useState("");
   const [days, setDays] = useState("");
   const [interests, setInterests] = useState("");
+  const [district, setDistrict] = useState("");
+  const [planCategory, setPlanCategory] = useState<PlanCategory>("mixed");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [budget, setBudget] = useState<any>(null);
@@ -173,6 +453,8 @@ export default function TripPlanner() {
     setCity("");
     setDays("");
     setInterests("");
+    setDistrict("");
+    setPlanCategory("mixed");
     setBudgetPreference("medium");
     setRainyMode(false);
     setPlan(null);
@@ -184,6 +466,14 @@ export default function TripPlanner() {
 
   const updateCity = (value: string) => {
     setCity(value);
+    if (plan) {
+      setPlan(null);
+      setBudget(null);
+    }
+  };
+
+  const updateDistrict = (value: string) => {
+    setDistrict(value);
     if (plan) {
       setPlan(null);
       setBudget(null);
@@ -208,6 +498,14 @@ export default function TripPlanner() {
 
   const updateBudgetPreference = (value: "low" | "medium" | "high") => {
     setBudgetPreference(value);
+    if (plan) {
+      setPlan(null);
+      setBudget(null);
+    }
+  };
+
+  const updatePlanCategory = (value: PlanCategory) => {
+    setPlanCategory(value);
     if (plan) {
       setPlan(null);
       setBudget(null);
@@ -255,6 +553,8 @@ export default function TripPlanner() {
     const cleanCity = city.trim();
     const cleanDays = days.trim();
     const cleanInterests = interests.trim();
+    const cleanDistrict = district.trim();
+    const selectedCategoryLabel = preferredCategoryText(planCategory, language);
 
     if (!cleanCity || !cleanDays) {
       Alert.alert(t("tripPlanner.missingTitle"), t("tripPlanner.missingMessage"));
@@ -273,10 +573,29 @@ export default function TripPlanner() {
         },
         body: JSON.stringify({
           city: cleanCity,
+          district: cleanDistrict,
           days: Number(cleanDays),
-          interests: rainyMode
-            ? `${cleanInterests} | rainy day indoor museums malls less walking`
-            : cleanInterests,
+          category: planCategory,
+          interests: [
+            cleanInterests,
+            `Selected trip category: ${selectedCategoryLabel}`,
+            cleanDistrict ? `Preferred district/area: ${cleanDistrict}` : "",
+            planCategory === "nature"
+              ? "Prioritize nature, parks, gardens, coastline, views. Do not recommend hotels or restaurants unless clearly requested."
+              : "",
+            planCategory === "culture"
+              ? "Prioritize museums, historical places, palaces, mosques, galleries and cultural stops. Do not recommend hotels or restaurants unless clearly requested."
+              : "",
+            planCategory === "food"
+              ? "Prioritize restaurants, cafes and local food stops."
+              : "",
+            planCategory === "shopping"
+              ? "Prioritize malls, bazaars, shopping streets and markets. Do not recommend hotels unless requested."
+              : "",
+            rainyMode ? "rainy day indoor museums malls less walking" : "",
+          ]
+            .filter(Boolean)
+            .join(" | "),
           budget_preference: budgetPreference,
           rainy_mode: rainyMode,
           language,
@@ -284,11 +603,17 @@ export default function TripPlanner() {
       });
 
       const data = await res.json();
-      setPlan(data);
+      const weatherAdjustedPlan = rainyMode ? applyRainyModeToPlan(data) : data;
+      const finalPlan = applyCategoryAndDistrictToPlan(
+        weatherAdjustedPlan,
+        planCategory,
+        cleanDistrict
+      );
+      setPlan(finalPlan);
 
       const allPlaces =
-        data?.places ||
-        (data?.days || []).flatMap((day: any) => day.places || []);
+        finalPlan?.places ||
+        (finalPlan?.days || []).flatMap((day: any) => day.places || []);
 
       await fetchBudget(allPlaces, Number(cleanDays) || 1);
 
@@ -499,8 +824,7 @@ export default function TripPlanner() {
     try {
       if (!plan?.days?.length) return;
 
-      const raw = await AsyncStorage.getItem("saved_routes");
-      const list = raw ? JSON.parse(raw) : [];
+      const list = await readJson<any[]>(STORAGE_KEYS.savedRoutes, []);
 
       const route = {
         id: Date.now().toString(),
@@ -508,6 +832,8 @@ export default function TripPlanner() {
         city,
         days,
         interests,
+        district,
+        planCategory,
         budgetPreference,
         rainyMode,
         plan,
@@ -515,9 +841,9 @@ export default function TripPlanner() {
         createdAt: new Date().toISOString(),
       };
 
-      await AsyncStorage.setItem(
-        "saved_routes",
-        JSON.stringify([route, ...(Array.isArray(list) ? list : [])])
+      await writeJson(
+        STORAGE_KEYS.savedRoutes,
+        [route, ...(Array.isArray(list) ? list : [])]
       );
 
       Alert.alert(t("tripPlanner.routeSavedTitle"), t("tripPlanner.routeSavedMessage"));
@@ -564,6 +890,15 @@ export default function TripPlanner() {
             onChangeText={updateCity}
           />
 
+          <Text style={styles.label}>{plannerText("district", language)}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder={plannerText("districtPlaceholder", language)}
+            placeholderTextColor="#9CA3AF"
+            value={district}
+            onChangeText={updateDistrict}
+          />
+
           <Text style={styles.label}>{t("tripPlanner.days")}</Text>
           <TextInput
             style={styles.input}
@@ -573,6 +908,27 @@ export default function TripPlanner() {
             onChangeText={updateDays}
             keyboardType="numeric"
           />
+
+          <Text style={styles.label}>{plannerText("planCategory", language)}</Text>
+          <View style={styles.categoryChipRow}>
+            {(["mixed", "nature", "culture", "food", "shopping"] as PlanCategory[]).map((item) => {
+              const active = planCategory === item;
+
+              return (
+                <TouchableOpacity
+                  key={item}
+                  activeOpacity={0.86}
+                  style={[styles.categoryChip, active && styles.categoryChipActive]}
+                  onPress={() => updatePlanCategory(item)}
+                >
+                  <Text style={[styles.categoryChipText, active && styles.categoryChipTextActive]}>
+                    {preferredCategoryText(item, language)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text style={styles.categoryHint}>{plannerText("categoryHint", language)}</Text>
 
           <Text style={styles.label}>{t("tripPlanner.interests")}</Text>
           <TextInput
@@ -646,16 +1002,26 @@ export default function TripPlanner() {
             )}
           </TouchableOpacity>
 
-          {(plan || city || days || interests) && (
+          {(plan || city || district || days || interests || planCategory !== "mixed") && (
             <TouchableOpacity style={styles.clearButton} onPress={clearAll}>
               <Ionicons name="refresh-outline" size={16} color={COLORS.text} />
-              <Text style={styles.clearButtonText}>Yeni plan yaz</Text>
+              <Text style={styles.clearButtonText}>{plannerText("newPlan", language)}</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {plan && (
           <View style={styles.resultWrapper}>
+            {rainyMode && (
+              <View style={styles.rainyNotice}>
+                <Ionicons name="rainy-outline" size={19} color={COLORS.accent} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rainyNoticeTitle}>{plannerText("rainyMode", language)}</Text>
+                  <Text style={styles.rainyNoticeText}>{plannerText("rainyModeDesc", language)}</Text>
+                </View>
+              </View>
+            )}
+
             <View style={styles.resultHeader}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.resultTitle}>{t("tripPlanner.generatedPlan")}</Text>
@@ -668,7 +1034,7 @@ export default function TripPlanner() {
             <View style={styles.actionsRow}>
               <TouchableOpacity style={styles.actionButton} onPress={resetPlan}>
                 <Ionicons name="create-outline" size={16} color={COLORS.text} />
-                <Text style={styles.actionButtonText}>Düzenle</Text>
+                <Text style={styles.actionButtonText}>{plannerText("editPlan", language)}</Text>
               </TouchableOpacity>
 
               {plan.days?.length > 0 && (
@@ -898,6 +1264,45 @@ const styles = StyleSheet.create({
   },
 
 
+  categoryChipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 8,
+  },
+
+  categoryChip: {
+    backgroundColor: COLORS.surfaceSoft,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  categoryChipActive: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+
+  categoryChipText: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+
+  categoryChipTextActive: {
+    color: COLORS.white,
+  },
+
+  categoryHint: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    lineHeight: 17,
+    marginBottom: 14,
+    fontWeight: "600",
+  },
+
   budgetPreferenceRow: {
     flexDirection: "row",
     gap: 8,
@@ -1019,6 +1424,32 @@ const styles = StyleSheet.create({
 
   resultWrapper: {
     marginTop: 24,
+  },
+
+  rainyNotice: {
+    backgroundColor: "#FFF1F4",
+    borderWidth: 1,
+    borderColor: "rgba(232,93,117,0.18)",
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 14,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+
+  rainyNoticeTitle: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "900",
+    marginBottom: 3,
+  },
+
+  rainyNoticeText: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: "600",
   },
 
   resultHeader: {

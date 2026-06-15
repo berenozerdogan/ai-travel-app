@@ -9,12 +9,15 @@ import {
   StatusBar,
   ScrollView,
   Linking,
+  Image,
+  Modal,
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
+import { readJson, writeJson, STORAGE_KEYS } from "../../services/storageService";
 
 const COLORS = {
   bg: "#F7F4EF",
@@ -170,25 +173,30 @@ type TabKey = "places" | "visited" | "routes" | "journal";
 
 export default function Saved() {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
+  const isAccountReady = !!user;
   const [activeTab, setActiveTab] = useState<TabKey>("places");
   const [savedPlaces, setSavedPlaces] = useState<any[]>([]);
   const [savedRoutes, setSavedRoutes] = useState<any[]>([]);
   const [visitedPlaces, setVisitedPlaces] = useState<any[]>([]);
   const [journalItems, setJournalItems] = useState<any[]>([]);
+  const [selectedJournal, setSelectedJournal] = useState<any | null>(null);
 
   const loadAllSavedData = async () => {
     try {
-      const placesRaw = await AsyncStorage.getItem("saved_places");
-      const routesRaw = await AsyncStorage.getItem("saved_routes");
-      const notesRaw = await AsyncStorage.getItem("user_place_notes");
-      const journalRaw = await AsyncStorage.getItem("travel_journal");
-      const visitedRaw = await AsyncStorage.getItem("visited_places");
+      if (!isAccountReady) {
+        setSavedPlaces([]);
+        setSavedRoutes([]);
+        setVisitedPlaces([]);
+        setJournalItems([]);
+        return;
+      }
 
-      const places = placesRaw ? JSON.parse(placesRaw) : [];
-      const routes = routesRaw ? JSON.parse(routesRaw) : [];
-      const notes = notesRaw ? JSON.parse(notesRaw) : {};
-      const travelJournal = journalRaw ? JSON.parse(journalRaw) : [];
-      const visited = visitedRaw ? JSON.parse(visitedRaw) : [];
+      const places = await readJson<any[]>(STORAGE_KEYS.savedPlaces, []);
+      const routes = await readJson<any[]>(STORAGE_KEYS.savedRoutes, []);
+      const notes = await readJson<Record<string, string>>(STORAGE_KEYS.userPlaceNotes, {});
+      const travelJournal = await readJson<any[]>(STORAGE_KEYS.travelJournal, []);
+      const visited = await readJson<any[]>(STORAGE_KEYS.visitedPlaces, []);
 
       setSavedPlaces(Array.isArray(places) ? places : []);
       setSavedRoutes(Array.isArray(routes) ? routes : []);
@@ -215,7 +223,15 @@ export default function Saved() {
             note: item.note,
             placeName: item.placeName || item.name || "Gezi Notu",
             city: item.city || "",
-            place: item.placeId && item.placeId !== "route" ? { id: item.placeId } : null,
+            photoUri: item.photoUri || "",
+            locationLabel: item.locationLabel || "",
+            createdAt: item.createdAt || "",
+            place:
+              item.placeId &&
+              item.placeId !== "route" &&
+              !String(item.placeId).startsWith("photo")
+                ? { id: item.placeId }
+                : null,
           }))
         : [];
 
@@ -237,14 +253,14 @@ export default function Saved() {
   useFocusEffect(
     useCallback(() => {
       loadAllSavedData();
-    }, [])
+    }, [isAccountReady, user?.uid])
   );
 
   const removePlace = async (id: number) => {
     try {
       const updated = savedPlaces.filter((item) => Number(item.id) !== Number(id));
       setSavedPlaces(updated);
-      await AsyncStorage.setItem("saved_places", JSON.stringify(updated));
+      await writeJson(STORAGE_KEYS.savedPlaces, updated);
       loadAllSavedData();
     } catch (error) {
       console.log(error);
@@ -256,7 +272,7 @@ export default function Saved() {
     try {
       const updated = visitedPlaces.filter((item) => Number(item.id) !== Number(id));
       setVisitedPlaces(updated);
-      await AsyncStorage.setItem("visited_places", JSON.stringify(updated));
+      await writeJson(STORAGE_KEYS.visitedPlaces, updated);
       loadAllSavedData();
     } catch (error) {
       console.log(error);
@@ -268,7 +284,7 @@ export default function Saved() {
     try {
       const updated = savedRoutes.filter((item) => String(item.id) !== String(routeId));
       setSavedRoutes(updated);
-      await AsyncStorage.setItem("saved_routes", JSON.stringify(updated));
+      await writeJson(STORAGE_KEYS.savedRoutes, updated);
     } catch (error) {
       console.log(error);
       Alert.alert(safeT(t, "saved.removeErrorTitle", "Hata", language), safeT(t, "saved.routeRemoveError", "Rota silinemedi.", language));
@@ -277,17 +293,15 @@ export default function Saved() {
 
   const removeJournalNote = async (id: string) => {
     try {
-      const raw = await AsyncStorage.getItem("user_place_notes");
-      const notes = raw ? JSON.parse(raw) : {};
+      const notes = await readJson<Record<string, string>>(STORAGE_KEYS.userPlaceNotes, {});
       delete notes[id];
-      await AsyncStorage.setItem("user_place_notes", JSON.stringify(notes));
+      await writeJson(STORAGE_KEYS.userPlaceNotes, notes);
 
-      const journalRaw = await AsyncStorage.getItem("travel_journal");
-      const journal = journalRaw ? JSON.parse(journalRaw) : [];
+      const journal = await readJson<any[]>(STORAGE_KEYS.travelJournal, []);
       const updatedJournal = Array.isArray(journal)
         ? journal.filter((item: any) => String(item.id) !== String(id))
         : [];
-      await AsyncStorage.setItem("travel_journal", JSON.stringify(updatedJournal));
+      await writeJson(STORAGE_KEYS.travelJournal, updatedJournal);
 
       loadAllSavedData();
     } catch (error) {
@@ -319,6 +333,85 @@ export default function Saved() {
 
     await Linking.openURL(`mailto:?subject=${encodeURIComponent(route.title || "Saved Route")}&body=${encodeURIComponent(text)}`).catch(() => {});
   };
+
+  if (!isAccountReady) {
+    return (
+      <View style={styles.screen}>
+        <StatusBar barStyle="dark-content" />
+
+      <Modal
+        visible={!!selectedJournal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSelectedJournal(null)}
+      >
+        <View style={styles.journalDetailOverlay}>
+          <View style={styles.journalDetailCard}>
+            <View style={styles.journalDetailHeader}>
+              <Text style={styles.journalDetailTitle}>
+                {selectedJournal?.placeName || safeT(t, "saved.journal", "Günlük", language)}
+              </Text>
+              <TouchableOpacity style={styles.journalDetailClose} onPress={() => setSelectedJournal(null)}>
+                <Ionicons name="close" size={20} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
+
+            {selectedJournal?.photoUri ? (
+              <Image source={{ uri: selectedJournal.photoUri }} style={styles.journalDetailImage} />
+            ) : null}
+
+            {selectedJournal?.locationLabel || selectedJournal?.city ? (
+              <View style={styles.journalDetailLocation}>
+                <Ionicons name="location-outline" size={15} color={COLORS.accent} />
+                <Text style={styles.journalDetailLocationText}>
+                  {selectedJournal?.locationLabel || selectedJournal?.city}
+                </Text>
+              </View>
+            ) : null}
+
+            <Text style={styles.journalDetailNote}>{selectedJournal?.note}</Text>
+
+            {selectedJournal?.place ? (
+              <TouchableOpacity
+                style={styles.journalDetailButton}
+                onPress={() => {
+                  const place = selectedJournal.place;
+                  setSelectedJournal(null);
+                  openPlace(place);
+                }}
+              >
+                <Text style={styles.journalDetailButtonText}>
+                  {language === "tr" ? "Mekan Detayına Git" : "Open Place Detail"}
+                </Text>
+                <Ionicons name="chevron-forward" size={17} color={COLORS.white} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        </View>
+      </Modal>
+
+
+        <LinearGradient
+          colors={["#FFFFFF", "#FAF8F5", "#F7F4EF"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.hero}
+        >
+          <Text style={styles.title}>{safeT(t, "saved.title", "Favoriler", language)}</Text>
+          <Text style={styles.subtitle}>Favoriler, ziyaretler, rotalar ve gezi günlüğü için giriş yapmalısın.</Text>
+        </LinearGradient>
+
+        <View style={styles.authGateCard}>
+          <Ionicons name="lock-closed-outline" size={42} color={COLORS.accent} />
+          <Text style={styles.authGateTitle}>Giriş gerekli</Text>
+          <Text style={styles.authGateText}>Bu sayfadaki kişisel seyahat verileri hesabına bağlı saklanır. Devam etmek için giriş yap veya kayıt ol.</Text>
+          <TouchableOpacity style={styles.authGateButton} onPress={() => router.push("/(tabs)/profile" as any)}>
+            <Text style={styles.authGateButtonText}>Profil'e Git</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   const renderTabs = () => (
     <View style={styles.tabsRow}>
@@ -433,10 +526,19 @@ export default function Saved() {
         contentContainerStyle={{ paddingBottom: 120 }}
         renderItem={({ item }) => (
           <View style={styles.journalCard}>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => item.place ? openPlace(item.place) : null}>
+            <TouchableOpacity
+              style={{ flex: 1 }}
+              activeOpacity={0.88}
+              onPress={() => setSelectedJournal(item)}
+            >
+              {item.photoUri ? (
+                <Image source={{ uri: item.photoUri }} style={styles.journalThumb} />
+              ) : null}
               <Text style={styles.name}>{item.placeName}</Text>
-              {item.city ? <Text style={styles.meta}>{item.city}</Text> : null}
-              <Text style={styles.noteText}>“{item.note}”</Text>
+              {item.locationLabel || item.city ? (
+                <Text style={styles.meta}>{item.locationLabel || item.city}</Text>
+              ) : null}
+              <Text style={styles.noteText} numberOfLines={2}>“{item.note}”</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.removeButton} onPress={() => removeJournalNote(item.id)}>
               <Ionicons name="trash-outline" size={16} color={COLORS.white} />
@@ -450,6 +552,59 @@ export default function Saved() {
   return (
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content" />
+
+      <Modal
+        visible={!!selectedJournal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSelectedJournal(null)}
+      >
+        <View style={styles.journalDetailOverlay}>
+          <View style={styles.journalDetailCard}>
+            <View style={styles.journalDetailHeader}>
+              <Text style={styles.journalDetailTitle}>
+                {selectedJournal?.placeName || safeT(t, "saved.journal", "Günlük", language)}
+              </Text>
+              <TouchableOpacity style={styles.journalDetailClose} onPress={() => setSelectedJournal(null)}>
+                <Ionicons name="close" size={20} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
+
+            {selectedJournal?.photoUri ? (
+              <Image source={{ uri: selectedJournal.photoUri }} style={styles.journalDetailImage} />
+            ) : null}
+
+            {selectedJournal?.locationLabel || selectedJournal?.city ? (
+              <View style={styles.journalDetailLocation}>
+                <Ionicons name="location-outline" size={15} color={COLORS.accent} />
+                <Text style={styles.journalDetailLocationText}>
+                  {selectedJournal?.locationLabel || selectedJournal?.city}
+                </Text>
+              </View>
+            ) : null}
+
+            <Text style={styles.journalDetailNote}>{selectedJournal?.note}</Text>
+
+            {selectedJournal?.place ? (
+              <TouchableOpacity
+                style={styles.journalDetailButton}
+                onPress={() => {
+                  const place = selectedJournal.place;
+                  setSelectedJournal(null);
+                  openPlace(place);
+                }}
+              >
+                <Text style={styles.journalDetailButtonText}>
+                  {language === "tr" ? "Mekan Detayına Git" : "Open Place Detail"}
+                </Text>
+                <Ionicons name="chevron-forward" size={17} color={COLORS.white} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        </View>
+      </Modal>
+
+
       <LinearGradient colors={["#FFFFFF", "#FAF8F5", "#F7F4EF"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <View style={styles.topRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -511,4 +666,134 @@ const styles = StyleSheet.create({
   smallActionButton: { width: 34, height: 34, borderRadius: 12, backgroundColor: COLORS.surfaceSoft, alignItems: "center", justifyContent: "center", marginLeft: 6, borderWidth: 1, borderColor: COLORS.border },
   smallActionButtonDanger: { width: 34, height: 34, borderRadius: 12, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center", marginLeft: 6 },
   removeButton: { width: 38, height: 38, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.accent, marginLeft: 8 },
+  authGateCard: {
+  backgroundColor: COLORS.surface,
+  borderRadius: 24,
+  padding: 24,
+  margin: 20,
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.2,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 3,
+},
+
+authGateTitle: {
+  color: COLORS.text,
+  fontSize: 22,
+  fontWeight: "800",
+  marginTop: 12,
+  marginBottom: 8,
+},
+
+authGateText: {
+  color: COLORS.textSoft,
+  fontSize: 15,
+  lineHeight: 22,
+  textAlign: "center",
+  marginBottom: 18,
+},
+
+authGateButton: {
+  backgroundColor: COLORS.accent,
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  borderRadius: 14,
+},
+
+authGateButtonText: {
+  color: COLORS.white,
+  fontSize: 14,
+  fontWeight: "700",
+},
+  journalThumb: {
+    width: "100%",
+    height: 145,
+    borderRadius: 18,
+    backgroundColor: COLORS.surfaceSoft,
+    marginBottom: 10,
+  },
+  journalDetailOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.30)",
+    justifyContent: "flex-end",
+  },
+  journalDetailCard: {
+    backgroundColor: COLORS.bg,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 18,
+    maxHeight: "88%",
+  },
+  journalDetailHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  journalDetailTitle: {
+    flex: 1,
+    color: COLORS.text,
+    fontSize: 20,
+    fontWeight: "900",
+    marginRight: 10,
+  },
+  journalDetailClose: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: COLORS.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  journalDetailImage: {
+    width: "100%",
+    height: 260,
+    borderRadius: 22,
+    backgroundColor: COLORS.surfaceSoft,
+    marginBottom: 12,
+  },
+  journalDetailLocation: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 10,
+  },
+  journalDetailLocationText: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    fontWeight: "700",
+    flex: 1,
+  },
+  journalDetailNote: {
+    color: COLORS.text,
+    fontSize: 15,
+    lineHeight: 23,
+    fontWeight: "600",
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  journalDetailButton: {
+    marginTop: 12,
+    backgroundColor: COLORS.accent,
+    borderRadius: 18,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  journalDetailButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "900",
+  },
 });
+

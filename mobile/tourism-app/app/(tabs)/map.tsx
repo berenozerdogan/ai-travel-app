@@ -21,7 +21,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import * as Speech from "expo-speech";
+import { Audio } from "expo-av";
 import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
 
 type Place = {
   id: number;
@@ -201,9 +203,23 @@ function safeT(
 
 function normalizeCategory(category?: string) {
   const c = String(category || "").toLowerCase();
+
   if (c.includes("restaurant") || c.includes("food") || c.includes("cafe")) return "restaurant";
   if (c.includes("hotel")) return "hotel";
-  if (c.includes("attraction") || c.includes("tourism") || c.includes("museum") || c.includes("park")) return "attraction";
+
+  if (
+    c.includes("attraction") ||
+    c.includes("tourism") ||
+    c.includes("museum") ||
+    c.includes("park") ||
+    c.includes("landmark") ||
+    c.includes("historical") ||
+    c.includes("palace") ||
+    c.includes("mosque")
+  ) {
+    return "attraction";
+  }
+
   return c || "attraction";
 }
 
@@ -223,7 +239,17 @@ function categoryDisplay(category: string | undefined, language: string) {
     if (language === "ru") return "Отель";
     return "Hotel";
   }
-
+  if (
+  c === "landmark" ||
+  c === "historical" ||
+  c === "museum" ||
+  c === "tourism"
+) {
+  if (language === "tr") return "Gezilecek Yer";
+  if (language === "de") return "Sehenswürdigkeit";
+  if (language === "ru") return "Достопримечательность";
+  return "Attraction";
+}
   if (c === "attraction") {
     if (language === "tr") return "Gezilecek Yer";
     if (language === "de") return "Sehenswürdigkeit";
@@ -293,78 +319,58 @@ function placeMood(category: string, subcategory: string | undefined, language: 
 }
 
 function guideTextForPlace(place: Place, language: string) {
-  const city = place.city || (language === "tr" ? "Türkiye" : "Turkey");
+  const city = place.city || "Türkiye";
   const district = place.district
     ? String(place.district).replace(/^\d{5}\s*/, "").split(/[\/,]/)[0].trim()
     : "";
-  const visitTime = Number(place.estimated_visit_time || 45);
-  const description = cleanGuideDescription(String(place.description || ""), language);
+
+  const name = place.name;
   const c = normalizeCategory(place.category);
-  const mood = placeMood(place.category, place.subcategory, language);
+  const sub = String(place.subcategory || "").toLowerCase();
+  const tags = "";
+  const visitTime = Number(place.estimated_visit_time || 45);
 
+  const description = String(place.description || "").toLowerCase();
+
+const isNature =
+  sub.includes("nature") ||
+  sub.includes("beach") ||
+  sub.includes("park") ||
+  description.includes("nature") ||
+  description.includes("park") ||
+  description.includes("forest") ||
+  description.includes("beach");
+
+const isHistorical =
+  sub.includes("historical") ||
+  sub.includes("museum") ||
+  sub.includes("history") ||
+  description.includes("historical") ||
+  description.includes("history") ||
+  description.includes("museum") ||
+  description.includes("palace") ||
+  description.includes("mosque");
   if (language === "tr") {
-    const placeType =
-      c === "hotel"
-        ? "konaklama noktası"
-        : c === "restaurant"
-        ? "yeme içme durağı"
-        : "gezi durağı";
+    if (c === "restaurant") {
+      return `${name}, ${city}${district ? " " + district : ""} bölgesinde rotana keyifli bir mola ekleyebileceğin bir yeme içme durağı. Burayı özellikle gezi arasında dinlenmek, çevreyi izlemek ve kısa bir ara vermek için değerlendirebilirsin. Ortalama mola süresi yaklaşık ${visitTime} dakika.`;
+    }
 
-    const opening = `Sesli rehbere hoş geldin. Şu anda ${city}${district ? " " + district : ""} bölgesindeki ${place.name} adlı ${placeType} üzerindesin.`;
+    if (c === "hotel") {
+      return `${name}, ${city}${district ? " " + district : ""} bölgesinde konaklama planı yaparken değerlendirebileceğin bir nokta. Çevredeki gezilecek yerlere yakınlığına, ulaşım kolaylığına ve rotana uygunluğuna bakmanı öneririm.`;
+    }
 
-    const detail = description
-      ? `Burası kısaca şöyle anlatılabilir: ${description}.`
-      : `Burası ${mood}.`;
+    if (isNature) {
+      return `${name}, ${city}${district ? " " + district : ""} bölgesinde doğa, manzara ve sakin bir keşif için güzel bir durak. Burada acele etmeden yürüyebilir, fotoğraf çekebilir ve rotana daha huzurlu bir mola ekleyebilirsin. Ortalama ziyaret süresi yaklaşık ${visitTime} dakika.`;
+    }
 
-    const advice =
-      c === "restaurant"
-        ? "Yakındaki gezi noktalarından sonra burada mola vermek rotanı daha dengeli hale getirebilir."
-        : c === "hotel"
-        ? "Konumunu, ulaşım kolaylığını ve çevredeki gezi duraklarına yakınlığını değerlendirmeni öneririm."
-        : "Burayı tek başına ziyaret edebilir ya da çevredeki diğer duraklarla birlikte kısa ve keyifli bir rota oluşturabilirsin.";
+    if (isHistorical) {
+      return `${name}, ${city}${district ? " " + district : ""} bölgesinin tarih ve kültür dokusunu hissedebileceğin önemli duraklardan biri. Burayı gezerken mimari detaylara, çevredeki tarihi izlere ve mekânın atmosferine dikkat etmeni öneririm. Ortalama ziyaret süresi yaklaşık ${visitTime} dakika.`;
+    }
 
-    return `${opening} ${detail} ${advice} Ortalama ziyaret süresi yaklaşık ${visitTime} dakika. Hazırsan yol tarifi butonuyla navigasyonu başlatabilirsin.`;
+    return `${name}, ${city}${district ? " " + district : ""} rotanda kısa ama keyifli bir keşif durağı olabilir. Çevredeki diğer noktalarla birlikte planladığında daha dengeli ve akıcı bir gezi rotası oluşturabilirsin. Ortalama ziyaret süresi yaklaşık ${visitTime} dakika.`;
   }
 
-  if (language === "de") {
-    const placeType = c === "hotel" ? "Unterkunftspunkt" : c === "restaurant" ? "Essensstopp" : "Reisestopp";
-    const opening = `Willkommen beim Audioguide. Du befindest dich gerade bei ${place.name}, einem ${placeType} in ${city}${district ? " " + district : ""}.`;
-    const detail = description ? `Kurz gesagt: ${description}.` : `Dieser Ort ist ${mood}.`;
-    const advice =
-      c === "restaurant"
-        ? "Nach nahegelegenen Sehenswürdigkeiten kann dieser Ort eine gute Pause sein."
-        : c === "hotel"
-        ? "Achte besonders auf die Lage, die Erreichbarkeit und die Nähe zu deinen geplanten Stopps."
-        : "Du kannst diesen Ort einzeln besuchen oder mit nahegelegenen Stopps zu einer angenehmen Route verbinden.";
-
-    return `${opening} ${detail} ${advice} Die empfohlene Aufenthaltsdauer beträgt ungefähr ${visitTime} Minuten. Wenn du bereit bist, kannst du über die Navigationstaste den Weg starten.`;
-  }
-
-  if (language === "ru") {
-    const placeType = c === "hotel" ? "место проживания" : c === "restaurant" ? "остановка для еды" : "туристическая точка";
-    const opening = `Добро пожаловать в аудиогид. Сейчас вы находитесь у места ${place.name}, это ${placeType} в городе ${city}${district ? " " + district : ""}.`;
-    const detail = description ? `Кратко об этом месте: ${description}.` : `Это ${mood}.`;
-    const advice =
-      c === "restaurant"
-        ? "После ближайших достопримечательностей здесь можно сделать хорошую паузу."
-        : c === "hotel"
-        ? "Оцените расположение, удобство транспорта и близость к точкам вашего маршрута."
-        : "Это место можно посетить отдельно или объединить с ближайшими точками в приятный маршрут.";
-
-    return `${opening} ${detail} ${advice} Рекомендуемое время посещения — около ${visitTime} минут. Когда будете готовы, нажмите кнопку навигации.`;
-  }
-
-  const placeType = c === "hotel" ? "stay point" : c === "restaurant" ? "food stop" : "sightseeing stop";
-  const opening = `Welcome to the voice guide. You are now at ${place.name}, a ${placeType} in ${city}${district ? " " + district : ""}.`;
-  const detail = description ? `In short: ${description}.` : `This place is ${mood}.`;
-  const advice =
-    c === "restaurant"
-      ? "It can be a good pause after visiting nearby attractions."
-      : c === "hotel"
-      ? "Consider its location, transport access and distance to your planned stops."
-      : "You can visit it on its own or combine it with nearby stops for a smoother route.";
-
-  return `${opening} ${detail} ${advice} The suggested visit time is around ${visitTime} minutes. When you are ready, use the navigation button to start directions.`;
+  return `${name} is a useful stop in ${city}${district ? " " + district : ""}. You can add it to your route as a short and pleasant discovery point. Suggested visit time is around ${visitTime} minutes.`;
 }
 
 function getMarkerColor(category?: string) {
@@ -389,6 +395,22 @@ function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number) {
 
 export default function MapScreen() {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
+  const isAccountReady = !!user;
+  const storageKey = (key: string) => isAccountReady ? `${key}_${user.uid}` : key;
+
+  const requireLogin = () => {
+    if (isAccountReady) return true;
+    Alert.alert(
+      "Giriş gerekli",
+      "Bu işlemi yapmak için giriş yapmalısın.",
+      [
+        { text: "Vazgeç" },
+        { text: "Profil'e Git", onPress: () => router.push("/(tabs)/profile" as any) },
+      ]
+    );
+    return false;
+  };
   const params = useLocalSearchParams();
   const mapRef = useRef<MapView | null>(null);
 
@@ -400,6 +422,7 @@ export default function MapScreen() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [listVisible, setListVisible] = useState(false);
   const [usefulVisible, setUsefulVisible] = useState(false);
+  const [nearbyVisible, setNearbyVisible] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [weatherAdvice, setWeatherAdvice] = useState<string>("");
   const [userLocation, setUserLocation] = useState<Location.LocationObjectCoords | null>(null);
@@ -432,7 +455,11 @@ export default function MapScreen() {
 
   const loadSavedPlaces = async () => {
     try {
-      const raw = await AsyncStorage.getItem("saved_places");
+      if (!isAccountReady) {
+        setSavedPlaces([]);
+        return;
+      }
+      const raw = await AsyncStorage.getItem(storageKey("saved_places"));
       setSavedPlaces(raw ? JSON.parse(raw) : []);
     } catch (error) {
       setSavedPlaces([]);
@@ -460,7 +487,7 @@ export default function MapScreen() {
   useEffect(() => {
     loadPlaces();
     loadSavedPlaces();
-  }, [language]);
+  }, [language, isAccountReady, user?.uid]);
 
   useEffect(() => {
     loadRouteFromParams();
@@ -669,11 +696,12 @@ export default function MapScreen() {
   };
 
   const saveRoute = async () => {
+    if (!requireLogin()) return;
     try {
       const list = routePlaces.length ? routePlaces : filteredPlaces.slice(0, 8);
       if (!list.length) return;
 
-      const raw = await AsyncStorage.getItem("saved_routes");
+      const raw = await AsyncStorage.getItem(storageKey("saved_routes"));
       const old = raw ? JSON.parse(raw) : [];
 
       const route = {
@@ -683,7 +711,7 @@ export default function MapScreen() {
         createdAt: new Date().toISOString(),
       };
 
-      await AsyncStorage.setItem("saved_routes", JSON.stringify([route, ...(Array.isArray(old) ? old : [])]));
+      await AsyncStorage.setItem(storageKey("saved_routes"), JSON.stringify([route, ...(Array.isArray(old) ? old : [])]));
       Alert.alert(
         safeT(t, "map.routeSavedTitle", "Rota kaydedildi", language),
         safeT(t, "map.routeSavedMessage", "Bu rotayı Favoriler > Rotalar bölümünde görebilirsin.", language)
@@ -725,7 +753,33 @@ export default function MapScreen() {
         return;
       }
 
-      const text = guideTextForPlace(place, language);
+      let text = guideTextForPlace(place, language);
+
+try {
+  const res = await fetch(`${API_BASE_URL}/voice-guide`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: place.name,
+      city: place.city,
+      district: place.district,
+      category: place.category,
+      subcategory: place.subcategory,
+      description: place.description,
+      language,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (data?.guide) {
+    text = data.guide;
+  }
+} catch (error) {
+  console.log("AI voice guide error:", error);
+}
       console.log("Voice guide text:", text.slice(0, 180));
 
       const preferredLanguage =
@@ -757,6 +811,19 @@ export default function MapScreen() {
       // iOS / Expo Go tarafında konuşma bazen çok hızlı tetiklenince ses çıkmayabiliyor.
       // Önce aktif konuşmayı temizleyip kısa gecikmeyle başlatıyoruz.
       await Speech.stop();
+
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+        });
+      } catch (audioModeError) {
+        console.log("audio mode error", audioModeError);
+      }
+
       setIsSpeaking(true);
 
       setTimeout(() => {
@@ -802,10 +869,11 @@ export default function MapScreen() {
   };
 
   const saveNote = async () => {
+    if (!requireLogin()) return;
     try {
       if (!selectedPlace || !noteText.trim()) return;
 
-      const raw = await AsyncStorage.getItem("travel_journal");
+      const raw = await AsyncStorage.getItem(storageKey("travel_journal"));
       const old = raw ? JSON.parse(raw) : [];
 
       const note = {
@@ -817,7 +885,7 @@ export default function MapScreen() {
         createdAt: new Date().toISOString(),
       };
 
-      await AsyncStorage.setItem("travel_journal", JSON.stringify([note, ...(Array.isArray(old) ? old : [])]));
+      await AsyncStorage.setItem(storageKey("travel_journal"), JSON.stringify([note, ...(Array.isArray(old) ? old : [])]));
       setNoteText("");
 
       Alert.alert(
@@ -1065,10 +1133,11 @@ export default function MapScreen() {
   };
 
   const addRouteToJournal = async () => {
+    if (!requireLogin()) return;
     try {
       if (!routePlaces.length) return;
 
-      const raw = await AsyncStorage.getItem("travel_journal");
+      const raw = await AsyncStorage.getItem(storageKey("travel_journal"));
       const old = raw ? JSON.parse(raw) : [];
 
       const note = {
@@ -1213,7 +1282,7 @@ export default function MapScreen() {
           style={styles.roundButtonLarge}
           onPress={async () => {
             await focusUserLocation();
-            setListVisible(true);
+            setNearbyVisible(true);
           }}
         >
           <Ionicons name="walk-outline" size={22} color={COLORS.text} />
@@ -1534,7 +1603,7 @@ export default function MapScreen() {
         </View>
       </Modal>
 
-      {userLocation && nearbyPlaces.length > 0 && routePlaces.length === 0 && (
+      {nearbyVisible && userLocation && nearbyPlaces.length > 0 && routePlaces.length === 0 && (
         <View style={styles.nearbyCard}>
           <View style={styles.nearbyHeader}>
             <View>
@@ -1545,9 +1614,15 @@ export default function MapScreen() {
                 {safeT(t, "map.nearMeSubtitle", "Konumuna en yakın gezi noktaları", language)}
               </Text>
             </View>
-            <TouchableOpacity onPress={() => setListVisible(true)}>
-              <Text style={styles.nearbySeeAll}>{safeT(t, "home.seeAll", "Tümünü Gör", language)}</Text>
-            </TouchableOpacity>
+            <View style={styles.nearbyHeaderActions}>
+              <TouchableOpacity onPress={() => setListVisible(true)}>
+                <Text style={styles.nearbySeeAll}>{safeT(t, "home.seeAll", "Tümünü Gör", language)}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.nearbyCloseButton} onPress={() => setNearbyVisible(false)}>
+                <Ionicons name="close-outline" size={18} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -1557,6 +1632,7 @@ export default function MapScreen() {
                 style={styles.nearbyMiniCard}
                 activeOpacity={0.88}
                 onPress={() => {
+                  setNearbyVisible(false);
                   setSelectedPlace(place);
                   mapRef.current?.animateToRegion(
                     {
@@ -2457,6 +2533,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 2,
   },
+  nearbyHeaderActions: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10,
+},
+
+nearbyCloseButton: {
+  width: 30,
+  height: 30,
+  borderRadius: 15,
+  backgroundColor: COLORS.surfaceSoft,
+  alignItems: "center",
+  justifyContent: "center",
+  borderWidth: 1,
+  borderColor: COLORS.border,
+},
   nearbySeeAll: {
     color: COLORS.accent,
     fontSize: 12,

@@ -13,6 +13,7 @@ import {
   ScrollView,
   Alert,
   Image,
+  Modal,
 } from "react-native";
 import { router } from "expo-router";
 import {
@@ -21,8 +22,9 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
+import { readJson, writeJson, STORAGE_KEYS } from "../../services/storageService";
 
 const { width } = Dimensions.get("window");
 
@@ -134,10 +136,129 @@ function homeText(key: string, language: string) {
       de: "Alle Vorschläge ansehen",
       ru: "Показать все",
     },
+    searchPlaceholderBetter: {
+      tr: "Şehir, müze veya restoran ara...",
+      en: "Search city, museum or restaurant...",
+      de: "Stadt, Museum oder Restaurant suchen...",
+      ru: "Найти город, музей или ресторан...",
+    },
+    loginRequiredTitle: {
+      tr: "Giriş gerekli",
+      en: "Login required",
+      de: "Anmeldung erforderlich",
+      ru: "Требуется вход",
+    },
+    loginRequiredMessage: {
+      tr: "Bu özelliği kullanabilmek için giriş yapmalısın.",
+      en: "You need to log in to use this feature.",
+      de: "Du musst dich anmelden, um diese Funktion zu nutzen.",
+      ru: "Чтобы использовать эту функцию, необходимо войти.",
+    },
+    cancel: {
+      tr: "Vazgeç",
+      en: "Cancel",
+      de: "Abbrechen",
+      ru: "Отмена",
+    },
+    goProfile: {
+      tr: "Profil'e Git",
+      en: "Go to Profile",
+      de: "Zum Profil",
+      ru: "В профиль",
+    },
+    weatherCloudy: {
+      tr: "Bulutlu",
+      en: "Cloudy",
+      de: "Bewölkt",
+      ru: "Облачно",
+    },
+    weatherRainy: {
+      tr: "Yağmurlu",
+      en: "Rainy",
+      de: "Regnerisch",
+      ru: "Дождливо",
+    },
+    weatherSnowy: {
+      tr: "Karlı",
+      en: "Snowy",
+      de: "Schnee",
+      ru: "Снег",
+    },
+    weatherFoggy: {
+      tr: "Sisli",
+      en: "Foggy",
+      de: "Neblig",
+      ru: "Туман",
+    },
+    weatherUnknown: {
+      tr: "Güncel",
+      en: "Current",
+      de: "Aktuell",
+      ru: "Текущая",
+    },
+    surveyTitle: {
+      tr: "Seyahat Testini Çöz",
+      en: "Take the Travel Quiz",
+      de: "Reisetest machen",
+      ru: "Пройти тест путешествий",
+    },
+    surveyDesc: {
+      tr: "Kısa testi çöz; AI ilgi alanlarına, bütçene ve gezi tempona göre yerler önersin.",
+      en: "Take a short quiz so AI can suggest places based on your interests, budget and travel pace.",
+      de: "Mache einen kurzen Test, damit AI passende Orte nach Interessen, Budget und Tempo empfiehlt.",
+      ru: "Пройдите короткий тест, чтобы AI предложил места по интересам, бюджету и темпу поездки.",
+    },
+    startSurvey: {
+      tr: "Teste Başla",
+      en: "Start Quiz",
+      de: "Test starten",
+      ru: "Начать тест",
+    },
+    personalizedForYou: {
+      tr: "Sana Özel Öneriler",
+      en: "Personalized Picks",
+      de: "Persönliche Empfehlungen",
+      ru: "Персональные рекомендации",
+    },
+    retakeSurvey: {
+      tr: "Testi Yenile",
+      en: "Retake Quiz",
+      de: "Test wiederholen",
+      ru: "Пройти заново",
+    },
+    finishSurvey: {
+      tr: "Test Sonucunu Oluştur",
+      en: "Create Quiz Result",
+      de: "Testergebnis erstellen",
+      ru: "Создать результат теста",
+    },
   };
 
   const lang = String(language || "en").toLowerCase();
   return texts[key]?.[lang] || texts[key]?.en || key;
+}
+
+
+function weatherTextFromCode(code: number, language: string) {
+  if (code === 0 || code === 1) return homeText("sunny", language);
+  if (code === 2 || code === 3) return homeText("weatherCloudy", language);
+  if (code === 45 || code === 48) return homeText("weatherFoggy", language);
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99)) {
+    return homeText("weatherRainy", language);
+  }
+  if (code >= 71 && code <= 77) return homeText("weatherSnowy", language);
+  return homeText("weatherUnknown", language);
+}
+
+function weatherIconFromCode(code: number) {
+  if (code === 0 || code === 1) return "sunny";
+  if (code === 2 || code === 3) return "partly-sunny";
+  if (code === 45 || code === 48) return "cloudy";
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99)) {
+    return "rainy";
+  }
+  if (code >= 71 && code <= 77) return "snow";
+  return "partly-sunny";
 }
 
 function categoryDisplay(category: string | undefined, language: string) {
@@ -244,6 +365,21 @@ function SmartImageBackground({
 
 export default function Home() {
   const { language, t } = useLanguage();
+  const { user } = useAuth();
+  const isAccountReady = !!user;
+
+  const requireLogin = () => {
+    if (isAccountReady) return true;
+    Alert.alert(
+      homeText("loginRequiredTitle", language),
+      homeText("loginRequiredMessage", language),
+      [
+        { text: homeText("cancel", language) },
+        { text: homeText("goProfile", language), onPress: () => router.push("/(tabs)/profile" as any) },
+      ]
+    );
+    return false;
+  };
   const categories = [
     {
       key: "attractions",
@@ -295,11 +431,92 @@ export default function Home() {
     },
   ];
 
+
+  const surveyQuestions = [
+    {
+      key: "pace",
+      question: {
+        tr: "Gezide tempon nasıl olsun?",
+        en: "What pace do you prefer?",
+        de: "Welches Tempo bevorzugst du?",
+        ru: "Какой темп поездки предпочитаете?",
+      },
+      options: [
+        { label: { tr: "Sakin", en: "Calm", de: "Ruhig", ru: "Спокойный" }, value: "calm" },
+        { label: { tr: "Dolu dolu", en: "Packed", de: "Intensiv", ru: "Насыщенный" }, value: "active" },
+      ],
+    },
+    {
+      key: "interest",
+      question: {
+        tr: "En çok ne ilgini çeker?",
+        en: "What interests you most?",
+        de: "Was interessiert dich am meisten?",
+        ru: "Что вам интереснее всего?",
+      },
+      options: [
+        { label: { tr: "Tarih / Müze", en: "History / Museum", de: "Geschichte / Museum", ru: "История / Музеи" }, value: "museum historical palace culture" },
+        { label: { tr: "Yemek / Kafe", en: "Food / Café", de: "Essen / Café", ru: "Еда / Кафе" }, value: "restaurant cafe food" },
+        { label: { tr: "Doğa / Manzara", en: "Nature / View", de: "Natur / Aussicht", ru: "Природа / Вид" }, value: "nature park beach view" },
+      ],
+    },
+    {
+      key: "budget",
+      question: {
+        tr: "Bütçen nasıl?",
+        en: "What is your budget?",
+        de: "Wie ist dein Budget?",
+        ru: "Какой у вас бюджет?",
+      },
+      options: [
+        { label: { tr: "Ekonomik", en: "Budget", de: "Günstig", ru: "Экономный" }, value: "budget" },
+        { label: { tr: "Orta", en: "Medium", de: "Mittel", ru: "Средний" }, value: "medium" },
+        { label: { tr: "Premium", en: "Premium", de: "Premium", ru: "Премиум" }, value: "premium" },
+      ],
+    },
+    {
+      key: "company",
+      question: {
+        tr: "Kimlerle geziyorsun?",
+        en: "Who are you traveling with?",
+        de: "Mit wem reist du?",
+        ru: "С кем вы путешествуете?",
+      },
+      options: [
+        { label: { tr: "Tek / Arkadaş", en: "Solo / Friends", de: "Allein / Freunde", ru: "Один / Друзья" }, value: "solo friends" },
+        { label: { tr: "Aile / Çocuk", en: "Family / Kids", de: "Familie / Kinder", ru: "Семья / Дети" }, value: "family kids" },
+      ],
+    },
+    {
+      key: "weather",
+      question: {
+        tr: "Hava kötü olursa ne istersin?",
+        en: "What if the weather is bad?",
+        de: "Was bei schlechtem Wetter?",
+        ru: "Что если погода плохая?",
+      },
+      options: [
+        { label: { tr: "Kapalı mekan", en: "Indoor", de: "Innenräume", ru: "В помещении" }, value: "indoor museum mall cafe" },
+        { label: { tr: "Yine açık hava", en: "Still outdoor", de: "Trotzdem draußen", ru: "Все равно на улице" }, value: "outdoor view park" },
+      ],
+    },
+  ];
+
+  const surveyText = (value: any) => {
+    const lang = String(language || "en").toLowerCase();
+    return value?.[lang] || value?.en || "";
+  };
+
   const [places, setPlaces] = useState<any[]>([]);
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [aiPicks, setAiPicks] = useState<any[]>([]);
   const [savedIds, setSavedIds] = useState<number[]>([]);
+  const [weatherTemp, setWeatherTemp] = useState<number | null>(null);
+  const [weatherCode, setWeatherCode] = useState<number>(0);
+  const [surveyVisible, setSurveyVisible] = useState(false);
+  const [surveyAnswers, setSurveyAnswers] = useState<Record<string, string>>({});
+  const [personalizedPicks, setPersonalizedPicks] = useState<any[]>([]);
 
   // 🌀 EFEKTLER İÇİN ANIMASYON DEĞERLERİ
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -310,10 +527,115 @@ export default function Home() {
   const plannerScale = useRef(new Animated.Value(1)).current;
   const chatScale = useRef(new Animated.Value(1)).current;
 
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        // Open-Meteo ücretsizdir ve API key gerektirmez. İstanbul merkez koordinatları kullanıldı.
+        const res = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=41.0082&longitude=28.9784&current_weather=true&timezone=auto"
+        );
+        const data = await res.json();
+        const current = data?.current_weather;
+
+        if (current) {
+          setWeatherTemp(Math.round(Number(current.temperature)));
+          setWeatherCode(Number(current.weathercode || 0));
+        }
+      } catch (error) {
+        console.log("Weather fetch error:", error);
+      }
+    };
+
+    fetchWeather();
+  }, []);
+
+
+  const computePersonalizedPicks = (answers: Record<string, string>, sourcePlaces = places) => {
+    const selectedText = Object.values(answers).join(" ").toLowerCase();
+
+    if (!selectedText.trim()) {
+      setPersonalizedPicks([]);
+      return;
+    }
+
+    const scored = sourcePlaces
+      .map((place: any) => {
+        const text = [
+          place?.name,
+          place?.city,
+          place?.category,
+          place?.subcategory,
+          place?.description,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        let score = 0;
+
+        selectedText.split(/\s+/).forEach((word) => {
+          if (word.length > 2 && text.includes(word)) score += 3;
+        });
+
+        if (selectedText.includes("family") || selectedText.includes("kids")) {
+          if (text.includes("park") || text.includes("museum") || text.includes("aquarium")) score += 2;
+        }
+
+        if (selectedText.includes("indoor")) {
+          if (text.includes("museum") || text.includes("mall") || text.includes("cafe") || text.includes("restaurant")) score += 3;
+          if (text.includes("beach") || text.includes("park")) score -= 1;
+        }
+
+        return { ...place, _score: score };
+      })
+      .filter((place: any) => place._score > 0)
+      .sort((a: any, b: any) => b._score - a._score)
+      .slice(0, 6);
+
+    setPersonalizedPicks(scored);
+  };
+
+  const finishSurvey = async () => {
+    if (!requireLogin()) return;
+
+    const filledCount = Object.keys(surveyAnswers).length;
+
+    if (filledCount < surveyQuestions.length) {
+      Alert.alert(
+        homeText("loginRequiredTitle", language),
+        language === "tr"
+          ? "Öneri oluşturmak için tüm soruları cevaplamalısın."
+          : language === "de"
+          ? "Bitte beantworte alle Fragen."
+          : language === "ru"
+          ? "Ответьте на все вопросы."
+          : "Please answer all questions."
+      );
+      return;
+    }
+
+    await writeJson(STORAGE_KEYS.travelStyleQuiz, surveyAnswers);
+    computePersonalizedPicks(surveyAnswers);
+    setSurveyVisible(false);
+  };
+
+  const resetSurveyForRetake = async () => {
+    if (!requireLogin()) return;
+
+    setSurveyAnswers({});
+    setPersonalizedPicks([]);
+    await writeJson(STORAGE_KEYS.travelStyleQuiz, {});
+    setSurveyVisible(true);
+  };
+
   const loadSavedIds = async () => {
     try {
-      const raw = await AsyncStorage.getItem("saved_places");
-      const list = raw ? JSON.parse(raw) : [];
+      if (!isAccountReady) {
+        setSavedIds([]);
+        return;
+      }
+      const list = await readJson<any[]>(STORAGE_KEYS.savedPlaces, []);
       setSavedIds(Array.isArray(list) ? list.map((p: any) => Number(p.id)).filter(Boolean) : []);
     } catch (error) {
       console.log("Saved load error:", error);
@@ -321,15 +643,15 @@ export default function Home() {
   };
 
   const toggleFavorite = async (place: any) => {
+    if (!requireLogin()) return;
     try {
       if (!place?.id) return;
-      const raw = await AsyncStorage.getItem("saved_places");
-      const list = raw ? JSON.parse(raw) : [];
+      const list = await readJson<any[]>(STORAGE_KEYS.savedPlaces, []);
       const exists = Array.isArray(list) && list.some((p: any) => Number(p.id) === Number(place.id));
       const updated = exists
         ? list.filter((p: any) => Number(p.id) !== Number(place.id))
         : [...(Array.isArray(list) ? list : []), place];
-      await AsyncStorage.setItem("saved_places", JSON.stringify(updated));
+      await writeJson(STORAGE_KEYS.savedPlaces, updated);
       setSavedIds(updated.map((p: any) => Number(p.id)).filter(Boolean));
       Alert.alert(exists ? "Favorilerden çıkarıldı" : "Favorilere eklendi", place.name || "Mekan");
     } catch (error) {
@@ -346,10 +668,21 @@ export default function Home() {
     .then((data) => {
       // Backend artık direkt liste dönüyor, o yüzden {data: ...} kısmını sildik
       console.log("Gelen liste:", data);
-      setPlaces(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setPlaces(list);
+
+      if (isAccountReady) {
+        readJson<Record<string, string>>(STORAGE_KEYS.travelStyleQuiz, {})
+          .then((savedAnswers) => {
+            if (!savedAnswers || Object.keys(savedAnswers).length === 0) return;
+            setSurveyAnswers(savedAnswers || {});
+            computePersonalizedPicks(savedAnswers || {}, list);
+          })
+          .catch(() => {});
+      }
     })
     .catch((err) => console.log("Hata:", err));
-}, []);
+}, [isAccountReady, user?.uid]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/hidden-gems?city=Istanbul`)
@@ -360,20 +693,60 @@ export default function Home() {
 
   useEffect(() => {
     const trimmed = query.trim();
+
     if (!trimmed) {
       setSearchResults([]);
       return;
     }
 
+    const lower = trimmed.toLowerCase();
+
+    const localResults = places
+      .filter((p: any) => {
+        const text = [
+          p?.name,
+          p?.city,
+          p?.district,
+          p?.category,
+          p?.subcategory,
+          p?.description,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return text.includes(lower);
+      })
+      .slice(0, 12);
+
     const timeout = setTimeout(() => {
       fetch(`${API_BASE_URL}/search?q=${encodeURIComponent(trimmed)}`)
         .then((res) => res.json())
-        .then((data) => setSearchResults(data))
-        .catch((err) => console.log("Search error:", err));
-    }, 300);
+        .then((data) => {
+          const remoteResults = Array.isArray(data)
+            ? data
+            : Array.isArray(data?.results)
+            ? data.results
+            : Array.isArray(data?.places)
+            ? data.places
+            : [];
+
+          const merged = [...remoteResults, ...localResults].filter(
+            (item, index, self) =>
+              item?.id &&
+              index === self.findIndex((x) => String(x?.id) === String(item?.id))
+          );
+
+          setSearchResults(merged.slice(0, 15));
+        })
+        .catch((err) => {
+          console.log("Search error:", err);
+          setSearchResults(localResults);
+        });
+    }, 250);
 
     return () => clearTimeout(timeout);
-  }, [query]);
+  }, [query, places]);
 
   useEffect(() => {
     Animated.parallel([
@@ -510,6 +883,67 @@ export default function Home() {
     <View style={styles.screen}>
       <StatusBar barStyle="light-content" />
 
+      <Modal
+        visible={surveyVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSurveyVisible(false)}
+      >
+        <View style={styles.surveyOverlay}>
+          <View style={styles.surveyModal}>
+            <View style={styles.surveyHeader}>
+              <View>
+                <Text style={styles.surveyTitle}>{homeText("surveyTitle", language)}</Text>
+                <Text style={styles.surveyDesc}>{homeText("surveyDesc", language)}</Text>
+                <Text style={styles.surveyProgressText}>
+                  {Object.keys(surveyAnswers).length}/{surveyQuestions.length}
+                </Text>
+              </View>
+              <TouchableOpacity style={styles.surveyClose} onPress={() => setSurveyVisible(false)}>
+                <Ionicons name="close" size={20} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {surveyQuestions.map((question) => (
+                <View key={question.key} style={styles.surveyQuestionBlock}>
+                  <Text style={styles.surveyQuestion}>{surveyText(question.question)}</Text>
+                  <View style={styles.surveyOptions}>
+                    {question.options.map((option) => {
+                      const active = surveyAnswers[question.key] === option.value;
+
+                      return (
+                        <TouchableOpacity
+                          key={option.value}
+                          style={[styles.surveyOption, active && styles.surveyOptionActive]}
+                          onPress={() =>
+                            setSurveyAnswers((old) => ({
+                              ...old,
+                              [question.key]: option.value,
+                            }))
+                          }
+                        >
+                          <Text style={[styles.surveyOptionText, active && styles.surveyOptionTextActive]}>
+                            {surveyText(option.label)}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity style={styles.surveyFinishButton} onPress={finishSurvey}>
+              <Ionicons name="sparkles-outline" size={17} color={COLORS.white} />
+              <Text style={styles.surveyFinishText}>{homeText("finishSurvey", language)}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+
+
       <Animated.View style={[styles.heroContainer, { height: heroHeight }]}>
         <Animated.View style={[StyleSheet.absoluteFillObject, { transform: [{ scale: imageScale }] }]}>
           <ImageBackground
@@ -534,7 +968,7 @@ export default function Home() {
               <TouchableOpacity style={styles.heroCircleButton}>
                 <Ionicons name="notifications-outline" size={20} color={COLORS.white} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.heroCircleButton}>
+              <TouchableOpacity style={styles.heroCircleButton} onPress={() => router.push("/(tabs)/profile" as any)}>
                 <Ionicons name="person-outline" size={20} color={COLORS.white} />
               </TouchableOpacity>
             </View>
@@ -552,7 +986,7 @@ export default function Home() {
             <View style={styles.searchBar}>
               <Ionicons name="search-outline" size={20} color={COLORS.textSoft} />
               <TextInput
-                placeholder={t("home.searchPlaceholder")}
+                placeholder={homeText("searchPlaceholderBetter", language)}
                 placeholderTextColor="#9CA3AF"
                 style={styles.searchInput}
                 value={query}
@@ -592,7 +1026,7 @@ export default function Home() {
                     style={styles.searchCard}
                     onPress={() => router.push({
     pathname: "/place", // Senin detay sayfanın adı (dosya yapına göre /place veya /(tabs)/place-detail olabilir)
-    params: { id: item.id } 
+    params: { id: String(item.id) } 
   })}
                   >
                   
@@ -642,17 +1076,83 @@ export default function Home() {
               </ScrollView>
 
 
+
+              <TouchableOpacity
+                style={styles.surveyCard}
+                activeOpacity={0.88}
+                onPress={() => {
+                  if (!requireLogin()) return;
+
+                  if (personalizedPicks.length > 0) {
+                    resetSurveyForRetake();
+                    return;
+                  }
+
+                  setSurveyVisible(true);
+                }}
+              >
+                <View style={styles.surveyCardIcon}>
+                  <Ionicons name="sparkles-outline" size={22} color={COLORS.accent} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.surveyCardTitle}>{homeText("surveyTitle", language)}</Text>
+                  <Text style={styles.surveyCardText}>{homeText("surveyDesc", language)}</Text>
+                </View>
+                <View style={styles.surveyCardButton}>
+                  <Text style={styles.surveyCardButtonText}>
+                    {personalizedPicks.length > 0 ? homeText("retakeSurvey", language) : homeText("startSurvey", language)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              {personalizedPicks.length > 0 && (
+                <>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>{homeText("personalizedForYou", language)}</Text>
+                    <TouchableOpacity onPress={resetSurveyForRetake}>
+                      <Text style={styles.viewAllText}>{homeText("retakeSurvey", language)}</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 8 }}>
+                    {personalizedPicks.map((item, index) => (
+                      <TouchableOpacity
+                        key={item.id || index}
+                        style={styles.personalizedCard}
+                        activeOpacity={0.92}
+                        onPress={() => router.push({ pathname: "/place", params: { id: String(item.id) } })}
+                      >
+                        <SmartImageBackground
+                          uri={item.image}
+                          category={item.category}
+                          style={styles.personalizedImage}
+                          imageStyle={styles.personalizedImageStyle}
+                        >
+                          <LinearGradient
+                            colors={["transparent", "rgba(19,22,34,0.2)", "rgba(19,22,34,0.88)"]}
+                            style={styles.personalizedOverlay}
+                          >
+                            <Text style={styles.personalizedTitle} numberOfLines={1}>{item.name}</Text>
+                            <Text style={styles.personalizedMeta}>{item.city} • {categoryDisplay(item.category, language)}</Text>
+                          </LinearGradient>
+                        </SmartImageBackground>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </>
+              )}
+
               <TouchableOpacity
                 style={styles.todayWeatherCard}
                 activeOpacity={0.88}
                 onPress={() => router.push("/(tabs)/explore")}
               >
                 <View style={styles.weatherLeft}>
-                  <Ionicons name="sunny" size={34} color="#F59E0B" />
+                  <Ionicons name={weatherIconFromCode(weatherCode) as any} size={34} color="#F59E0B" />
                   <View>
                     <Text style={styles.weatherCity}>{homeText("todayIstanbul", language)}</Text>
-                    <Text style={styles.weatherTemp}>28°C</Text>
-                    <Text style={styles.weatherStatus}>{homeText("sunny", language)}</Text>
+                    <Text style={styles.weatherTemp}>{weatherTemp !== null ? `${weatherTemp}°C` : "--°C"}</Text>
+                    <Text style={styles.weatherStatus}>{weatherTextFromCode(weatherCode, language)}</Text>
                   </View>
                 </View>
 
@@ -894,7 +1394,14 @@ export default function Home() {
                   </View>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.featureSmallCard} activeOpacity={0.88} onPress={() => router.push("/travel-journal" as any)}>
+                <TouchableOpacity
+                  style={styles.featureSmallCard}
+                  activeOpacity={0.88}
+                  onPress={() => {
+                    if (!requireLogin()) return;
+                    router.push("/travel-journal" as any);
+                  }}
+                >
                   <View style={styles.journalPhotoPreview}>
                     <Image
                       source={{ uri: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=600" }}
@@ -1717,5 +2224,183 @@ const styles = StyleSheet.create({
     color: COLORS.textSoft,
     fontSize: 14,
     fontWeight: "500",
+  },
+
+  surveyOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.28)",
+    justifyContent: "flex-end",
+  },
+  surveyModal: {
+    maxHeight: "88%",
+    backgroundColor: COLORS.bg,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    padding: 18,
+  },
+  surveyHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+  surveyTitle: {
+    color: COLORS.text,
+    fontSize: 22,
+    fontWeight: "900",
+  },
+  surveyDesc: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 4,
+    maxWidth: width * 0.78,
+  },
+  surveyProgressText: {
+    alignSelf: "flex-start",
+    marginTop: 8,
+    backgroundColor: "#FFF1F4",
+    color: COLORS.accent,
+    fontSize: 12,
+    fontWeight: "900",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  surveyClose: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: COLORS.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  surveyQuestionBlock: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(31,41,55,0.08)",
+  },
+  surveyQuestion: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "900",
+    marginBottom: 10,
+  },
+  surveyOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  surveyOption: {
+    backgroundColor: COLORS.surfaceSoft,
+    borderRadius: 999,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "rgba(31,41,55,0.08)",
+  },
+  surveyOptionActive: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  surveyOptionText: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  surveyOptionTextActive: {
+    color: COLORS.white,
+  },
+  surveyFinishButton: {
+    marginTop: 8,
+    backgroundColor: COLORS.accent,
+    borderRadius: 18,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 7,
+  },
+  surveyFinishText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  surveyCard: {
+    backgroundColor: "#FFF1F4",
+    borderRadius: 22,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(232,93,117,0.18)",
+    marginBottom: 18,
+    gap: 12,
+  },
+  surveyCardIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: "rgba(232,93,117,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  surveyCardTitle: {
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "900",
+  },
+  surveyCardText: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 3,
+  },
+  surveyCardButton: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 999,
+    paddingHorizontal: 11,
+    paddingVertical: 8,
+  },
+  surveyCardButtonText: {
+    color: COLORS.white,
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  personalizedCard: {
+    width: width * 0.54,
+    height: 190,
+    borderRadius: 22,
+    overflow: "hidden",
+    marginRight: 12,
+    marginBottom: 20,
+    backgroundColor: COLORS.surface,
+  },
+  personalizedImage: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  personalizedImageStyle: {
+    borderRadius: 22,
+  },
+  personalizedOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    padding: 13,
+    borderRadius: 22,
+  },
+  personalizedTitle: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: "900",
+  },
+  personalizedMeta: {
+    color: "rgba(255,255,255,0.82)",
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: "600",
   },
 });

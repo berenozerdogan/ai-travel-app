@@ -12,10 +12,11 @@ import {
   StatusBar,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
+import { readJson, writeJson, STORAGE_KEYS } from "../services/storageService";
 
 // 🌉 BOĞAZIN KIZILI & SİSLİ GECE PLACE DETAILS RENKLERİ
 const COLORS = {
@@ -275,6 +276,33 @@ function visitedAlertMessage(language: string, removed: boolean) {
 export default function Place() {
   const { id, name, from } = useLocalSearchParams();
   const { t, language } = useLanguage();
+  const { user } = useAuth();
+
+  const isAccountReady = !!user;
+
+  const requireLogin = () => {
+    if (isAccountReady) return true;
+
+    Alert.alert(
+      language === "tr" ? "Giriş gerekli" : language === "de" ? "Anmeldung erforderlich" : language === "ru" ? "Требуется вход" : "Login required",
+      language === "tr"
+        ? "Bu işlemi yapmak için giriş yapmalısın."
+        : language === "de"
+        ? "Du musst dich anmelden, um diese Funktion zu nutzen."
+        : language === "ru"
+        ? "Чтобы использовать эту функцию, необходимо войти."
+        : "You need to log in to use this feature.",
+      [
+        { text: language === "tr" ? "Vazgeç" : language === "de" ? "Abbrechen" : language === "ru" ? "Отмена" : "Cancel" },
+        {
+          text: language === "tr" ? "Profil'e Git" : language === "de" ? "Zum Profil" : language === "ru" ? "В профиль" : "Go to Profile",
+          onPress: () => router.push("/(tabs)/profile" as any),
+        },
+      ]
+    );
+
+    return false;
+  };
 
   const [place, setPlace] = useState<any>(null);
   const [analysis, setAnalysis] = useState<any>(null);
@@ -282,6 +310,7 @@ export default function Place() {
   const [insightData, setInsightData] = useState<any>(null);
   const [loadingInsight, setLoadingInsight] = useState(true);
   const [isVisited, setIsVisited] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [weatherAdvice, setWeatherAdvice] = useState("");
   const [loadingWeather, setLoadingWeather] = useState(false);
 
@@ -408,52 +437,94 @@ export default function Place() {
       });
   }, [place?.latitude, place?.longitude, place?.error, language]);
 
+  const loadUserPlaceState = async (currentPlace: any) => {
+    try {
+      if (!isAccountReady || !currentPlace?.id) {
+        setIsSaved(false);
+        setIsVisited(false);
+        return;
+      }
+
+      const savedList = await readJson<any[]>(STORAGE_KEYS.savedPlaces, []);
+      setIsSaved(
+        Array.isArray(savedList) &&
+          savedList.some((item: any) => Number(item.id) === Number(currentPlace.id))
+      );
+
+      const visitedList = await readJson<any[]>(STORAGE_KEYS.visitedPlaces, []);
+      setIsVisited(
+        Array.isArray(visitedList) &&
+          visitedList.some((item: any) => Number(item.id) === Number(currentPlace.id))
+      );
+    } catch (error) {
+      console.log("Place state load error:", error);
+      setIsSaved(false);
+      setIsVisited(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUserPlaceState(place);
+  }, [place?.id, isAccountReady, user?.uid]);
+
   const savePlace = async () => {
     try {
-      if (!place) return;
+      if (!requireLogin()) return;
+      if (!place?.id) return;
 
-      const existing = await AsyncStorage.getItem("saved_places");
-      const savedPlaces = existing ? JSON.parse(existing) : [];
+      const savedPlaces = await readJson<any[]>(STORAGE_KEYS.savedPlaces, []);
+      const safeList = Array.isArray(savedPlaces) ? savedPlaces : [];
 
-      const alreadySaved = savedPlaces.some((item: any) => item.id === place.id);
+      const alreadySaved = safeList.some(
+        (item: any) => Number(item.id) === Number(place.id)
+      );
 
       if (alreadySaved) {
+        setIsSaved(true);
         Alert.alert(
-          t("place.alreadySavedTitle"),
-          t("place.alreadySavedMessage")
+          t("place.alreadySavedTitle") || "Kaydedildi",
+          t("place.alreadySavedMessage") || "Bu yer zaten favorilerinde."
         );
         return;
       }
 
-      const updatedPlaces = [...savedPlaces, place];
-      await AsyncStorage.setItem("saved_places", JSON.stringify(updatedPlaces));
+      const updatedPlaces = [place, ...safeList];
+      await writeJson(STORAGE_KEYS.savedPlaces, updatedPlaces);
+      setIsSaved(true);
 
-      Alert.alert(t("place.savedTitle"), t("place.savedMessage"));
+      Alert.alert(t("place.savedTitle") || "Kaydedildi", t("place.savedMessage") || "Bu yer favorilerine eklendi.");
     } catch (error) {
       console.log(error);
-      Alert.alert(t("place.errorTitle"), t("place.saveError"));
+      Alert.alert(t("place.errorTitle") || "Hata", t("place.saveError") || "Kayıt işlemi yapılamadı.");
     }
   };
 
   const toggleVisited = async () => {
     try {
+      if (!requireLogin()) return;
       if (!place?.id) return;
-      const raw = await AsyncStorage.getItem("visited_places");
-      const list = raw ? JSON.parse(raw) : [];
+
+      const list = await readJson<any[]>(STORAGE_KEYS.visitedPlaces, []);
       const safeList = Array.isArray(list) ? list : [];
-      const exists = safeList.some((item: any) => Number(item.id) === Number(place.id));
+
+      const exists = safeList.some(
+        (item: any) => Number(item.id) === Number(place.id)
+      );
+
       const updated = exists
         ? safeList.filter((item: any) => Number(item.id) !== Number(place.id))
         : [place, ...safeList];
-      await AsyncStorage.setItem("visited_places", JSON.stringify(updated));
+
+      await writeJson(STORAGE_KEYS.visitedPlaces, updated);
       setIsVisited(!exists);
+
       Alert.alert(
         visitedAlertTitle(language),
         visitedAlertMessage(language, exists)
       );
     } catch (error) {
       console.log(error);
-      Alert.alert(t("place.errorTitle"), t("place.saveError"));
+      Alert.alert(t("place.errorTitle") || "Hata", t("place.saveError") || "İşlem yapılamadı.");
     }
   };
 
@@ -626,12 +697,20 @@ export default function Place() {
         <View style={styles.floatingActions}>
           <TouchableOpacity
             activeOpacity={0.85}
-            style={styles.saveButton}
+            style={[styles.saveButton, isSaved && styles.savedButton]}
             onPress={savePlace}
           >
-            <Ionicons name="heart-outline" size={18} color={COLORS.white} />
+            <Ionicons name={isSaved ? "heart" : "heart-outline"} size={18} color={COLORS.white} />
             <Text style={styles.saveButtonText}>
-              {t("common.save") || "Kaydet"}
+              {isSaved
+                ? language === "tr"
+                  ? "Kaydedildi"
+                  : language === "de"
+                  ? "Gespeichert"
+                  : language === "ru"
+                  ? "Сохранено"
+                  : "Saved"
+                : t("common.save") || "Kaydet"}
             </Text>
           </TouchableOpacity>
 
@@ -1561,4 +1640,8 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginLeft: 8,
   },
+  savedButton: {
+    backgroundColor: "#22C55E",
+  },
+
 });

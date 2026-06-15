@@ -8,11 +8,18 @@ import {
   Alert,
   SectionList,
   Image,
+  Modal,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
+import * as MediaLibrary from "expo-media-library";
 import { useLanguage } from "../context/LanguageContext";
 import {
   readJson,
@@ -41,6 +48,9 @@ type JournalItem = {
   note: string;
   createdAt?: string;
   photoUri?: string;
+  locationLabel?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 type JournalSection = {
@@ -110,6 +120,54 @@ function journalText(key: string, language: string) {
       de: "Foto-Erinnerung",
       ru: "Фото-воспоминание",
     },
+    noPhotoLocation: {
+      tr: "Fotoğrafın çekildiği konum bulunamadı",
+      en: "Photo location was not found",
+      de: "Foto-Standort wurde nicht gefunden",
+      ru: "Место съемки не найдено",
+    },
+    photoNoteTitle: {
+      tr: "Fotoğraf Notu",
+      en: "Photo Note",
+      de: "Foto-Notiz",
+      ru: "Заметка к фото",
+    },
+    notePlaceholder: {
+      tr: "Bu anı hakkında not yaz...",
+      en: "Write a note about this memory...",
+      de: "Schreibe eine Notiz zu dieser Erinnerung...",
+      ru: "Напишите заметку об этом воспоминании...",
+    },
+    save: {
+      tr: "Kaydet",
+      en: "Save",
+      de: "Speichern",
+      ru: "Сохранить",
+    },
+    photoCountAdded: {
+      tr: "Fotoğraflar gezi günlüğüne eklendi.",
+      en: "Photos were added to your travel journal.",
+      de: "Fotos wurden deinem Reisetagebuch hinzugefügt.",
+      ru: "Фотографии добавлены в дневник путешествий.",
+    },
+    editTitlePlaceholder: {
+      tr: "Anı başlığı yaz...",
+      en: "Write a memory title...",
+      de: "Titel der Erinnerung schreiben...",
+      ru: "Введите название воспоминания...",
+    },
+    editNoteTitle: {
+      tr: "Başlık",
+      en: "Title",
+      de: "Titel",
+      ru: "Название",
+    },
+    editNoteLabel: {
+      tr: "Not",
+      en: "Note",
+      de: "Notiz",
+      ru: "Заметка",
+    },
   };
 
   const lang = String(language || "en").toLowerCase();
@@ -119,6 +177,9 @@ function journalText(key: string, language: string) {
 export default function TravelJournal() {
   const { language, t } = useLanguage();
   const [items, setItems] = useState<JournalItem[]>([]);
+  const [editingItem, setEditingItem] = useState<JournalItem | null>(null);
+  const [editingNote, setEditingNote] = useState("");
+  const [editingTitle, setEditingTitle] = useState("");
 
   const loadJournal = async () => {
     const travelJournal = await readJson<JournalItem[]>(
@@ -216,6 +277,125 @@ export default function TravelJournal() {
   };
 
 
+
+  const normalizeCoordinate = (value: any) => {
+    if (value === undefined || value === null) return null;
+
+    if (typeof value === "number") return value;
+
+    if (typeof value === "string") {
+      const numberValue = Number(value);
+      return Number.isFinite(numberValue) ? numberValue : null;
+    }
+
+    if (Array.isArray(value) && value.length >= 3) {
+      const [degrees, minutes, seconds] = value.map(Number);
+      if ([degrees, minutes, seconds].every(Number.isFinite)) {
+        return degrees + minutes / 60 + seconds / 3600;
+      }
+    }
+
+    return null;
+  };
+
+  const getAddressLabel = async (latitude: number, longitude: number) => {
+    const address = await Location.reverseGeocodeAsync({ latitude, longitude });
+    const first = address?.[0];
+
+    return [first?.name, first?.district, first?.city, first?.country]
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  const getPhotoLocationLabel = async (asset: any) => {
+    try {
+      let latitude: number | null = null;
+      let longitude: number | null = null;
+
+      const exif = asset?.exif || {};
+
+      latitude =
+        normalizeCoordinate(exif.GPSLatitude) ??
+        normalizeCoordinate(exif.gpsLatitude) ??
+        normalizeCoordinate(exif.latitude) ??
+        normalizeCoordinate(exif.Latitude);
+
+      longitude =
+        normalizeCoordinate(exif.GPSLongitude) ??
+        normalizeCoordinate(exif.gpsLongitude) ??
+        normalizeCoordinate(exif.longitude) ??
+        normalizeCoordinate(exif.Longitude);
+
+      const latRef = String(exif.GPSLatitudeRef || exif.gpsLatitudeRef || "").toUpperCase();
+      const lngRef = String(exif.GPSLongitudeRef || exif.gpsLongitudeRef || "").toUpperCase();
+
+      if (latitude !== null && latRef === "S") latitude = -Math.abs(latitude);
+      if (longitude !== null && lngRef === "W") longitude = -Math.abs(longitude);
+
+      if ((latitude === null || longitude === null) && asset?.assetId) {
+        const mediaPermission = await MediaLibrary.requestPermissionsAsync();
+
+        if (mediaPermission.granted) {
+          const assetInfo: any = await MediaLibrary.getAssetInfoAsync(asset.assetId);
+
+          latitude =
+            normalizeCoordinate(assetInfo?.location?.latitude) ??
+            normalizeCoordinate(assetInfo?.exif?.GPSLatitude) ??
+            latitude;
+
+          longitude =
+            normalizeCoordinate(assetInfo?.location?.longitude) ??
+            normalizeCoordinate(assetInfo?.exif?.GPSLongitude) ??
+            longitude;
+        }
+      }
+
+      if (latitude !== null && longitude !== null) {
+        const label = await getAddressLabel(latitude, longitude);
+
+        return {
+          latitude,
+          longitude,
+          label: label || `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
+        };
+      }
+
+      return {
+        label: journalText("noPhotoLocation", language),
+      };
+    } catch (error) {
+      console.log("photo location error", error);
+      return { label: journalText("noPhotoLocation", language) };
+    }
+  };
+
+  const openPhotoEditor = (item: JournalItem) => {
+    if (!item.photoUri) return;
+
+    setEditingItem(item);
+    setEditingNote(item.note || "");
+    setEditingTitle(item.placeName || journalText("photoMemory", language));
+  };
+
+  const savePhotoNote = async () => {
+    if (!editingItem) return;
+
+    const journal = await readJson<JournalItem[]>(STORAGE_KEYS.travelJournal, []);
+    const cleanTitle = editingTitle.trim() || journalText("photoMemory", language);
+
+    const updated = journal.map((item) =>
+      String(item.id) === String(editingItem.id)
+        ? { ...item, placeName: cleanTitle, note: editingNote }
+        : item
+    );
+
+    await writeJson(STORAGE_KEYS.travelJournal, updated);
+    setEditingItem(null);
+    setEditingNote("");
+    setEditingTitle("");
+    loadJournal();
+  };
+
   const addPhotoMemory = async () => {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -230,26 +410,46 @@ export default function TravelJournal() {
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
+        allowsEditing: false,
+        allowsMultipleSelection: true,
+        selectionLimit: 10,
         quality: 0.82,
-        aspect: [4, 3],
+        exif: true,
       });
 
-      if (result.canceled || !result.assets?.[0]?.uri) return;
+      if (result.canceled || !result.assets?.length) return;
 
       const old = await readJson<JournalItem[]>(STORAGE_KEYS.travelJournal, []);
+      const newItems: JournalItem[] = [];
 
-      const item: JournalItem = {
-        id: Date.now().toString(),
-        placeId: "photo",
-        placeName: journalText("photoMemory", language),
-        city: journalText("unknownCity", language),
-        note: journalText("photoNote", language),
-        photoUri: result.assets[0].uri,
-        createdAt: new Date().toISOString(),
-      };
+      for (const asset of result.assets) {
+        if (!asset?.uri) continue;
 
-      await writeJson(STORAGE_KEYS.travelJournal, [item, ...(Array.isArray(old) ? old : [])]);
+        const locationInfo = await getPhotoLocationLabel(asset);
+        const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+        newItems.push({
+          id: uniqueId,
+          placeId: `photo-${uniqueId}`,
+          placeName: journalText("photoMemory", language),
+          city: locationInfo.label || journalText("unknownCity", language),
+          note: journalText("photoNote", language),
+          photoUri: asset.uri,
+          locationLabel: locationInfo.label,
+          latitude: locationInfo.latitude,
+          longitude: locationInfo.longitude,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      if (newItems.length === 0) return;
+
+      await writeJson(STORAGE_KEYS.travelJournal, [
+        ...newItems,
+        ...(Array.isArray(old) ? old : []),
+      ]);
+
+      Alert.alert(journalText("photoMemory", language), journalText("photoCountAdded", language));
       loadJournal();
     } catch (error) {
       console.log("photo memory error", error);
@@ -261,7 +461,16 @@ export default function TravelJournal() {
       <TouchableOpacity
         style={{ flex: 1 }}
         onPress={() => {
-          if (item.placeId && item.placeId !== "route") {
+          if (item.photoUri) {
+            openPhotoEditor(item);
+            return;
+          }
+
+          if (
+            item.placeId &&
+            item.placeId !== "route" &&
+            !String(item.placeId).startsWith("photo")
+          ) {
             router.push({
               pathname: "/place",
               params: { id: String(item.placeId) },
@@ -270,10 +479,22 @@ export default function TravelJournal() {
         }}
       >
         {item.photoUri ? (
-          <Image source={{ uri: item.photoUri }} style={styles.memoryImage} />
+          <TouchableOpacity activeOpacity={0.9} onPress={() => openPhotoEditor(item)}>
+            <Image source={{ uri: item.photoUri }} style={styles.memoryImage} />
+            <View style={styles.photoEditBadge}>
+              <Ionicons name="create-outline" size={15} color={COLORS.white} />
+              <Text style={styles.photoEditText}>Not Yaz</Text>
+            </View>
+          </TouchableOpacity>
         ) : null}
         <Text style={styles.cardTitle}>{item.placeName}</Text>
         <Text style={styles.note}>{item.note}</Text>
+        {item.locationLabel ? (
+          <View style={styles.locationRow}>
+            <Ionicons name="location-outline" size={14} color={COLORS.accent} />
+            <Text style={styles.locationText}>{item.locationLabel}</Text>
+          </View>
+        ) : null}
         {item.createdAt ? (
           <Text style={styles.date}>
             {new Date(item.createdAt).toLocaleDateString()}
@@ -293,6 +514,71 @@ export default function TravelJournal() {
   return (
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content" />
+
+      <Modal
+        visible={!!editingItem}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditingItem(null)}
+      >
+        <KeyboardAvoidingView
+          style={styles.editorOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
+        >
+          <View style={styles.editorCard}>
+            <View style={styles.editorHeader}>
+              <Text style={styles.editorTitle}>{journalText("photoNoteTitle", language)}</Text>
+              <TouchableOpacity onPress={() => setEditingItem(null)} style={styles.editorClose}>
+                <Ionicons name="close" size={20} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 16 }}
+            >
+              {editingItem?.photoUri ? (
+                <Image source={{ uri: editingItem.photoUri }} style={styles.editorImage} />
+              ) : null}
+
+              {editingItem?.locationLabel ? (
+                <View style={styles.locationRow}>
+                  <Ionicons name="location-outline" size={14} color={COLORS.accent} />
+                  <Text style={styles.locationText}>{editingItem.locationLabel}</Text>
+                </View>
+              ) : null}
+
+              <Text style={styles.editorLabel}>{journalText("editNoteTitle", language)}</Text>
+              <TextInput
+                style={styles.editorTitleInput}
+                value={editingTitle}
+                onChangeText={setEditingTitle}
+                placeholder={journalText("editTitlePlaceholder", language)}
+                placeholderTextColor={COLORS.textSoft}
+              />
+
+              <Text style={styles.editorLabel}>{journalText("editNoteLabel", language)}</Text>
+              <TextInput
+                style={styles.editorInput}
+                value={editingNote}
+                onChangeText={setEditingNote}
+                placeholder={journalText("notePlaceholder", language)}
+                placeholderTextColor={COLORS.textSoft}
+                multiline
+                textAlignVertical="top"
+              />
+
+              <TouchableOpacity style={styles.editorSaveButton} onPress={savePhotoNote}>
+                <Text style={styles.editorSaveText}>{journalText("save", language)}</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+
 
       <LinearGradient
         colors={["#FFFFFF", "#FAF8F5", "#F7F4EF"]}
@@ -644,4 +930,113 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginLeft: 10,
   },
+  photoEditBadge: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+    backgroundColor: COLORS.accent,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  photoEditText: {
+    color: COLORS.white,
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 8,
+  },
+  locationText: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "700",
+    flex: 1,
+  },
+  editorOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.30)",
+    justifyContent: "flex-end",
+  },
+  editorCard: {
+    backgroundColor: COLORS.bg,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 18,
+    maxHeight: "92%",
+  },
+  editorHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  editorTitle: {
+    color: COLORS.text,
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  editorClose: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: COLORS.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  editorImage: {
+    width: "100%",
+    height: 220,
+    borderRadius: 20,
+    backgroundColor: COLORS.surfaceSoft,
+  },
+  editorLabel: {
+    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: "900",
+    marginTop: 12,
+    marginBottom: 7,
+  },
+  editorTitleInput: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
+    padding: 14,
+    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: "700",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  editorInput: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
+    minHeight: 110,
+    padding: 14,
+    color: COLORS.text,
+    fontSize: 14,
+    lineHeight: 20,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginTop: 0,
+    textAlignVertical: "top",
+  },
+  editorSaveButton: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 18,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  editorSaveText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "900",
+  },
 });
+

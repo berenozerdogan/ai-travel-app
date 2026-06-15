@@ -6,12 +6,15 @@ import {
   TouchableOpacity,
   StatusBar,
   ScrollView,
+  TextInput,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
 
 const COLORS = {
   bg: "#F7F4EF",
@@ -261,6 +264,192 @@ const PROFILE_FALLBACKS: Record<string, Record<string, string>> = {
     de: "Reisenotizen",
     ru: "Заметки",
   },
+  "auth.title": {
+    tr: "Giriş Yap / Kayıt Ol",
+    en: "Login / Register",
+    de: "Anmelden / Registrieren",
+    ru: "Вход / Регистрация",
+  },
+  "auth.subtitle": {
+    tr: "Favorilerin, gezi günlüğün ve rozetlerin hesabına bağlı saklanır.",
+    en: "Your favorites, travel journal and badges are saved to your account.",
+    de: "Favoriten, Reisetagebuch und Abzeichen werden in deinem Konto gespeichert.",
+    ru: "Избранное, дневник путешествий и значки сохраняются в вашем аккаунте.",
+  },
+  "auth.email": {
+    tr: "E-posta",
+    en: "Email",
+    de: "E-Mail",
+    ru: "Эл. почта",
+  },
+  "auth.password": {
+    tr: "Şifre",
+    en: "Password",
+    de: "Passwort",
+    ru: "Пароль",
+  },
+  "auth.login": {
+    tr: "Giriş Yap",
+    en: "Login",
+    de: "Anmelden",
+    ru: "Войти",
+  },
+  "auth.register": {
+    tr: "Kayıt Ol",
+    en: "Register",
+    de: "Registrieren",
+    ru: "Зарегистрироваться",
+  },
+  "auth.welcome": {
+    tr: "Hoş Geldin",
+    en: "Welcome",
+    de: "Willkommen",
+    ru: "Добро пожаловать",
+  },
+  "auth.accountReady": {
+    tr: "Seyahat geçmişin, favorilerin ve başarıların bu hesapla ilişkilendirildi.",
+    en: "Your travel history, favorites and achievements are linked to this account.",
+    de: "Deine Reisehistorie, Favoriten und Erfolge sind mit diesem Konto verknüpft.",
+    ru: "История поездок, избранное и достижения связаны с этим аккаунтом.",
+  },
+  "auth.logout": {
+    tr: "Çıkış Yap",
+    en: "Logout",
+    de: "Abmelden",
+    ru: "Выйти",
+  },
+  "auth.error": {
+    tr: "Hata",
+    en: "Error",
+    de: "Fehler",
+    ru: "Ошибка",
+  },
+  "auth.validEmail": {
+    tr: "Geçerli bir e-posta adresi girmelisin.",
+    en: "Please enter a valid email address.",
+    de: "Bitte gib eine gültige E-Mail-Adresse ein.",
+    ru: "Введите корректный адрес электронной почты.",
+  },
+  "auth.passwordRequired": {
+    tr: "Şifreni girmelisin.",
+    en: "Please enter your password.",
+    de: "Bitte gib dein Passwort ein.",
+    ru: "Введите пароль.",
+  },
+  "auth.passwordMin": {
+    tr: "Şifre en az 6 karakter olmalı.",
+    en: "Password must be at least 6 characters.",
+    de: "Das Passwort muss mindestens 6 Zeichen lang sein.",
+    ru: "Пароль должен содержать минимум 6 символов.",
+  },
+  "auth.loginSuccessTitle": {
+    tr: "Giriş başarılı",
+    en: "Login successful",
+    de: "Anmeldung erfolgreich",
+    ru: "Вход выполнен",
+  },
+  "auth.loginSuccessText": {
+    tr: "Hesabına giriş yapıldı.",
+    en: "You are now logged in.",
+    de: "Du bist jetzt angemeldet.",
+    ru: "Вы вошли в аккаунт.",
+  },
+  "auth.loginFailed": {
+    tr: "Giriş başarısız. E-posta ve şifreni kontrol et.",
+    en: "Login failed. Please check your email and password.",
+    de: "Anmeldung fehlgeschlagen. Prüfe E-Mail und Passwort.",
+    ru: "Не удалось войти. Проверьте почту и пароль.",
+  },
+  "auth.userNotFound": {
+    tr: "Bu bilgilerle kullanıcı bulunamadı. E-posta veya şifre hatalı olabilir.",
+    en: "No user was found with these details. Email or password may be wrong.",
+    de: "Mit diesen Daten wurde kein Benutzer gefunden. E-Mail oder Passwort kann falsch sein.",
+    ru: "Пользователь с такими данными не найден. Почта или пароль могут быть неверными.",
+  },
+  "auth.wrongPassword": {
+    tr: "Şifre hatalı.",
+    en: "Password is incorrect.",
+    de: "Das Passwort ist falsch.",
+    ru: "Неверный пароль.",
+  },
+  "auth.networkLogin": {
+    tr: "İnternet bağlantısı nedeniyle giriş yapılamadı.",
+    en: "Login failed due to internet connection.",
+    de: "Anmeldung wegen Internetverbindung fehlgeschlagen.",
+    ru: "Не удалось войти из-за интернет-соединения.",
+  },
+  "auth.registerSuccessTitle": {
+    tr: "Kayıt başarılı",
+    en: "Registration successful",
+    de: "Registrierung erfolgreich",
+    ru: "Регистрация успешна",
+  },
+  "auth.registerSuccessText": {
+    tr: "Hesabın oluşturuldu. Artık favoriler, gezi günlüğü ve rozetler bu hesaba bağlı çalışacak.",
+    en: "Your account has been created. Favorites, journal and badges will now be linked to it.",
+    de: "Dein Konto wurde erstellt. Favoriten, Tagebuch und Abzeichen sind nun damit verknüpft.",
+    ru: "Аккаунт создан. Избранное, дневник и значки теперь связаны с ним.",
+  },
+  "auth.registerFailed": {
+    tr: "Kayıt oluşturulamadı. Lütfen bilgilerini kontrol et.",
+    en: "Registration failed. Please check your information.",
+    de: "Registrierung fehlgeschlagen. Bitte prüfe deine Angaben.",
+    ru: "Не удалось зарегистрироваться. Проверьте данные.",
+  },
+  "auth.emailUsed": {
+    tr: "Bu e-posta ile daha önce kayıt olunmuş. Giriş Yap butonunu kullanabilirsin.",
+    en: "This email is already registered. You can use the Login button.",
+    de: "Diese E-Mail ist bereits registriert. Nutze die Anmelden-Schaltfläche.",
+    ru: "Этот адрес уже зарегистрирован. Используйте кнопку входа.",
+  },
+  "auth.invalidEmail": {
+    tr: "E-posta formatı geçersiz.",
+    en: "Email format is invalid.",
+    de: "Das E-Mail-Format ist ungültig.",
+    ru: "Неверный формат электронной почты.",
+  },
+  "auth.networkRegister": {
+    tr: "İnternet bağlantısı nedeniyle kayıt oluşturulamadı.",
+    en: "Registration failed due to internet connection.",
+    de: "Registrierung wegen Internetverbindung fehlgeschlagen.",
+    ru: "Не удалось зарегистрироваться из-за интернет-соединения.",
+  },
+  "settings.explorerBadgeDesc": {
+    tr: "3 yer kaydettiğinde veya ziyaret ettiğinde açılır.",
+    en: "Unlocks when you save or visit 3 places.",
+    de: "Wird freigeschaltet, wenn du 3 Orte speicherst oder besuchst.",
+    ru: "Открывается после сохранения или посещения 3 мест.",
+  },
+  "settings.routeMasterBadgeDesc": {
+    tr: "En az 1 rota oluşturduğunda açılır.",
+    en: "Unlocks when you create at least 1 route.",
+    de: "Wird freigeschaltet, wenn du mindestens 1 Route erstellst.",
+    ru: "Открывается после создания хотя бы 1 маршрута.",
+  },
+  "settings.journalKeeperBadgeDesc": {
+    tr: "Gezi günlüğüne not veya fotoğraf eklediğinde açılır.",
+    en: "Unlocks when you add a note or photo to your journal.",
+    de: "Wird freigeschaltet, wenn du eine Notiz oder ein Foto hinzufügst.",
+    ru: "Открывается после добавления заметки или фото в дневник.",
+  },
+  "settings.cityCollectorBadgeDesc": {
+    tr: "2 farklı şehirden yer kaydettiğinde açılır.",
+    en: "Unlocks when you save places from 2 different cities.",
+    de: "Wird freigeschaltet, wenn du Orte aus 2 Städten speicherst.",
+    ru: "Открывается после сохранения мест из 2 разных городов.",
+  },
+  "settings.foodLoverBadgeDesc": {
+    tr: "2 restoran veya kafe keşfettiğinde açılır.",
+    en: "Unlocks when you discover 2 restaurants or cafés.",
+    de: "Wird freigeschaltet, wenn du 2 Restaurants oder Cafés entdeckst.",
+    ru: "Открывается после открытия 2 ресторанов или кафе.",
+  },
+  "settings.museumHunterBadgeDesc": {
+    tr: "En az 1 müze veya kültürel yer keşfettiğinde açılır.",
+    en: "Unlocks when you discover at least 1 museum or cultural place.",
+    de: "Wird freigeschaltet, wenn du mindestens 1 Museum oder Kulturort entdeckst.",
+    ru: "Открывается после открытия хотя бы 1 музея или культурного места.",
+  },
 };
 
 function safeT(
@@ -302,6 +491,13 @@ function badgeEmoji(key: string) {
 
 export default function Profile() {
   const { language, setLanguage, t } = useLanguage();
+  const { user, login, register, logout } = useAuth();
+  const isAccountReady = !!user;
+  const storageKey = (key: string) => isAccountReady ? `${key}_${user.uid}` : key;
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const [stats, setStats] = useState<Stats>({
     places: 0,
     routes: 0,
@@ -321,10 +517,14 @@ export default function Profile() {
 
   const loadStats = async () => {
     try {
-      const placesRaw = await AsyncStorage.getItem("saved_places");
-      const routesRaw = await AsyncStorage.getItem("saved_routes");
-      const notesRaw = await AsyncStorage.getItem("user_place_notes");
-      const visitedRaw = await AsyncStorage.getItem("visited_places");
+      if (!isAccountReady) {
+        setStats({ places: 0, routes: 0, notes: 0, visited: 0, cities: 0, restaurants: 0, museums: 0 });
+        return;
+      }
+      const placesRaw = await AsyncStorage.getItem(storageKey("saved_places"));
+      const routesRaw = await AsyncStorage.getItem(storageKey("saved_routes"));
+      const notesRaw = await AsyncStorage.getItem(storageKey("user_place_notes"));
+      const visitedRaw = await AsyncStorage.getItem(storageKey("visited_places"));
 
       const places = placesRaw ? JSON.parse(placesRaw) : [];
       const routes = routesRaw ? JSON.parse(routesRaw) : [];
@@ -359,13 +559,14 @@ export default function Profile() {
   useFocusEffect(
     useCallback(() => {
       loadStats();
-    }, [])
+    }, [isAccountReady, user?.uid])
   );
 
   const achievements = useMemo(
     () => [
       {
         key: "explorer",
+        desc: safeT(t, "settings.explorerBadgeDesc", "3 yer kaydettiğinde veya ziyaret ettiğinde açılır.", language),
         icon: "compass-outline",
         label: safeT(t, "settings.explorerBadge", "Kaşif", language),
         unlocked: stats.places >= 3 || stats.visited >= 3,
@@ -373,6 +574,7 @@ export default function Profile() {
       },
       {
         key: "routeMaster",
+        desc: safeT(t, "settings.routeMasterBadgeDesc", "En az 1 rota oluşturduğunda açılır.", language),
         icon: "map-outline",
         label: safeT(t, "settings.routeMasterBadge", "Rota Ustası", language),
         unlocked: stats.routes >= 1,
@@ -380,6 +582,7 @@ export default function Profile() {
       },
       {
         key: "journalKeeper",
+        desc: safeT(t, "settings.journalKeeperBadgeDesc", "Gezi günlüğüne not veya fotoğraf eklediğinde açılır.", language),
         icon: "book-outline",
         label: safeT(t, "settings.journalKeeperBadge", "Günlük Tutucu", language),
         unlocked: stats.notes >= 1,
@@ -387,6 +590,7 @@ export default function Profile() {
       },
       {
         key: "cityCollector",
+        desc: safeT(t, "settings.cityCollectorBadgeDesc", "2 farklı şehirden yer kaydettiğinde açılır.", language),
         icon: "business-outline",
         label: safeT(t, "settings.cityCollectorBadge", "Şehir Koleksiyoncusu", language),
         unlocked: stats.cities >= 2,
@@ -394,6 +598,7 @@ export default function Profile() {
       },
       {
         key: "foodLover",
+        desc: safeT(t, "settings.foodLoverBadgeDesc", "2 restoran veya kafe keşfettiğinde açılır.", language),
         icon: "restaurant-outline",
         label: safeT(t, "settings.foodLoverBadge", "Lezzet Avcısı", language),
         unlocked: stats.restaurants >= 2,
@@ -401,6 +606,7 @@ export default function Profile() {
       },
       {
         key: "museumHunter",
+        desc: safeT(t, "settings.museumHunterBadgeDesc", "En az 1 müze veya kültürel yer keşfettiğinde açılır.", language),
         icon: "color-palette-outline",
         label: safeT(t, "settings.museumHunterBadge", "Müze Gezgini", language),
         unlocked: stats.museums >= 1,
@@ -492,6 +698,171 @@ export default function Profile() {
       >
         <Text style={styles.sectionTitle}>{safeT(t, "settings.dashboard", "Özet Paneli", language)}</Text>
 
+        {!user ? (
+          <View style={styles.authCard}>
+            <View style={styles.authHeader}>
+              <View style={styles.authIcon}>
+                <Ionicons name="person-circle-outline" size={26} color={COLORS.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.authTitle}>
+                  {safeT(t, "auth.title", "Giriş Yap / Kayıt Ol", language)}
+                </Text>
+                <Text style={styles.authSubtitle}>
+                  {safeT(t, "auth.subtitle", "Favorilerin, gezi günlüğün ve rozetlerin hesabına bağlı saklanır.", language)}
+                </Text>
+              </View>
+            </View>
+
+            <TextInput
+              style={styles.authInput}
+              placeholder={safeT(t, "auth.email", "E-posta", language)}
+              placeholderTextColor={COLORS.textSoft}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+
+            <TextInput
+              style={styles.authInput}
+              placeholder={safeT(t, "auth.password", "Şifre", language)}
+              placeholderTextColor={COLORS.textSoft}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+
+            <View style={styles.authRow}>
+              <TouchableOpacity
+                style={styles.authButton}
+                onPress={async () => {
+                  const cleanEmail = email.trim();
+                  const cleanPassword = password.trim();
+
+                  if (!cleanEmail || !cleanEmail.includes("@")) {
+                    Alert.alert(
+                      safeT(t, "auth.error", "Hata", language),
+                      safeT(t, "auth.validEmail", "Geçerli bir e-posta adresi girmelisin.", language)
+                    );
+                    return;
+                  }
+
+                  if (!cleanPassword) {
+                    Alert.alert(
+                      safeT(t, "auth.error", "Hata", language),
+                      safeT(t, "auth.passwordRequired", "Şifreni girmelisin.", language)
+                    );
+                    return;
+                  }
+
+                  try {
+                    await login(cleanEmail, cleanPassword);
+                    setPassword("");
+                    Alert.alert(
+                      safeT(t, "auth.loginSuccessTitle", "Giriş başarılı", language),
+                      safeT(t, "auth.loginSuccessText", "Hesabına giriş yapıldı.", language)
+                    );
+                  } catch (e: any) {
+                    const code = String(e?.code || "");
+                    let message = safeT(t, "auth.loginFailed", "Giriş başarısız. E-posta ve şifreni kontrol et.", language);
+
+                    if (code.includes("user-not-found") || code.includes("invalid-credential")) {
+                      message = safeT(t, "auth.userNotFound", "Bu bilgilerle kullanıcı bulunamadı. E-posta veya şifre hatalı olabilir.", language);
+                    } else if (code.includes("wrong-password")) {
+                      message = safeT(t, "auth.wrongPassword", "Şifre hatalı.", language);
+                    } else if (code.includes("network-request-failed")) {
+                      message = safeT(t, "auth.networkLogin", "İnternet bağlantısı nedeniyle giriş yapılamadı.", language);
+                    }
+
+                    Alert.alert(safeT(t, "auth.error", "Hata", language), message);
+                  }
+                }}
+              >
+                <Text style={styles.authButtonText}>
+                  {safeT(t, "auth.login", "Giriş Yap", language)}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.authButtonSecondary}
+                onPress={async () => {
+                  const cleanEmail = email.trim();
+                  const cleanPassword = password.trim();
+
+                  if (!cleanEmail || !cleanEmail.includes("@")) {
+                    Alert.alert(
+                      safeT(t, "auth.error", "Hata", language),
+                      safeT(t, "auth.validEmail", "Geçerli bir e-posta adresi girmelisin.", language)
+                    );
+                    return;
+                  }
+
+                  if (cleanPassword.length < 6) {
+                    Alert.alert(
+                      safeT(t, "auth.error", "Hata", language),
+                      safeT(t, "auth.passwordMin", "Şifre en az 6 karakter olmalı.", language)
+                    );
+                    return;
+                  }
+
+                  try {
+                    await register(cleanEmail, cleanPassword);
+                    setPassword("");
+                    Alert.alert(
+                      safeT(t, "auth.registerSuccessTitle", "Kayıt başarılı", language),
+                      safeT(t, "auth.registerSuccessText", "Hesabın oluşturuldu. Artık favoriler, gezi günlüğü ve rozetler bu hesaba bağlı çalışacak.", language)
+                    );
+                  } catch (e: any) {
+                    const code = String(e?.code || "");
+                    let message = safeT(t, "auth.registerFailed", "Kayıt oluşturulamadı. Lütfen bilgilerini kontrol et.", language);
+
+                    if (code.includes("email-already-in-use")) {
+                      message = safeT(t, "auth.emailUsed", "Bu e-posta ile daha önce kayıt olunmuş. Giriş Yap butonunu kullanabilirsin.", language);
+                    } else if (code.includes("invalid-email")) {
+                      message = safeT(t, "auth.invalidEmail", "E-posta formatı geçersiz.", language);
+                    } else if (code.includes("weak-password")) {
+                      message = safeT(t, "auth.passwordMin", "Şifre en az 6 karakter olmalı.", language);
+                    } else if (code.includes("network-request-failed")) {
+                      message = safeT(t, "auth.networkRegister", "İnternet bağlantısı nedeniyle kayıt oluşturulamadı.", language);
+                    }
+
+                    Alert.alert(safeT(t, "auth.error", "Hata", language), message);
+                  }
+                }}
+              >
+                <Text style={styles.authButtonSecondaryText}>
+                  {safeT(t, "auth.register", "Kayıt Ol", language)}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.authCard}>
+            <View style={styles.authHeader}>
+              <View style={styles.authIcon}>
+                <Ionicons name="checkmark-circle-outline" size={26} color={COLORS.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.authTitle}>
+                  {safeT(t, "auth.welcome", "Hoş Geldin", language)}
+                </Text>
+                <Text style={styles.authEmail}>{user.email}</Text>
+                <Text style={styles.authSubtitle}>
+                  {safeT(t, "auth.accountReady", "Seyahat geçmişin, favorilerin ve başarıların bu hesapla ilişkilendirildi.", language)}
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+              <Text style={styles.authButtonText}>
+                {safeT(t, "auth.logout", "Çıkış Yap", language)}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {!user ? null : (
+          <>
         <View style={styles.statsGrid}>
           <TouchableOpacity style={styles.statBox} onPress={() => router.push("/(tabs)/saved" as any)}>
             <Ionicons name="heart-outline" size={21} color={COLORS.accent} />
@@ -600,6 +971,9 @@ export default function Profile() {
                 <Text style={[styles.badgeText, badge.unlocked && styles.badgeTextUnlocked]} numberOfLines={2}>
                   {badge.label}
                 </Text>
+                <Text style={styles.badgeDesc} numberOfLines={3}>
+                  {badge.desc}
+                </Text>
                 <Text style={[styles.badgeProgress, badge.unlocked && styles.badgeProgressUnlocked]}>
                   {badge.progress}
                 </Text>
@@ -607,6 +981,9 @@ export default function Profile() {
             ))}
           </View>
         </View>
+
+          </>
+        )}
 
         <TouchableOpacity style={styles.journalShortcut} onPress={() => router.push("/emergency" as any)}>
           <View style={styles.shortcutIcon}>
@@ -663,6 +1040,106 @@ const styles = StyleSheet.create({
   statBox: { width: "48%", backgroundColor: COLORS.surface, borderRadius: 22, alignItems: "center", paddingVertical: 16, borderWidth: 1, borderColor: COLORS.border, marginBottom: 10, shadowColor: COLORS.shadow, shadowOpacity: 0.20, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 3 },
   statValue: { color: COLORS.text, fontSize: 25, fontWeight: "800", marginTop: 6 },
   statLabel: { color: COLORS.textSoft, fontSize: 12, fontWeight: "700", marginTop: 2 },
+
+  lockedCard: { backgroundColor: COLORS.surface, borderRadius: 24, padding: 18, alignItems: "center", borderWidth: 1, borderColor: COLORS.border, marginBottom: 14, shadowColor: COLORS.shadow, shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 2 },
+  lockedTitle: { color: COLORS.text, fontSize: 18, fontWeight: "900", marginTop: 10, marginBottom: 6, textAlign: "center" },
+  lockedText: { color: COLORS.textSoft, fontSize: 13, lineHeight: 20, textAlign: "center", fontWeight: "600" },
+
+  authCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+  authHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  authIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: "#FFF1F4",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  authTitle: {
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: "900",
+    marginBottom: 4,
+  },
+  authSubtitle: {
+    color: COLORS.textSoft,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600",
+  },
+  authEmail: {
+    color: COLORS.accent,
+    fontSize: 14,
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+  authInput: {
+    backgroundColor: COLORS.surfaceSoft,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 10,
+    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  authRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 2,
+  },
+  authButton: {
+    flex: 1,
+    backgroundColor: COLORS.accent,
+    paddingVertical: 12,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  authButtonSecondary: {
+    flex: 1,
+    backgroundColor: COLORS.surfaceSoft,
+    paddingVertical: 12,
+    borderRadius: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  authButtonText: {
+    color: COLORS.white,
+    fontWeight: "900",
+    fontSize: 13,
+  },
+  authButtonSecondaryText: {
+    color: COLORS.text,
+    fontWeight: "900",
+    fontSize: 13,
+  },
+  logoutButton: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 12,
+    borderRadius: 16,
+    alignItems: "center",
+    marginTop: 2,
+  },
 
   smartSummaryCard: {
     backgroundColor: "#FFF1F4",
@@ -808,7 +1285,7 @@ const styles = StyleSheet.create({
   achievementSubtitle: { color: COLORS.textSoft, fontSize: 13, lineHeight: 19, marginBottom: 12 },
   badgeGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   badgeBox: {
-    width: "31%",
+    width: "48%",
     backgroundColor: COLORS.surfaceSoft,
     borderRadius: 20,
     padding: 10,
@@ -846,6 +1323,15 @@ const styles = StyleSheet.create({
     minHeight: 28,
   },
   badgeTextUnlocked: { color: COLORS.text },
+  badgeDesc: {
+    color: COLORS.textSoft,
+    fontSize: 10,
+    lineHeight: 14,
+    fontWeight: "700",
+    textAlign: "center",
+    minHeight: 40,
+    marginTop: 4,
+  },
   badgeProgress: {
     color: COLORS.textSoft,
     fontSize: 10,

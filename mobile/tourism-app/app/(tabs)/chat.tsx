@@ -14,6 +14,7 @@ import {
   Pressable,
   ScrollView,
   StatusBar,
+  Keyboard,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,8 +24,17 @@ import { useChat, ChatMessage } from "../../context/ChatContext";
 
 type DayPlan = {
   day: number;
-  places: string[];
+  places: any[];
 };
+
+function getPlaceName(place: any): string {
+  if (typeof place === "string") return place;
+  return String(place?.name || "");
+}
+
+function getPlaceNames(places: any[] = []): string[] {
+  return places.map(getPlaceName).filter(Boolean);
+}
 
 const COLORS = {
   bg: "#F7F4EF",
@@ -172,6 +182,7 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
   const [hasAutoSent, setHasAutoSent] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const listRef = useRef<FlatList<any>>(null);
 
@@ -180,6 +191,25 @@ export default function Chat() {
       createNewChat(welcomeText);
     }
   }, [activeChatId, welcomeText, createNewChat]);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates?.height || 0);
+      scrollToBottom();
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
 
   useEffect(() => {
@@ -222,7 +252,7 @@ export default function Chat() {
     }, 100);
   };
 
-  const showRoute = async (places: string[]) => {
+  const showRoute = async (places: any[]) => {
     try {
       if (!places || places.length === 0) return;
 
@@ -231,7 +261,7 @@ export default function Chat() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ places, language }),
+        body: JSON.stringify({ places: getPlaceNames(places), language }),
       });
 
       const data = await res.json();
@@ -278,13 +308,35 @@ export default function Chat() {
 
       const data = await res.json();
 
-      const aiMessage: ChatMessage = {
-        id: Date.now().toString() + "_ai",
-        text: data.reply || safeT(t, "chat.somethingWrong", "Bir şeyler ters gitti.", language),
-        sender: "ai",
-        places: data.places || [],
-        days: data.days || [],
-      };
+      let replyText =
+  data.reply ||
+  safeT(
+    t,
+    "chat.somethingWrong",
+    "Bir şeyler ters gitti.",
+    language
+  );
+
+try {
+  const parsed =
+    typeof replyText === "string"
+      ? JSON.parse(replyText)
+      : replyText;
+
+  if (parsed?.draft_reply) {
+    replyText = parsed.draft_reply;
+  }
+} catch (e) {
+  // normal metinse hiçbir şey yapma
+}
+
+const aiMessage: ChatMessage = {
+  id: Date.now().toString() + "_ai",
+  text: replyText,
+  sender: "ai",
+  places: data.places || [],
+  days: data.days || [],
+};
 
       appendMessageToChat(currentChatId, aiMessage);
     } catch (err) {
@@ -315,20 +367,24 @@ export default function Chat() {
     }
   }, [params.prompt, hasAutoSent, activeChatId]);
 
-  const renderPlaceChip = (place: string, index: number) => (
-    <TouchableOpacity
-      key={`${place}-${index}`}
-      style={styles.placeChip}
-      onPress={() =>
-        router.push({
-          pathname: "/place",
-          params: { name: place },
-        })
-      }
-    >
-      <Text style={styles.placeChipText}>{place}</Text>
-    </TouchableOpacity>
-  );
+  const renderPlaceChip = (place: any, index: number) => {
+    const placeName = getPlaceName(place);
+
+    return (
+      <TouchableOpacity
+        key={`${placeName}-${index}`}
+        style={styles.placeChip}
+        onPress={() =>
+          router.push({
+            pathname: "/place",
+            params: { name: placeName },
+          })
+        }
+      >
+        <Text style={styles.placeChipText}>{placeName}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const hasDays = item.sender === "ai" && item.days && item.days.length > 0;
@@ -474,11 +530,7 @@ export default function Chat() {
         </View>
       </Modal>
 
-      <KeyboardAvoidingView
-        style={styles.wrapper}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={8}
-      >
+      <View style={styles.wrapper}>
         <LinearGradient
           colors={["#FFFFFF", "#FAF8F5", "#F7F4EF"]}
           start={{ x: 0, y: 0 }}
@@ -519,7 +571,12 @@ export default function Chat() {
           }
         />
 
-        <View style={styles.inputBar}>
+        <View
+          style={[
+            styles.inputBar,
+            { bottom: keyboardHeight > 0 ? keyboardHeight + 8 : 74 },
+          ]}
+        >
           <TextInput
             style={styles.input}
             placeholder={safeT(t, "chat.askPlaceholder", "Seyahat asistanına sor...", language)}
@@ -538,7 +595,7 @@ export default function Chat() {
             <Ionicons name="arrow-up" size={20} color={COLORS.white} />
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -692,7 +749,7 @@ const styles = StyleSheet.create({
   messagesContainer: {
     paddingHorizontal: 16,
     paddingTop: 18,
-    paddingBottom: 120,
+    paddingBottom: 150,
   },
 
   messageBlock: {
@@ -845,7 +902,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 12,
     right: 12,
-    bottom: 74,
     flexDirection: "row",
     alignItems: "flex-end",
     backgroundColor: COLORS.surface,
