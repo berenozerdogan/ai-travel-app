@@ -1388,24 +1388,15 @@ def trip_plan(payload: dict = Body(...)):
             p for p in city_places_all
             if normalized_district in normalize_text(p.get("district", ""))
         ]
-        city_places = _fallback_relax_district(city_places_all, district_places)
+
+        # İlçede sonuç varsa onu kullan
+        if district_places:
+            city_places = district_places
+        else:
+            # İlçede sonuç yoksa şehir geneline dön
+            city_places = city_places_all
     else:
         city_places = city_places_all
-
-    if normalized_district and not city_places:
-        return {
-            "reply": tr_text(lang, {
-                "tr": f"{city} içinde {district_raw} için veri bulunamadı. Lütfen başka bir ilçe seç veya ilçe alanını boş bırak.",
-                "en": f"No data found for {district_raw} in {city}. Please choose another district or leave the district empty.",
-                "de": f"Keine Daten für {district_raw} in {city} gefunden. Bitte wähle einen anderen Bezirk oder lasse das Feld leer.",
-                "ru": f"Нет данных для {district_raw} в {city}. Выберите другой район или оставьте поле пустым.",
-            }),
-            "days": [],
-            "places": [],
-            "district": district_raw,
-            "category": category_raw,
-            "requested_days": days_count,
-        }
 
     # Önce frontend'den gelen kategoriye göre kesin filtrele.
     category_places = _category_filtered_places(city_places, normalized_category, interests)
