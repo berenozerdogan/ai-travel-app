@@ -1359,6 +1359,22 @@ def trip_plan(payload: dict = Body(...)):
     normalized_district = normalize_text(district_raw)
     normalized_category = normalize_text(category_raw)
 
+    category_label_tr = {
+        "culture": "tarih/müze",
+        "nature": "doğa",
+        "food": "yeme-içme",
+        "shopping": "alışveriş",
+        "mixed": "karma",
+    }.get(normalized_category, normalized_category or "karma")
+
+    category_label_en = {
+        "culture": "history/museum",
+        "nature": "nature",
+        "food": "food",
+        "shopping": "shopping",
+        "mixed": "mixed",
+    }.get(normalized_category, normalized_category or "mixed")
+
     places_list = get_places_from_db(lang=lang)
     allowed_cities = get_city_aliases(normalized_city)
 
@@ -1457,22 +1473,6 @@ def trip_plan(payload: dict = Body(...)):
             "day": i + 1,
             "places": day_places,
         })
-
-    category_label_tr = {
-        "culture": "tarih/müze",
-        "nature": "doğa",
-        "food": "yeme-içme",
-        "shopping": "alışveriş",
-        "mixed": "karma",
-    }.get(normalized_category, normalized_category or "karma")
-
-    category_label_en = {
-        "culture": "history/museum",
-        "nature": "nature",
-        "food": "food",
-        "shopping": "shopping",
-        "mixed": "mixed",
-    }.get(normalized_category, normalized_category or "mixed")
 
     if lang == "tr":
         reply = f"{city} için {days_count} günlük gezi planı hazır."
