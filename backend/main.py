@@ -1339,10 +1339,8 @@ def _sort_places_for_trip(places: list, category: str, district: str = "") -> li
 
 
 def _fallback_relax_district(all_city_places: list, district_places: list) -> list:
-    # ÖNEMLİ:
-    # Kullanıcı ilçe seçtiyse şehir geneline düşmek yanlış sonuç üretir.
-    # Örneğin Kadıköy seçiliyken Fatih/Beşiktaş oteli gelmemeli.
-    # Bu yüzden sadece ilçe sonuçları döndürülür.
+    # Önce ilçe sonuçları denenir.
+    # İlçede seçilen kategoriye uygun yer yoksa trip_plan içinde şehir geneline düşülür.
     return district_places
 
 @app.post("/trip-plan")
@@ -1383,37 +1381,48 @@ def trip_plan(payload: dict = Body(...)):
         if normalize_text(p.get("city", "")) in allowed_cities
     ]
 
+    district_places = []
     if normalized_district:
         district_places = [
             p for p in city_places_all
             if normalized_district in normalize_text(p.get("district", ""))
         ]
 
-        # İlçede sonuç varsa onu kullan
-        if district_places:
-            city_places = district_places
-        else:
-            # İlçede sonuç yoksa şehir geneline dön
-            city_places = city_places_all
+    def build_category_places(source_places: list):
+        filtered = _category_filtered_places(source_places, normalized_category, interests)
+        sorted_list = _sort_places_for_trip(filtered, normalized_category, normalized_district)
+
+        # Food dışındaki kategorilerde otel/restoran/kafe kesinlikle gösterilmez.
+        if normalized_category in ["culture", "nature", "shopping"]:
+            sorted_list = [
+                p for p in sorted_list
+                if normalize_text(p.get("category", "")) not in ["hotel", "restaurant", "cafe"]
+            ]
+
+        return sorted_list
+
+    # 1) Önce ilçe + kategori dene
+    used_city_fallback = False
+
+    if normalized_district and district_places:
+        sorted_places = build_category_places(district_places)
+
+        # İlçede kategoriye uygun yer yoksa şehir geneline geç
+        if not sorted_places:
+            sorted_places = build_category_places(city_places_all)
+            used_city_fallback = True
     else:
-        city_places = city_places_all
-
-    # Önce frontend'den gelen kategoriye göre kesin filtrele.
-    category_places = _category_filtered_places(city_places, normalized_category, interests)
-
-    sorted_places = _sort_places_for_trip(
-        category_places,
-        normalized_category,
-        normalized_district
-    )
+        # İlçe yoksa veya ilçeye ait kayıt yoksa şehir geneline geç
+        sorted_places = build_category_places(city_places_all)
+        used_city_fallback = bool(normalized_district)
 
     if not sorted_places:
         return {
             "reply": tr_text(lang, {
-                "tr": f"{city} içinde {district_raw or 'seçilen bölge'} için bu kategoriye uygun yer bulunamadı. Otel/restoran önermemek için sonuç döndürmedim.",
-                "en": f"No matching places found for this category in {district_raw or city}. I did not return hotels/restaurants to avoid irrelevant results.",
-                "de": f"Keine passenden Orte für diese Kategorie in {district_raw or city} gefunden.",
-                "ru": f"Подходящие места для этой категории в {district_raw or city} не найдены.",
+                "tr": f"{city} için uygun {category_label_tr} rotası bulunamadı. Otel/restoran önermemek için boş sonuç döndürdüm.",
+                "en": f"No suitable {category_label_en} route found for {city}. I returned an empty result to avoid irrelevant hotels/restaurants.",
+                "de": f"Keine passende {category_label_en}-Route für {city} gefunden.",
+                "ru": f"Подходящий маршрут для {city} не найден.",
             }),
             "days": [],
             "places": [],
@@ -1422,32 +1431,8 @@ def trip_plan(payload: dict = Body(...)):
             "requested_days": days_count,
         }
 
-    # Her gün için en fazla 4 durak.
     max_total_places = min(days_count * 4, len(sorted_places))
     selected_places = sorted_places[:max_total_places]
-
-    # Eğer seçilen kategori food değilse, son güvenlik filtresi:
-    # otel/restoran/kafe kesinlikle çıkmalı.
-    if normalized_category in ["culture", "nature", "shopping"]:
-        selected_places = [
-            p for p in selected_places
-            if normalize_text(p.get("category", "")) not in ["hotel", "restaurant", "cafe"]
-        ][:max_total_places]
-
-        if not selected_places:
-            return {
-                "reply": tr_text(lang, {
-                    "tr": f"{city} içinde {district_raw or 'seçilen bölge'} için uygun {category_label_tr} rotası bulunamadı. Otel/restoran önermemek için boş sonuç döndürdüm.",
-                    "en": f"No suitable {category_label_en} route found for {district_raw or city}. I returned an empty result to avoid hotels/restaurants.",
-                    "de": f"Keine passende Route gefunden.",
-                    "ru": f"Подходящий маршрут не найден.",
-                }),
-                "days": [],
-                "places": [],
-                "district": district_raw,
-                "category": category_raw,
-                "requested_days": days_count,
-            }
 
     plan_days = []
     used_places = []
@@ -1465,30 +1450,51 @@ def trip_plan(payload: dict = Body(...)):
             "places": day_places,
         })
 
+    fallback_note = ""
+    if used_city_fallback and normalized_district:
+        if district_places:
+            fallback_note = tr_text(lang, {
+                "tr": f" {district_raw} içinde bu kategoriye uygun yer az olduğu için İstanbul geneline göre öneri oluşturdum.",
+                "en": f" Since there were not enough matching places in {district_raw}, I used city-wide results.",
+                "de": f" Da es in {district_raw} nicht genug passende Orte gab, wurden stadtweite Ergebnisse verwendet.",
+                "ru": f" Так как в районе {district_raw} мало подходящих мест, использованы результаты по всему городу.",
+            })
+        else:
+            fallback_note = tr_text(lang, {
+                "tr": f" {district_raw} için veri bulunamadığı için İstanbul geneline göre öneri oluşturdum.",
+                "en": f" Since there was no data for {district_raw}, I used city-wide results.",
+                "de": f" Da keine Daten für {district_raw} gefunden wurden, wurden stadtweite Ergebnisse verwendet.",
+                "ru": f" Так как данных по району {district_raw} нет, использованы результаты по всему городу.",
+            })
+
     if lang == "tr":
         reply = f"{city} için {days_count} günlük gezi planı hazır."
         if district_raw:
             reply += f" İlçe/bölge: {district_raw}."
         if category_raw and category_raw != "mixed":
             reply += f" Kategori: {category_label_tr}."
+        reply += fallback_note
     elif lang == "de":
         reply = f"Der {days_count}-Tage-Reiseplan für {city} ist bereit."
         if district_raw:
             reply += f" Bezirk/Gebiet: {district_raw}."
         if category_raw and category_raw != "mixed":
             reply += f" Kategorie: {category_label_en}."
+        reply += fallback_note
     elif lang == "ru":
         reply = f"План поездки на {days_count} дн. для {city} готов."
         if district_raw:
             reply += f" Район: {district_raw}."
         if category_raw and category_raw != "mixed":
             reply += f" Категория: {category_label_en}."
+        reply += fallback_note
     else:
         reply = f"{days_count}-day trip plan for {city} is ready."
         if district_raw:
             reply += f" District/area: {district_raw}."
         if category_raw and category_raw != "mixed":
             reply += f" Category: {category_label_en}."
+        reply += fallback_note
 
     return {
         "reply": reply,
