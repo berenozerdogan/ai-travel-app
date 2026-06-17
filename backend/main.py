@@ -577,68 +577,70 @@ def _place_ai_insight_fallback(p_data: dict, lang: str):
 
     if lang == "tr":
         if is_hotel:
-            intro = f"{name}, {city} içinde konaklama için değerlendirilebilecek bir oteldir. Konumu, ulaşım kolaylığı ve çevresindeki gezi noktalarına yakınlığı rota planı yaparken avantaj sağlayabilir."
-            best = ["Konaklama odaklı seyahat edenler", "Şehir içinde rahat ulaşım isteyenler"]
-            strengths = ["Konaklama için pratik bir durak olması", "Yakındaki gezi noktalarıyla birlikte planlanabilmesi", "Şehir rotasına kolayca eklenebilmesi"]
-            cautions = ["Fiyatlar sezona göre değişebilir", "Rezervasyon ve müsaitlik önceden kontrol edilmelidir"]
-        elif is_food:
-            intro = f"{name}, {city} içinde yeme içme molası için tercih edilebilecek bir mekandır. Gezi sırasında kısa bir dinlenme veya öğün molası için rotaya eklenebilir."
-            best = ["Yeme içme molası vermek isteyenler", "Yakındaki yerleri gezerken kısa ara planlayanlar"]
-            strengths = ["Rota içinde mola noktası olarak kullanılabilmesi", "Yakındaki mekanlarla birlikte kolay planlanması", "Günlük gezi akışını desteklemesi"]
-            cautions = ["Yoğun saatlerde yer bulmak zor olabilir", "Fiyat ve menü bilgisi gitmeden önce kontrol edilmelidir"]
-        elif is_museum:
-            intro = f"{name}, {city} içinde kültür ve tarih odaklı gezi yapmak isteyenler için uygun bir müzedir. Ziyaret sırasında bölgenin geçmişi, sanatı veya kültürel yapısı hakkında bilgi edinilebilir."
-            best = ["Kültür ve tarih meraklıları", "Müze gezmeyi seven ziyaretçiler"]
-            strengths = ["Bilgi verici ve öğretici bir durak olması", "Kültür rotalarına kolayca eklenebilmesi", "Kapalı mekan alternatifi sunması"]
-            cautions = ["Ziyaret saatleri önceden kontrol edilmelidir", "Yoğun dönemlerde kalabalık olabilir"]
-        elif is_nature:
-            intro = f"{name}, {city} içinde açık alan ve manzara odaklı bir gezi noktasıdır. Yürüyüş, fotoğraf çekimi ve kısa keşifler için rotaya eklenebilir."
-            best = ["Doğa ve manzara sevenler", "Açık alanda vakit geçirmek isteyenler"]
-            strengths = ["Fotoğraf için uygun bir ortam sunması", "Açık hava rotalarına uyum sağlaması", "Kısa keşifler için ideal olması"]
-            cautions = ["Hava durumuna göre plan yapılmalıdır", "Rahat ayakkabı tercih edilmelidir"]
-        elif is_historical:
-            intro = f"{name}, {city} içinde tarihi ve turistik değeri olan önemli bir duraktır. Bölgenin geçmişini tanımak ve mimari dokusunu görmek isteyenler için gezi rotasına eklenebilir."
-            best = ["Tarih meraklıları", "Kültürel gezi yapmak isteyenler"]
-            strengths = ["Tarihi atmosfer sunması", "Fotoğraf ve keşif için uygun olması", "Şehir rotasında anlamlı bir durak olması"]
-            cautions = ["Kalabalık saatler tercih edilmemelidir", "Ziyaret süresi rota yoğunluğuna göre ayarlanmalıdır"]
-        else:
-            intro = f"{name}, {city} içinde gezi rotasına eklenebilecek bir noktadır. {district + ' bölgesindeki' if district else 'Şehirdeki'} diğer yerlerle birlikte planlandığında daha verimli bir rota oluşturulabilir."
-            best = ["Şehri keşfetmek isteyenler", "Yakındaki yerlerle birlikte rota planlayanlar"]
-            strengths = ["Rota içine kolay eklenebilmesi", "Yakındaki yerlerle birlikte gezilebilmesi", "Kısa keşifler için uygun olması"]
-            cautions = ["Gitmeden önce konum ve ziyaret bilgisi kontrol edilmelidir", "Yoğun saatlerde planlama yapmak gerekebilir"]
+            return {
+                "summary": f"{name}, {city} içinde konaklama için değerlendirilebilecek bir oteldir. Konumu, ulaşım kolaylığı ve çevresindeki gezi noktalarına yakınlığı rota planı yaparken avantaj sağlayabilir.",
+                "best_for": ["Konaklama odaklı seyahat edenler", "Şehir içinde rahat ulaşım isteyenler"],
+                "strengths": ["Konaklama için pratik bir durak olması", "Yakındaki gezi noktalarıyla birlikte planlanabilmesi", "Şehir rotasına kolayca eklenebilmesi"],
+                "watch_out": ["Fiyatlar sezona göre değişebilir", "Rezervasyon ve müsaitlik önceden kontrol edilmelidir"],
+            }
+        if is_food:
+            return {
+                "summary": f"{name}, {city} içinde yeme içme molası için tercih edilebilecek bir mekandır. Gezi sırasında kısa bir dinlenme veya öğün molası için rotaya eklenebilir.",
+                "best_for": ["Yeme içme molası vermek isteyenler", "Yakındaki yerleri gezerken kısa ara planlayanlar"],
+                "strengths": ["Rota içinde mola noktası olarak kullanılabilmesi", "Yakındaki mekanlarla birlikte kolay planlanması", "Günlük gezi akışını desteklemesi"],
+                "watch_out": ["Yoğun saatlerde yer bulmak zor olabilir", "Fiyat ve menü bilgisi gitmeden önce kontrol edilmelidir"],
+            }
+        if is_museum:
+            return {
+                "summary": f"{name}, {city} içinde kültür ve tarih odaklı gezi yapmak isteyenler için uygun bir müzedir. Ziyaret sırasında bölgenin geçmişi, sanatı veya kültürel yapısı hakkında bilgi edinilebilir.",
+                "best_for": ["Kültür ve tarih meraklıları", "Müze gezmeyi seven ziyaretçiler"],
+                "strengths": ["Bilgi verici ve öğretici bir durak olması", "Kültür rotalarına kolayca eklenebilmesi", "Kapalı mekan alternatifi sunması"],
+                "watch_out": ["Ziyaret saatleri önceden kontrol edilmelidir", "Yoğun dönemlerde kalabalık olabilir"],
+            }
+        if is_nature:
+            return {
+                "summary": f"{name}, {city} içinde açık alan ve manzara odaklı bir gezi noktasıdır. Yürüyüş, fotoğraf çekimi ve kısa keşifler için rotaya eklenebilir.",
+                "best_for": ["Doğa ve manzara sevenler", "Açık alanda vakit geçirmek isteyenler"],
+                "strengths": ["Fotoğraf için uygun bir ortam sunması", "Açık hava rotalarına uyum sağlaması", "Kısa keşifler için ideal olması"],
+                "watch_out": ["Hava durumuna göre plan yapılmalıdır", "Rahat ayakkabı tercih edilmelidir"],
+            }
+        if is_historical:
+            return {
+                "summary": f"{name}, {city} içinde tarihi ve turistik değeri olan önemli bir duraktır. Bölgenin geçmişini tanımak ve mimari dokusunu görmek isteyenler için gezi rotasına eklenebilir.",
+                "best_for": ["Tarih meraklıları", "Kültürel gezi yapmak isteyenler"],
+                "strengths": ["Tarihi atmosfer sunması", "Fotoğraf ve keşif için uygun olması", "Şehir rotasında anlamlı bir durak olması"],
+                "watch_out": ["Kalabalık saatler tercih edilmemelidir", "Ziyaret süresi rota yoğunluğuna göre ayarlanmalıdır"],
+            }
 
-        return (
-            f"{intro}\n\n"
-            f"En uygun olduğu kişiler\n"
-            + "\n".join([f"• {x}" for x in best])
-            + "\n\nGüçlü yanlar\n"
-            + "\n".join([f"• {x}" for x in strengths])
-            + "\n\nDikkat edilmesi gerekenler\n"
-            + "\n".join([f"• {x}" for x in cautions])
-        )
+        return {
+            "summary": f"{name}, {city} içinde gezi rotasına eklenebilecek bir noktadır. {district + ' bölgesindeki' if district else 'Şehirdeki'} diğer yerlerle birlikte planlandığında daha verimli bir rota oluşturulabilir.",
+            "best_for": ["Şehri keşfetmek isteyenler", "Yakındaki yerlerle birlikte rota planlayanlar"],
+            "strengths": ["Rota içine kolay eklenebilmesi", "Yakındaki yerlerle birlikte gezilebilmesi", "Kısa keşifler için uygun olması"],
+            "watch_out": ["Gitmeden önce konum ve ziyaret bilgisi kontrol edilmelidir", "Yoğun saatlerde planlama yapmak gerekebilir"],
+        }
 
     if lang == "de":
-        return (
-            f"{name} ist ein Reiseziel in {city}, das je nach Kategorie gut in eine Tagesroute aufgenommen werden kann.\n\n"
-            "Geeignet für\n• Reisende, die die Stadt entdecken möchten\n• Besucher, die nahegelegene Orte kombinieren wollen\n\n"
-            "Stärken\n• Gute Ergänzung für eine Route\n• Lässt sich mit Orten in der Nähe planen\n• Praktisch für kurze Besuche\n\n"
-            "Hinweise\n• Öffnungszeiten und aktuelle Informationen vorher prüfen\n• Besuchszeit je nach Route planen"
-        )
+        return {
+            "summary": f"{name} ist ein Reiseziel in {city}, das je nach Kategorie gut in eine Tagesroute aufgenommen werden kann.",
+            "best_for": ["Reisende, die die Stadt entdecken möchten", "Besucher, die nahegelegene Orte kombinieren wollen"],
+            "strengths": ["Gute Ergänzung für eine Route", "Lässt sich mit Orten in der Nähe planen", "Praktisch für kurze Besuche"],
+            "watch_out": ["Öffnungszeiten und aktuelle Informationen vorher prüfen", "Besuchszeit je nach Route planen"],
+        }
 
     if lang == "ru":
-        return (
-            f"{name} — место в городе {city}, которое можно добавить в маршрут в зависимости от типа поездки.\n\n"
-            "Подходит для\n• путешественников, которые хотят познакомиться с городом\n• тех, кто планирует маршрут с ближайшими местами\n\n"
-            "Сильные стороны\n• легко добавить в маршрут\n• можно совместить с ближайшими точками\n• подходит для короткого посещения\n\n"
-            "Важно учитывать\n• перед поездкой проверьте часы работы и актуальную информацию\n• время посещения лучше планировать заранее"
-        )
+        return {
+            "summary": f"{name} — место в городе {city}, которое можно добавить в маршрут в зависимости от типа поездки.",
+            "best_for": ["Путешественники, которые хотят познакомиться с городом", "Те, кто планирует маршрут с ближайшими местами"],
+            "strengths": ["Легко добавить в маршрут", "Можно совместить с ближайшими точками", "Подходит для короткого посещения"],
+            "watch_out": ["Перед поездкой проверьте часы работы и актуальную информацию", "Время посещения лучше планировать заранее"],
+        }
 
-    return (
-        f"{name} is a place in {city} that can be added to a travel route depending on the trip style.\n\n"
-        "Best for\n• Travelers who want to explore the city\n• Visitors planning a route with nearby places\n\n"
-        "Strengths\n• Easy to add to a daily route\n• Can be planned together with nearby places\n• Suitable for a short visit\n\n"
-        "Things to consider\n• Check current visit information before going\n• Plan the visit time according to your route"
-    )
+    return {
+        "summary": f"{name} is a place in {city} that can be added to a travel route depending on the trip style.",
+        "best_for": ["Travelers who want to explore the city", "Visitors planning a route with nearby places"],
+        "strengths": ["Easy to add to a daily route", "Can be planned together with nearby places", "Suitable for a short visit"],
+        "watch_out": ["Check current visit information before going", "Plan the visit time according to your route"],
+    }
 
 
 @app.get("/place-insight")
