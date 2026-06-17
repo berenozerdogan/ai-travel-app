@@ -153,9 +153,10 @@
       "landscape",
       "balloons"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJq9Fr03loKhURUK4_ohdObEY/photos/AU_ZVEHEdCWEPt2s0DcQ8FQN15qhMinDr2ARQoPkn7yyvTnTQZLZ90kd2mtPYoyS8pyIU90_lux3qaWcG-OZUoq_nYTWZ02zXZ-9CSlKguWgQSFFAgrf-IcWp_x6oRPSFZyoTrzncIvPJhZ8Z16rjY2ZHrzd9Fli4dIg75FD1qwv0h5kEA8--GKfUsJr5W08-r43GuW4O9OLn9pFG_GTHWea8SGAv6wUsC9sGq94CVRxbosNqfzvNof_wMcVx7tCuPAI86BHQnZpee-iXkUopLFDE1nkN2cWOMnrBe23rN9td_DRb7AIQecUcpeKnojmJli7HSnEtnxEeco-8nJ-aRO_-VFY-bPmzna1vbvKVhsFcfFZEGxcJ9TJXXnxbwdlGzY6JUrRgVYj-YBlrBHUDsko7QexuhmYNafL1SONHwxajJJx-w/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Cappadociasunrise.jpg/3840px-Cappadociasunrise.jpg",
     "estimated_visit_time": 180,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 6,
@@ -185,9 +186,10 @@
       "museum",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJ7eS75-xnKhUR_syP0bAUyrs/photos/AU_ZVEEJCSvhLnbcslgQSkAeYSC9SAEJmrojGr59OW0eG6Rlh9NSo2BJGZzP9Fyl4jQ1DrX7k1eER3pFqwGpJ_5tJcvkD0hb_b3BoR-FIOdaPsCKHa9xaI6KjZ3lry4T5YAKO5xTqhiZf5j6xsj0SEIA073h8Ud1-yjaGJfPvtYNkpvDvbZKa0rgagad3GkdhgwiA0b6cbuM5faOYCeGSci0Lggj8KLobsJjZlZ7O87un47k4RF-Zlp1x2ad5PTCgEXCXxjVCzf5TrT4gjAm6IJQPgWdtAsepDoiQ3YaRU045Wa2lIe3YbJ1p1ylpsLebjaa2eo8D1vLlMwYPX2sZKr5BlqUsXDFktYXb1913dTKLBZGwImfDU-YJR_LsFzPVSA_18vYz_g1q4sQ1Vvf3UbtnOCHLD6_PxpVnjhvZQoo8M7Kfg/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/G%C3%B6reme_Open_Air_Museum_01.jpg/3840px-G%C3%B6reme_Open_Air_Museum_01.jpg",
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 7,
@@ -217,9 +219,10 @@
       "landscape",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJ1eSgdDoSxxQRWzBYe0LxxJI/photos/AU_ZVEFdETkQrTrzbElU0A84Ed5XcJxiyiI9O8OUm1K5sxELequCAeI5OvDTdS9XLtK79WjU65E-6S4Y8rshdvtOzY_KyOMqb5lx0hT0K5_E-zhige_1MkBS7V9lU1uGp2_hVcK21M2vXOI39Ql-s8jBSpzgulVhYdB2uh4S0Pvqyb03Nkd7nI-Q6Owt5bQiCNBr_oDKwksnTZFcL5rtrPsyfQHt1ShKzmHL1Oc3FIRMqhyYEPZu14_kaAjtLaAdw5WewVhLV41RaIiL6_7xSS-h-zpzl0tcgDNZLnSA0mFTjf2DJOeaGfq07b1eKQobW0uVFxzufqKkfYe_NjX2zW1keVUJbm8mxtAhqYQd8Z2SKTofNXb63YNGx9TAUzG5P_Wgiun61oKVakB7H6XdxdB0ozPgio-iMxbW7Z6zz9y43YDbdBkF/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Pamukkale_Turkey.jpg/1280px-Pamukkale_Turkey.jpg",
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 8,
@@ -249,9 +252,10 @@
       "ruins",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJL9ogVskTxxQR1vweRV8PGbE/photos/AU_ZVEFYNX9oQSNZ6cYfjXQIDgQeFuZCWZ_nGuIIa_6LK4bS7k65UJhZvbCfHpIDlzTLvJQA5li_bw5-VSYgYjVgMFp7_i9iFCoyf2yJhSuVHqXT9l4zjotynzp8fMrYl-JE1xiXC4OwSYAu0YQI1txyXgP9VpYMV4lz4-Z2najSnYRIZXlsgbOCgdINUH5waCmUHXexmUSfwf3aea52FYj8nnI1W2kZRTjyIIHo97YCjQxOH8kafaw6Im8GNCkVFirF0FsRmsJ5crByrPmB2HgeSOOOOqrW1EJDQGChgtPjzD5N-Ana7Cp3eea8X4Nfa7ryxXdHFTjGHorpdrqLdP3W11AopNfGq3CMt3sU9baySlDw8KFHRkJDyD05yUgeew9JTr_w9ToAysGu9mojsk8Z_SKIk3iVsWR1oqKAYXuIlZyExQ/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Hierapolis_theatre_2003.jpg/1280px-Hierapolis_theatre_2003.jpg",
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 9,
@@ -281,9 +285,10 @@
       "ruins",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJRwSz8EitvhQR-LYkCYrx-9A/photos/AU_ZVEHlZMnQjisBugtZy65XIB0tKY1u-WCz7oG-DYBBh8HL1TtaMZGYrk7m1bOrWDhYOaR7Bn-YPFrTVlNIktUqYpuUeU7Xq4C0q2f65pXk5EbTSXGz_wz1VGJaBPMDdQOcoaILP2VN0hHU3UOgslzbju9QSXeAvpc8ChfoemtjejaTGA0Of5ssm72lOcmU95Ox_aBay4TAHLvd1Ntk9PA4peIBkCyG6OknLdFmTayrIgZhLNIH49RpwCzltIf7L5npZo6RNpp-w_IoKbS_Sk6p40el2KYAHPb6fE465jFdjsaO_vgAgx2Nqqsfoa3UgBNB-o9Q9_JeX0_zJ6drCxoGqF3sNdDkCJr5mtyXZAWirCbcxQs0yIVQAQXGdXjIneYjxBSJ7gS7D54YMxeqfqKUi68SeTdrRgWCRM07_UIJh92kETdG/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Celsus_Library%2C_Ephesus.jpg/1280px-Celsus_Library%2C_Ephesus.jpg",
     "estimated_visit_time": 120,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 10,
@@ -313,9 +318,10 @@
       "architecture",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJAw5J10utvhQRxWF0iXjxNFo/photos/AU_ZVEH9_LvFB8JbfsKRhG6AbGBDL8b8LXP7Q3wxCKDm1mEXATIjkhkHrBe7VG3QtXbFMEirLfOk1rWThqYy5_L_aCVCt8O3sxZySqnqsNEcgwU520XqRAFTA0mlgZbdYpKMWE_KynCbPbMLljxu5UVlBOo28AJFHqhjh6_-OLnOJfHAhJoEZKaI9PDeZQayqQCnQJY1YvHljLY_KX599y9kKCGgwDdDXhuAOMrtq23t-OBfhhDNMLXlrIUDLGAZtonYr0OTpTr4W3Q2lrJbk2G3rH50ETmyn1JzjfNETrnA316UglucK2RhGPyk-NdcNQcvTsXqglDZskJGptl821DM7jZ_vqLhkEhyxK8gMOaG3Ni5BFeQf3VJ4CoQM7K_kMvBU2dt6riQSTBrwB24XK6cME4VXtvWe6PO1hBVhwNrvvaV-g/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Celsus_Library%2C_Ephesus.jpg/1280px-Celsus_Library%2C_Ephesus.jpg",
     "estimated_visit_time": 45,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 11,
@@ -376,9 +382,10 @@
       "waterfall",
       "park"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJCQehRUCbwxQRtPR0g040MQw/photos/AU_ZVEGuZdB2b_bW93lihY198ky94bF8eZ4FQj_K15JlBTQwoEfhmr5pRVmF42tswra-zZNbUe3ckS0keIp4mTUB-ELj-s2d9z5JvvVtbrJEIpDDT68o66bfecvvUrGHE5DgsSeawgvd1y6S1BQhz1wOefIxm5MJFVPhUuTjEczZutIUjT6OCy9H5HQllvXz79hOdMuYiBgxEqJeEuzZ7pqRsDRdVxniP7b1JOpCZboRkfFHbiXY_K6DuHlrjj7anJEdxVjIj6C0aWsLvINl7253gOWN6XZ5i2s1_SFjxpYcpvedinG05gcZ6EPvcQ1hvZNfLdlEnylgWYwohIB3-9vexrGRcGstJK_hgabkjSqXCsndhBq5Ni185YfD2937tb_DNC45yTZyzmyNpHUlEC8OJFW-NryKIsEpsEqQB5q2TQbriIC7KyFyRW5EITg84g/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/c/ce/D%C3%BCdenWaterfalls01.jpg",
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 13,
@@ -407,9 +414,10 @@
       "ski",
       "mountain"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJPWFOq606yhQRz9Yw2l99n6o/photos/AU_ZVEH1b8H5C3SqAuRdJ6rbu3TtVkqqqx4W03ZIzMYOthpkdNZyzqGRfVN09sh0csNSIH4rqNbsZpyMAPAWuIx0FqRh9cEFoddj2OuoAOIXOY-HJPmgnvzoD0ZiSRMe555GRLLFbxmh2HCvtQltza7ZksWIR58c9lDWGq9GWBMBAKtjPqZWVnKJkgT6FxyxMiTH-Pi8QYvukNUNlcifIrYhTa4OynnuA2vq0gq-5Ahc4jj-M5hN1jJSMDRqt82FHnNJbp8xVhEXPKX_Z0WreFExHCWrVxGC0KfUUDQG6Y_2ym9sdz_EgSm7kDiWOrQaHrMLwFioKcJexVP1x4nNY_K4_UiGv5_a4sXUv6hMZU9d0y-9eEyV5oBdn9yA-ZAgTSy4U1sY9EUCO83lzOnv1I-0LXIQG0Yv5XNbB25owJjkrmvzW1SRFsosmCdexMF23w/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Uluda%C4%9F_-_Olympos_Misios.jpg/3840px-Uluda%C4%9F_-_Olympos_Misios.jpg",
     "estimated_visit_time": 180,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 14,
@@ -439,9 +447,10 @@
       "architecture",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJi1a_zZhUZEARB00b4pkinzk/photos/AU_ZVEFiA3FqftQJPVKED8GA6wVEO6ajHNL03dl4EdYYwVEWwdjJ9jB6FW6fHuWxHVs5OiyIONLbU5ynWDGgmaAkfcebPWmfpdHEbrifHgRaV6pitFvvpVymXqC2uSwtXKP9orsA6XntoTwoxSAk6uw2i0Bk5boNJF8Vv-o1_krhD83-wUnOFrnXBszUg7FZOUdKhFue7i3MJbiLgtWqW54_wEoOpSHxCdaGFo0W1k20QvnwpQVh4qauS-izyptfhPg8GNiIMdV-BUoIa0ueMFuOPVU5GdP7x4CyR5Dk770wo7RqzjoWohOibp1idZlzKK2u4v4DyMuVfbuEwiq9zBNOfYGrfgJakci6aIodyeQuUl69MbPrNYRXVpcJbI4X5NVd7mtqOvcGc9L53dtUhUv30-orIGfalSXlG5biz6nJliU/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/1/18/Sumela_Showing_Location.JPG",
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 15,
@@ -470,9 +479,10 @@
       "lake",
       "mountain"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJZ3KUPFqUZUARVEwdBwpj9bk/photos/AU_ZVEERr34G22-brRhheUcepB3CJXLXi80AQbi2F70HabUFLJkXhBWEvTorBG95wne5c2oug8FgLXzaVgZlgB3CKtiTMVrEqUE03CF9eksQxA8BUs_GikmzOUHmueFc7w6-RGgf-Dvon5wALNLtL5dhN3zRBD4--pdbwHTGW_1i-cCluNM8C3QNlaWHUZLue86Ewi5dUCUqVEAE7UnPtrW3X0YLgdHCFVoDHhISY8IJHAo5PFzLCkvfSIi_RK5k67VY5NAkPQODDfO68GpmG7b2HPxVjIcN-RkhEKO78EPycLidCW2mgriHW3R5Af-ZiRnOs8xQOOSt7rulUpep7j3cwaoC2GS1F0LIDXaYrVPwQFRpvfA5ZpDz2cuNLpRooAtj6U-s8n5sP5Y__N7M_RFkKTE9dDq_adRCxMPkY8hcOVNzAQ/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Uzung%C3%B6l%2C_Trabzon.jpg/3840px-Uzung%C3%B6l%2C_Trabzon.jpg",
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 16,
@@ -501,9 +511,10 @@
       "monument",
       "unesco"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJ2UwjMBj_dUARI6DQF7yPkfA/photos/AU_ZVEG8Q7Cbn0zFf4HG-drWOoGLSbDmMQAdDKoTpIfqx08C2ov4KInssKlikiEMrMN0rrVmM0G6DXrAtBdCpTBD8OohVhsnUn1fegBC7i3NqTWxFHnLSwAgrhIblI3f9W7-ofs0-AgJEjg1w2IvRoJXy_Ze9ylHiJRaDTZL0xzdxRkcafQ1AkLzeOvsY9QHJ6dRQqpVkaVbJGqURlxZGyqQyPYx8tjZSVqRPWr8Rw-EWhEkigF_UdIZDMxQqUUBzZIEHsSDOanpnKSLaR_jiyxhQPQiysTt1Mm2CKMKD2vW_i1OJyrNZwLqVtTPIcrV67Kjs6zsJK0SBA0PMPWPSWYcC69YexoUJ7jRjxhgxQKq8Qxrq2ggvzfrpbavTVd15AY9OkdSsJ2SLM7ZQqxsWRzfMqgKLIK6_YsnaMLq8psCVpxcF9jCEtlL7IR6jfyalCqa/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Mount_Nemrut_-_East_Terrace_%284961323529%29.jpg/3840px-Mount_Nemrut_-_East_Terrace_%284961323529%29.jpg",
     "estimated_visit_time": 120,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 17,
@@ -533,9 +544,10 @@
       "landmark",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJP__QMU3hMRURGSnqQ-TLVxc/photos/AU_ZVEE_27vxpAfEn2qxtoe52ZNmc_Za0_z-t_HGTvzlh9QR8gvDndXpHso9GiTGOh68b5nntROCfXqeBG0zxVbDb1XRRbzDpozIju-Hi3xqZt56Ve5imJnOtL5x_uxrR3AtfrjrZDg9D0JOiRnFMFw56aKmzNgTu2Aent9ICZJQ1JJOV6jmwgL5XfbL1xZVeqqZHtRz-hTFczHdEs3JxWnazt3ARIktVk9bgf7GNXIBxIX_Wjfe3tlI-VcdtMtfXqObXbOTGoQoZe_TxCOAuOgFmoLC8so9c6d0-5641CYoYmlkPw/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/9/90/Gaziantep%2C_Turkey_-_panoramio_%288%29.jpg",
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 18,
@@ -627,9 +639,10 @@
       "monument",
       "turkey"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJj-qcChlP0xQRoAiNJKguhtM/photos/AU_ZVEEBesm6H-geISLJBmYPNxwSR0nDTHCFBhPapxSJlw1FOb1AiHO1BlFOXm2iQSjy6Cio5AB2NBA4dU09DHYQ9orJK5vVvEDaM9sxXnuQV4vu95dh7pOXOdyK9kSSC2qErFiIB7wn5tTsAqqUubKCL_Qh_e9S3JZmGBi2ieQXQ99JHPpZrsWHBBvItfFHW_WZoW4b7nX1NwbYYuo_Een8uHWMJWaPU0eZBWlK1przjAjCvtEQhqMbg13WRN7VP2rNHHW_aoaALRsZa-9BM4L1FBVKKTkJg0eQz2Xq4uvYzFxGX_4NMnq3MjJvnC0fO_0Y0lb_2sGWzCYpGfLYBHwGirPshVJAsty2GFC_JeTnM1rOb7mBx2RJkvoOIbSdhDMhIRUpVLZWOtbqWGhuOnObP5nqq8Ff40vvyy2oqn9naicHTw/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Anitkabir_Ankara.jpg/1280px-Anitkabir_Ankara.jpg",
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 21,
@@ -659,9 +672,10 @@
       "underground",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJyWrG4L25yhQRcYRt7uEvwGA/photos/AU_ZVEEpJ7WnKUPQXARWMS-x8AU_zCUoQpbTUk71spE2fPy9ivJrpwr7Lk-N1etnuaMMZ5a6nyoKW0shPfIHmayQgXtaRE_xclOWomYFsXraT6DaNBExr3WolFbSxpszXaCj_vIi64TXdXBjVPUfZfPnx4R-QtmvoygKenInYLQgKU6oSG137OHcP5Ji4waSTqCDYZkxFJ2S-0OEwWs42U0yaF1WDKOSueYPncBMhfu028qf0z9X_s9mVZvgW_3GuRKOaUVaU74NGRctcJowCOgCMmaUyBMX4U5iBaqOtZeUVqRYwCFzW2Okh9zNkMpCTjAuBiaHm6XZ-yNvIIF3F5HQi58Ov6_QusCE-OjWbaVQ0S1WGPxmAcngidt-Ck3a5KsFiFpJqjWX4St_aBZEb-Ea29tWtnfCjKaqp0trIjCzsFU/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Cisterna_Bas%C3%ADlica%2C_Estambul%2C_Turqu%C3%ADa%2C_2024-09-28%2C_DD_58-60_HDR.jpg/3840px-Cisterna_Bas%C3%ADlica%2C_Estambul%2C_Turqu%C3%ADa%2C_2024-09-28%2C_DD_58-60_HDR.jpg",
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 22,
@@ -722,9 +736,10 @@
       "mosque",
       "historical"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJ4fRwZb25yhQRpHwVijb3LeU/photos/AU_ZVEGvHNgkzxLFLIKMSiTgAog0TZ4uencDs92F_yYKVqf80o2wrBXYKA-SHap5JMSJs1uvLpoSLvT_eE51LDWp2cZ1OW0pmMGweRMQKmvWD57AkA7ob14mxmlbZRHX-xvxeC-fAWAtS6GJFVTGUHqNpgNwQWcv6NGVc8ismEVo-oRMvMjYl7aaWUzk_WAXGdwPT8H0r8CySv_T5b77JmHYvEPKYz6rCyeetterBC1HZ7A6i2XMD-8THK0GOU3E59qQDiucbKq7e-44GBKhWU32Jyk2T-xaTVEn4tSi54W9h6GbS-KoOCz8qgEYk494ZJOG1PYg32L_aByrDx6Z_yyDjbE6fHtJdpHfrbfVfaWiwDnbiaIjfWXXwkx_x7b2_i6dnUzRX5I9pyVctFPilrpfNU8XztqEZ4ZfWyNnQGjtv0c/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Sultan_Ahmed_Mosque_Istanbul_Turkey_retouched.jpg/1280px-Sultan_Ahmed_Mosque_Istanbul_Turkey_retouched.jpg",
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 24,
@@ -784,9 +799,10 @@
       "history",
       "landmark"
     ],
-    "image": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFAa4Epm0oOA5qy0uDFCFZhBqb9sw7LxDik7-XrIrMXWeBUXAa2hW0wBZUVWDWwn9CCnCH5gyuyRZN34_VTD0s94oxEbXeqYTemLPXsNP7uQWJt9h9n9wxegKFZ-Gxw3kTIrlw=s1360-w1360-h1020-rw",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Maiden%27s_Tower_Bosphorus.jpg/1280px-Maiden%27s_Tower_Bosphorus.jpg",
     "estimated_visit_time": 45,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 26,
@@ -847,9 +863,10 @@
       "cappadocia",
       "landscape"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJhVL9QnlnKhURwKAgI9NTUlU/photos/AU_ZVEHYucT0jPCik2-ZhvuFIGPIz3PntLQJaAoZk00EfChktje8uPG6lUdZ50YNmwA8XnLu0m-DFbhqoU__U2RatRaAcvwxSZtO866a3HMkSBDsyqQCBy_QDCe_46gPBbtjXS2RNIi_Ponf-e_sWXPoZG6V9NkB4eaDH-41LGuhh8G9jZTJdtRp9koQtsrELfMRODmfs47HUP6ZMwFYBwb0rBhGI1L8uJDqK52Zej7rZGU3jJiLRC5HaYFTpPrL02wamTb4DtHVXhorRikVV1Aw7mM26YOqTzdkaN7SKZ8qcBI6NhEjlcWT-ArvEJQ2QeSomxFTgf1KxFqyD1WDOi9bK-KwlFQ4nUkraQ2rNQc32RTSqHuGqmgD2X5YhjFwf9OslUsbamQ7jEWKpio25Kv-3XYTuFtoi6iUxeotN97S4hSVv_JOPCjWQyID7iCpExmM/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Pa%C5%9Faba%C4%9F%C4%B1.jpg/1280px-Pa%C5%9Faba%C4%9F%C4%B1.jpg",
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 28,
@@ -878,9 +895,10 @@
       "view",
       "cappadocia"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJ0wqxYwBnKhURHU_ADjkNAKI/photos/AU_ZVEEIpvlwBRR7Obe1PFcY2i_5dAVHibb_RAeSfDUg5ULajnK1mkdgdGpRHD5Ae_dRWz2F5tPcnNMgOsr6Vo9PrWeyQzWwhpd9YIFye76qb0END9_2Vov-FgNktT51Mp4nMu6qFDxLfD0Kh7GcmnMQE1XEyXf7Hxg8YDN4Hf7MbGT7t-yX7sQQkUL8fyk5fSYBzHl6sZfuGKXP8r6-L8mS3z6Q1yATjvIWc_gLtUhM7MjyDARhIQgeXjFI16whQwQtDeYhsVkBI3t43AZ9eKMydg3kSVpTMK282tt34to9tEIHtkUF7i1v0JrxGimi6ROv9IztP6yQx4--AJEz87jLW2b4fr9NfJf7JI7SqgeHcuS4TofSzTbfCjzW3UhvgadokurICKFVZiMX4qZL7aNfCWzBi5hbEs02R4abiWk0OfwrgqSbMhpzUJCAJjyPVyr2/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Love_Valley_Cappadocia.jpg/1280px-Love_Valley_Cappadocia.jpg",
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 29,
@@ -909,9 +927,10 @@
       "sea",
       "nature"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJVVomOEuQwxQRmQMLiTqogSQ/photos/AU_ZVEGTC-C-z4U8MkRHIQV-ALtysW3sGl9XCiKIyIRkrbSa-4-jDi609s_1PN7xnjt6k6SCkXGmrFdUlToaEhwV9DumDCFesBtUMUHaNr1uNoiknuuEkw9j8ZQi2acmu8BdMoVtp38-V0_z0FEPo_UbenE_6NNqUThAcB8PdZCbzXuE9oeAeaSwsePnrwdKzcHBMMCm6DMtLnpSPeSTGLK_oEvs25HfZ_mjGW_8tBcc-tCfdKVqOzf0hLGWuRNkKM5DVp4tI4Z6YfPVqsIqgkhnWACABxwaoJzMU6rzejtPdn5nNVo45KHwwbgoyywM2Y2rRX7IVUkByN_LZJWRszoCxBq-dmrYZp5iI2j13izB2EavwC5cXH9nhJfLSgLRff8AJfjI97YCiPlEL_LRVND80kgv9fr8FUwBB1kSQLIDRm1APbLG/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Falezlerden_Antalya_Konyaalt%C4%B1_Plaj%C4%B1na_do%C4%9Fru_bir_g%C3%B6r%C3%BCn%C3%BCm.jpg/3840px-Falezlerden_Antalya_Konyaalt%C4%B1_Plaj%C4%B1na_do%C4%9Fru_bir_g%C3%B6r%C3%BCn%C3%BCm.jpg",
     "estimated_visit_time": 120,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 30,
@@ -1035,9 +1054,10 @@
       "village",
       "culture"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJKWW46RM5yhQRZDAPFyiJzIc/photos/AU_ZVEGjUxC0RtPzc2BriOVpxVOoA-oQRGPEWXpfAFOO28uCPTSV6IGI7KH5NEStEN1RXRVO_gTbzD5L8nC5HANf0ONWRmBzQrcZYzxeKjMAWUdsr6wqBZ1c3BnlD_lcQS4tGtdDav-Ch7Tb3skemxHQlPHd0UNUGhZjyls8OW5z7qk3LQvSWD3SJbmid2DPu9OTZqKU-aCahFY5PAfhNPkT8G701aFrKkDLxq-88zJoO-8grWrjy8IQTFH0vmxqBvUwc9-XxxPiRpiLTBvzq8-h7MebyUhGeDxVPysz91l06NsSeGA6pQ1WutyzuaNzZtnZyczDLrKuF2rZQ59wrpC8F7HwlJ6KzziuQyXXVaoti7uOtpdf4FIWEy-YFag9EdscOPOvBD5JrXFAuAHsRbslDOkkrXVjJOl8YIhfSEhegJYN7A/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/1/19/Cumal%C4%B1k%C4%B1z%C4%B1k_7121.jpg",
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 34,
@@ -1225,9 +1245,10 @@
       "historical",
       "museum"
     ],
-    "image": "https://places.googleapis.com/v1/places/ChIJXzpuX7ZmNBURcU15VQJRZxY/photos/AU_ZVEG_PMgW5PFQh_Jp6d95rCZngJKHpfSIwnf0_dpcdtvSdagbgy9ZmDGsGP2UFkwqxJF_zNjuthYHn6xwRpZSaXj73_kzoDGq3DS7sCh0iO4JPaSKMggcQPcXfpAs1dmxRqCah8pPMg9kG4kzkGjzr5z3QDJBgr78L1W8v7MuMEXKsXqNVXXzMsGfbKNZKVSZLx7eW1asL7FDFP9LHHaCCuR46YOYfWl1M2tC86BKQNBN7K7h4CZeA-FA9SoXYWTd0uT3zEUgX8mNNMkgW7ftnPVjvuKPewtRWIPrENeKX0_C1OilcvOnsZqAmFim1BU4-jM1eeopXeyDFx785VvIEyjXrM6XP02tGQ4Kp7iUN0lvwndAQPwSHxgH1PbHFnlyXQctV9ZT_YommSiwqLZCgDJkbQ1CuKbqh_pjgMG4vb6hyLD7gBUWWtPNVEVYGaWz/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/G%C3%B6bekli_Tepe%2C_Urfa.jpg/1280px-G%C3%B6bekli_Tepe%2C_Urfa.jpg",
     "estimated_visit_time": 120,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 40,
@@ -2591,7 +2612,7 @@
     "rating": 4.7,
     "review_count": 35539,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJ2XlLfO25yhQR8Hcxg0Af5V4/photos/AU_ZVEEdOeUpSxG9J4tDGhXr-MDavp3MA98krHBv6X6UBwnHFvIO3qWpoLAe356HXN7kmY5RqkYJ5BJaKxr2JPomdselFbWY8MvE4NibfrWh6HH6PxzwkBlIam8Go0dw9rPGK43a1qyw0Dgs8s_bGRCOvtZNKv3tQw6AwROTF1r5K3OFTf03E5kuNQUNPQXj-HmhZywkXTzEC_yqi9sn-sYz6ya4-o70QOegt660O8peQqKpZwXttfo950bQDkhgS3RQXzTSeHs9GO8vE4UIvixo9g8RUn1XEWw8MABuEMb_Me8fGz9Hm3mqkKJtyLBJ6ECfCK5iGH0Zf6L6lz5Y_SvH1tHfPUQLpGMHcOyc5hzaH1U9aI8PHd0J_I-leR9YTCWa6OoR6TrUwAOHgJ4NzmH9Hg_4GpJUGUHYgtLLbjTwR9m4yodguCa9MtA-pMiTpnc-/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Sultanahmet_Square%2C_Obelisk_of_Theodosius%2C_Istanbul_%2852121868925%29.jpg/3840px-Sultanahmet_Square%2C_Obelisk_of_Theodosius%2C_Istanbul_%2852121868925%29.jpg",
     "description": {
       "tr": "Istanbul içinde doğa noktası",
       "en": "Park in Istanbul",
@@ -2605,7 +2626,8 @@
       "nature"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 85,
@@ -2690,7 +2712,7 @@
     "rating": 4.6,
     "review_count": 205472,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJQ3x3p-e5yhQRCzOLzD3Pdkw/photos/AU_ZVEGxF94FWRxXyMXQk5u51nvJKKozOdTgljuNvSuYVbwCn10NgbD6MRnFObKCSsbByzGZB_2pZ17QSrLpDLZX1y-s_r05DoWb4dO4hnrKjawIpelgCChBbS0x29FP50kN_i6Rm20eDNhqnnTTw7tgQ01LRfEdgOg57_lSsyWEJOAKCeDehGgDFPU71_qFAFkh4Qfustgcq0FTp1OBCeIYR39qTZy4dWq3Slab-wYKavXX9MtuYWLkxz1ZHn1I2L___VCdgRs9XIraJLwD6C2kE0zJ9b_4MT95r6k_IoicHDPF9ALSzGAlf00QLLogP6POWsuSoA6tFHGw905z6ge3PAZE8G6Ex-u7WaR_BaqNaMBixj1d7LU8q3yPkdWQ3d0tBut_GUPgIF0X4JeGGtbuG01Ntsj-7qzOUIxHFLDvGRRgo547ZpBWKMmz8EfhAw/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/tr/0/04/Galata_Kulesi_logo.png",
     "description": {
       "tr": "Istanbul içinde tarihi yer",
       "en": "Historical place in Istanbul",
@@ -2703,7 +2725,8 @@
       "historical"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 88,
@@ -2722,7 +2745,7 @@
     "rating": 4.7,
     "review_count": 67024,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJK9q8Nce5yhQRy0am325qXgY/photos/AU_ZVEEilg4Dlh41YvvRgyDqLwFde7pkMdmwRxoC4-8FTwYdfcOgcEmueCt6uZZ5NoiOxLOy6cpMEoPNmMU34mA_63GIhJ2M94-TmFZrRd5x4ETrmIdkDNfOiEq8ryhg_YZ7JydepvtMtFetYINQ1ErusWT6-NxikdtB_aymqlH2nZX3Wz2msyPdbvH3RClFRQ00vfj986t3Aq9ktN44qAVC5oTFRUksRm4fKxPQF19d0Pn_AGfJLVpKTAJW0hhJtGwq1-6beFp5X_TM771gLEmdp-8-A1bc9A14ibeQeq3uauEZycw_ruSIr0bmp-49L7mAlCoqgUhx5UiMMuoCifQ80MDEdO6ll-lIWWxsdMVKlTR1-V0yWNQB1Jb2V3wGjWk04-OgS48Mzj94ZRaHHHrmVQ0kzs8mnFGkt92ynChukuYEUg/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/G%C3%BClhane_Park%2C_Istanbul.jpg/3840px-G%C3%BClhane_Park%2C_Istanbul.jpg",
     "description": {
       "tr": "Istanbul içinde doğa noktası",
       "en": "Park in Istanbul",
@@ -2737,7 +2760,8 @@
       "historical"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 89,
@@ -2756,7 +2780,7 @@
     "rating": 4.7,
     "review_count": 89754,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJ4307Gna3yhQRC4M7zzg-09w/photos/AU_ZVEHhpOZpoaioovDBMoele2F9iLULjnVLvvbp2OGaYwWxYRiil4F_9iTmqSZsj45Gkpu1liqRr8WJACEF9kncck4jZp31tqZaxkY1EoA1hlI3TKs34YrLNYwsN4KN1bKrxHiaLzVEAKYltuTymgotyvUkf47w8ThRNQSHB5TlIQP0sqbi13xtRCUVCP4VkW2YhRxFpx8DIN6srkly95G5AGMxr_MvhQKqJ-jlnZg3xDDZGZs39hcPK5142Lk-XnPQ1EML5-OHINHPf9mkAm5zsbThhgfoqn_CyFJEC0nXIPauWGmAAXYmTMQKZWMVuNcF-tLdkWkp0B4xyHjIdn9svWxvYQdXN0266eKYjUuKinz2ebTcRKa_knKp9v6-_6wYYcKoDtj9MPyi_SzNh1lSEDaqWg-q7cHaRcImA2uZcGR42sGZ/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Dolmabahce_Istanbul_Turkey.jpg/3840px-Dolmabahce_Istanbul_Turkey.jpg",
     "description": {
       "tr": "Istanbul içinde simgesel yapı",
       "en": "Landmark in Istanbul",
@@ -2770,7 +2794,8 @@
       "historical"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 90,
@@ -3209,7 +3234,7 @@
     "rating": 4.6,
     "review_count": 7085,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJLTINFuC5yhQRyRbXfXliR9k/photos/AU_ZVEHiRGU-0EKAXmboImh5OhFR_Z18RaQarMZZWznKO6WY8WERLx0u_Uu-BJAy1KeJZ59J4LUWwxj5PscK9OhceUwrknCuZwsTYS5b74qGVQUlrqI4Ttygk-MKBRx7PHwLjJir_7V8qBEcNWX-uttlDCZBw-2HaHAqoF4M-ktgKCn1AUKrZvwsggwFu2__0CnlXPruv9LXDtBI-KIlN4193y5UwMMQaV3VHt8pvWNpszG4VtJ5Xme7eF0dsQ9dVnV6uBJlNPCxIomPS5AYyqqbrtP9jYLN7-Lmbd3jgCd6kLu0Jl0gaATSElyyrjMB3cLTKmBM9OXiLt5XPfrubzGpd1RAAt7CZvYAs9kdpHxEXh6QQpIAB04FtuoF-JGWAeG9Irb2pIkyNI7hG6oHFZnkDEC0af5qdSRXWQmz84jyn_41MRz0/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Pera_Museum_Logo.png",
     "description": {
       "tr": "Istanbul içinde müze",
       "en": "Museum in Istanbul",
@@ -3223,7 +3248,8 @@
       "historical"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 118,
@@ -5267,7 +5293,7 @@
     "rating": 4.6,
     "review_count": 36905,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJu3F7zgmGwxQRiKcatsput3I/photos/AU_ZVEFuwcdO6mZsQ-qJ1tdRdZO8WhCpY_SRDkXYnhVSquAtUgATkeLM6P_xd7m2bIXoxC3KZ8xeZ6kGRL4ClxAh0t02RhiRoHVw9J2oDXuoBMF3C0WJj5gitZVYN4oWIN2PowVWl062U-C-saQPFuWffFXvBxtdgG9zyVQ_xBfiJRNk3Z7Qm83c80XH0EROT4zXodWK8uDBeMCglXDgmH314QXh0hyRPq2QSARNHUSDDmoBsniJefn9KRASd8S24N4-RbpulngvzRGXTj65X9ViGIBkn8PYDnXpfkRjmQIjr9XcMEH7ZOI6dKPLlLz63fdhu8bYidKFJQ0gWqxNwQk0XD6wlADoxDc109-UeObWTaWR6VHBUtOzB1qfqdMyMQnyasKrRK_y2boKFhG6WAe5F3n-KGuDHVxXv8vrLJhkO8TWgQnp2oRhcUulzKix90gR/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/c/ce/D%C3%BCdenWaterfalls01.jpg",
     "description": {
       "tr": "Antalya içinde simgesel yapı",
       "en": "Landmark in Antalya",
@@ -5281,7 +5307,8 @@
       "nature"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 192,
@@ -6085,7 +6112,7 @@
     "rating": 4.6,
     "review_count": 2262,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJB56FB9dbwxQRxXcFaZT1DsQ/photos/AU_ZVEH2E08cesbXDUIHTkwl49XITVxetl-LjrDmkvB2zBSbXt9AfNRXUmrRLGtphGdfIGbyv9lwU4owqyh3KPcvJcbPrbNX9qax18TfAvT9MqPDjWHcqiVvBu6-4Had6C69RpGmngj9jVAQ1HR990vVddhJ46gJM6th8jGOjXBqI5mRLI1SD0Q6nEZNkMVj1DXAAkCdFvm77PlLswZOpAEGW0GT4oUpZmtTfJB5jOJzF5TpWRd7XJ42XgvnSMxf9nk0f7xPf0NqLg9sM5xYaGJCKjUW8mUUlxBRU0fmPKvk6jJ-imLORmyQy_nIbLWr0R0IiUXUlK94tywbyj8VL2xwk3KTMP0_cU4-f1ZVfigypLLmhkKV33VmEfHoBeVFBFZJMC3SfUwcwEHml5RtMM9vvizPzux5dnsRkHFTGIh3o7Xt5Q/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Side_S%C3%BCd_Basilika_4.JPG",
     "description": {
       "tr": "Antalya içinde müze",
       "en": "Museum in Antalya",
@@ -6099,7 +6126,8 @@
       "historical"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 229,
@@ -8037,7 +8065,7 @@
     "rating": 4.9,
     "review_count": 138804,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJj-qcChlP0xQRoAiNJKguhtM/photos/AU_ZVEEJjsLClxNbWVUVp5iIdqgrTWz2zKPMexTUVLbhMNfdf1jRtNdTLFdJDhcOcIzsRWC45azKmeM5AVd8JNWdOS0WgYWU7Jt3eWqtEyMpH0K8VsJNvkDcwzi7h5hGhiCQ1wYXjThsKi5Ajp08COD8WTUfP3NDPlB-oOXRfX-CIA27ROrAsrrmphFNGvmycD44Z9lpPS4Vji165_K9AZV_FQ97zgvQzvwIpdNn9elgaSu1zvQEXnDLjb2_YaD61quldLXvATwLmdfy6pUnJmfp8dxAqYEx00L4mndPuOilF7YIeGPeR7gXfQ4KQgLec95O8k6JndB97SZG_iJ--gP9_DWMheahqZjgHXguTO_TNWUv4kwPoZLHn0vdvnqWtGcoaKCbON06DwvwtfoDxoq_Ag3jjfjlvcGZE-2UcQAvE57Z9g/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Anitkabir_Ankara.jpg/1280px-Anitkabir_Ankara.jpg",
     "description": {
       "tr": "Ankara içinde tarihi yer",
       "en": "Historical place in Ankara",
@@ -8050,7 +8078,8 @@
       "historical"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 309,
@@ -13248,7 +13277,7 @@
     "rating": 4.6,
     "review_count": 26449,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJ7eS75-xnKhUR_syP0bAUyrs/photos/AU_ZVEE8YgSoBUNS735IchqJmIf5N3d4RaJqHAbQyLVFdQ3hWoWjjpT6hKUnmv96OHw68dHoxKTBuer_IguwVCmrmpvht1XOQnWR33krz6kGbHcCwcXV8sU6pnHwi7GpGVX4InEHsOkksJXKPQValCabIE_sEuXNkrLfyGEqMufFhhI2uOHJeXxhCDCJlPl2WKCxug6C2-K77-RB1Yh1f6v2yp1b1mvVTWm11vYCK0Boki76AN8PGwuaiRTlNskhY1ZlEgdNw4mU8TYNQ_EjBTAy_wAegwPZ7kAjYvJ9rBdSFzJeNIyby4hzY7p96ickrcNqr-p-90u8LNwa_B2VsD-Ae9ZNR0JQ-3e48DZRAiBdbKucZoe0094ePPxOjDRHUSFRU9EoZybhDi8iUFDy6e38IFF4_BbwYTnvvfdpzP1wO3xTvQ/media?maxHeightPx=800&maxWidthPx=1200",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/G%C3%B6reme_Open_Air_Museum_01.jpg/3840px-G%C3%B6reme_Open_Air_Museum_01.jpg",
     "description": {
       "tr": "Cappadocia içinde müze",
       "en": "Museum in Cappadocia",
@@ -13262,7 +13291,8 @@
       "historical"
     ],
     "estimated_visit_time": 90,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 554,
@@ -16687,7 +16717,7 @@
     "rating": 4.6,
     "review_count": 689,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJq6qqNiNx1hQR1BzP5nX757o/photos/Ab43m-tKrv2Pu-VpTEBctM5yImHGKSyHkiUS1YTP0EKlKTxRNwJgn2PO4qQgQm-qf39ywfZiGdFQMJaxLWyYEyykueusVUB-GrtWRMDT2Mpu6eQmKXALxzeB88kZLUgxF5gnTuB1Gik7T_1tU-P2qEWLfMrhelRjMvYTHrAwk3pXwzpT6bx7F1QJEu0AqMhfi6IIi-5EJDemtPkFtZDqtd8i15B5-1SxUQg0vrdtUp2FjBWBnYCAwOMZTwz-H71WqCwhxZatXTgs86IILsUv7sjXrIkWbe9hTYmD5_xzaFgLcuzkCupU2Q4RrtwtZ9Cvi888EYMgkq3FpzoHScHS3IW1FTHGad8qr6JMzE4FubZ7fgyBj-3WvGS5stz5WLEsZWiRlAwXI5IylZx74eHpRn2akYGzFR6vZjvoe8RNqVG81K4egaU/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Aksaray_Museum01.jpg/3840px-Aksaray_Museum01.jpg",
     "description": {
       "tr": "Aksaray için müze",
       "en": "tourism in Aksaray",
@@ -16703,7 +16733,8 @@
       "museum"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 682,
@@ -16722,7 +16753,7 @@
     "rating": 4,
     "review_count": 288,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJQ77UhiJx1hQR-FkQ6XXlV6c/photos/Ab43m-vt5qznmDYIYhBEGktIaahlGXFS3CEa6k78Di7Ede6d1Mk-z0Veb_ikD_lgPtC78rvl7P1k2vqgu5FsPIOaWSJ5t_pCyf2qrPvh5GL0_BnAB_tDWnHp3T9d8hcqizgNDjtp9B55IviD2_4Y87iYCKm7DOCXVxQ82L68O3_indDq40MCLABaSzjuj81luoz3VeUlF2xciBaB3dNRH4r1T2j5qSmuUS_IZMSBgmU3xl41E8eMbC6rV8-5-rI_PrgfmopNk9k1lhKvfuKUzdg4DyV1F6DJYReDfPOn2UXNr0hcPUS882HbUFraK1PdZwtqoxHK5EMKGOD-zWtvP_HZELjuiwVuJBzqqpZrJubTwuVjUmHnOelJ22tO8sJyJOIUU6IJh2_-aN_Y9Rfj0RRmnq5ZJFLRIZOhG769Fvo55cs/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Elizabeth_Tower_2014-09-21_205MP.jpg/3840px-Elizabeth_Tower_2014-09-21_205MP.jpg",
     "description": {
       "tr": "Aksaray içinde gezilecek yer",
       "en": "tourism in Aksaray",
@@ -16737,7 +16768,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 683,
@@ -16756,7 +16788,7 @@
     "rating": 4.6,
     "review_count": 257,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJczcLPyNx1hQRYV9wTCZFA_E/photos/Ab43m-t1rJK9f2qJtSGb5OZb_-NeTr-xWBax9an36nlbJOUljuvVQi7Ha07rL8JR1yAk-fkvYVZtqu2iIo5SfFiS-4YBeVPhuwm7pYK3u26ocnj7PO7zsF4ULSx62yvWH-F8dwmR1-TsZvUfauAsVBysljYi4WRJOmp9rRq55kz69g7RMDE5820Z5GGUKHRPOhdL3iNJyf36HKPNFZg6jQmfx45FQjTNdFNcEHlIB9UAOxMfGCIprWKPoibLXwAPtZ1xPdI8QhmpOo-h-H2CgDQJEm91LGr3kMxwWCPAoXFPaiCfFV10HZ9rKT2WBwDhGnNzeOTOcU_Wn7oT6AROqI7CSunnqpRcqsECnnFcI_eBQvXkzWiUHqTzFSveM5rP5vY5WcA23tSJUvC_1yBq6lMwBkqHkQpqopU6ZbEMDe8azlL1lblY/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/3/30/Aksaray_Leaning_Minaret_3114.jpg",
     "description": {
       "tr": "Aksaray içinde gezilecek yer",
       "en": "tourism in Aksaray",
@@ -16771,7 +16803,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 684,
@@ -20546,7 +20579,7 @@
     "rating": 4.3,
     "review_count": 929,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJQR85BA-Hb0AR0qZvq8kcCMQ/photos/Ab43m-tVYc5lnEFumuAqcRxJUCO53gDdQLxpE7XD3gYecY52ocDHQg34WtnEyAIpev_c5xlf3kr5ffrI9qXAOs3RMmLk295yi2I8JeleNUocR6PUiMNuirqdy1VYA54Jk651x7jXgc4xMsYtVjFjO0DZRmVCWoUr6SElLeqgn2SWTrWtrZ5IOYzrUSwczhvHH7fgZH6p5z57IWYgbz-gjbt8IVgVfLCuKDzXvVLr9arHDxeqefXzKACw72kdsrpLdN6s2XfmCPgaWVKzyLY6fg8I70P6OKcmWEH4N4ABl06BbelGwKHQb4jSqv40ouuoWf0UA0Yu6AwVEMB7VR-dUDXfhnQwGBwpzDueXSbgUtWZ6EDl_CU4IHbaUhTtF_T4SMXjBfVbaU1nFAH5Y59y6QcreoJMQ1N3-iT-RlpyCj5SrmVtRg/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Bayburt_kalesi.JPG",
     "description": {
       "tr": "Bayburt içinde gezilecek yer",
       "en": "tourism in Bayburt",
@@ -20561,7 +20594,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 800,
@@ -21774,7 +21808,7 @@
     "rating": 4.4,
     "review_count": 1032,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJJ2cUiVIhDUARou2ACjtxCxY/photos/Ab43m-u4kJikDjrrrrmdVzcg7Hyz0eu2oE7oI7yWxByklyoFGmHTqa1YPcwReWxIgmill9KiPrtdzbqf16rEBZIRdFP4xMOP0A6rzvCYFImLlIe-C1s4XuYrnXq9RFx5WKxdN3b7b0FGqx7hVMbyWR0HtasZu9ASeqOtJoY7b83Q9qfZ-GtSi8dfMnA2MynE6NAMWy7wjz-4ZcFd4im6H_JDrT0NFOLktYHSWdpEFOW0bmA69rZ2msf7kKJVdfdHlGDWje9qDt4h7C0E-wq0QsrQBDNL_272_umlzVrObN4r8bWQaiBt99CLw7DoC2zqjVBL4OqfAKcz9vq1r5SyfzqNnYztSOqTEpYEzPzXiRPIf3iNxrQg0D0GU_8O9nQ7aTyTgO-SHXLgrjeFnttD4-NSjaSaBHNP_qnf8VZptXEoyUAMXg/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Bitlis_Kalesi%2C_Bitlis.jpg",
     "description": {
       "tr": "Bitlis içinde gezilecek yer",
       "en": "tourism in Bitlis",
@@ -21789,7 +21823,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 837,
@@ -21874,7 +21909,7 @@
     "rating": 4.8,
     "review_count": 4322,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJl_6Y35FWDUARqcg66TKkjEg/photos/Ab43m-vWg_UOD4x7HvB0aOTdMMtTiJUT3YO8gbIi_db0DHXFmAyoFSLgSxcoECdGyB7H2AjAsPXn-TQmZQud1e1b4VG1dUoDehE5c4Gm9pH66G3jKprBc1-NBOHJzjpoU_kmujWm9r8HumHKMOkftou-_PQyhdirGSX7eR-kzwe5PhF9YzpmqGfmKXxRIfmGyz7Mkf6ugilxApNAAPaJ45HPLbWTSQ34TF_PLejP9Tx_0FkX--wUeZFy6KHYzFh0_KBhfKze3Wk3mfB6eF_PqPLmKVBapVUQScTjGLiOGcZUgyxKoRR82z3XAHeQvJY9btgaz8U2iElpNFcuRoTZeFyrPi0y5mpI1sFkj_Zvloy02RsZpatTnvfnRPVZycnckFHvSuYFWwzt3rbx28uY9BycfyP17F0cxk0p325tLidc0yjqnTK22Fz2a5zTV-5dA3C4/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/a/af/Ancient_tombstones_in_the_historical_cemetery_of_Selcuk_Turks_from_12th_century%2C_in_the_town_of_Ahlat%2C_Turkey.jpg",
     "description": {
       "tr": "Bitlis içinde tarihi yer",
       "en": "Historical place in Bitlis",
@@ -21888,7 +21923,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 840,
@@ -24114,7 +24150,7 @@
     "rating": 4.6,
     "review_count": 675,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJv7AW0oPEg0ARUsLl_DK1lp8/photos/Ab43m-slb-vSPKTtSruNBLAPBa5I0Y3JYlr2Xg7sOybdOBySmgTroRgw7aGzsMtuaXq9YLvxkp5Ah3vhOqlIoMBOQTrXV8n67FnkmW6ll6uzKndc2-q9SdjWnGtZqn168jytXfteF_zOhO7_msXaV65WQZZi6vSWlWUdMN6bcC6eXkLTGi_HV05quIS-Fpvj7XrHf3UKsZDMDYIbHhmhIKjdz5O6_Us2N8fceDFaqSTUaWJwzrQI3ztM1hbmJpF5MNlIcTOeMj7x-ov2gUKdlRYtZ0Oi4I8Vowg47csSGkJMHSrTBUWHrz8SXHmBwpmdm534efRAJV34u69pAa_qkDTb7jNjUxozVU67mz_Kqy2Uc1ZMICmcDbmFAngLlUrn32XMCB8yXjT81hq7BrCrB6KsC0waqwad0OsqcXVY_dnT5GnNVJIJ/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/0/07/%C3%87ank%C4%B1r%C4%B1_M%C3%BCzesi.jpg",
     "description": {
       "tr": "Çankırı için müze",
       "en": "tourism in Çankırı",
@@ -24130,7 +24166,8 @@
       "museum"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 908,
@@ -26812,7 +26849,7 @@
     "rating": 4.6,
     "review_count": 4398,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJzUYPTUvHdkARW-8w2WCUJPg/photos/Ab43m-uWxiKxqblwfN8U5sVpBTctALJnCV6akrwAw4_XizTx1YcR65mpRcNrKiA11IJZnWKrw4lAZZTM-S4G6B3qMmzdprYBVI6bgHaXCQ2590-zt93Gb63eewLNV8AlN-23BSKG4yJPHx4azsiVLT1dMeJBPR2jBhLGk-7Lfw3h9YobGlgirjyzF1V3ph398cg-DM4OsaqvPFt0_ZoeX2dZoNRTeRpB-uEv188E2m4FUZZURcAnVtAqFAuFbLdt58Cn561OMxmWmi7qfuzWapFsF8-WfPvxAPn9klwxEUoU6QBA4g2jDExyDl8G8qX8z6KqpmjgSa-OoaEIeLaFV8Fx6ey3n19ksWiBv1kjWAcCivxeKXzNi7JSMqUoej4NKKCor52DgYn5yR-1y4xJWdNlzop25tWRw0DyogM91iRhHM0/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/e/ee/Harput_kalesi-Harput-Elaz%C4%B1%C4%9F_-_panoramio.jpg",
     "description": {
       "tr": "Elazığ içinde gezilecek yer",
       "en": "tourism in Elazığ",
@@ -26827,7 +26864,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 990,
@@ -27337,7 +27375,7 @@
     "rating": 4.3,
     "review_count": 486,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJY1KOBOt_ekARz_ZJ94oTa_s/photos/Ab43m-u_QGqDAXv-xs1gmNIS95mZ3m85vYfSeKtzyX_AkD_6Jfb9EmIonTJCEH5DkfzCD69X64R2iNja5V7U63h92MZIzkCvgzkK1oXe7ro0Wmp-2Il0d87WGOBzltCiC-J4NaR4uvK5utEM_Z4G6ge7QD1dWg1X5a5Qg6Cu4nq1MKmnC_-_EXIj3Jo-b1w6PxhwwNhtpEtfCc8HhGnZMcs3jwH0VzgMYMhf4eu8W_mn_mPJajPHgUGq1Zy4xjmOhQrbyoc9GtZRNDbG5mxQDsXgZtD9b47u1kDfzi-Qw727gb3ylrjc_awMJgbsgYSAtMehCvEfiBTbEb2S25PNAIAvgir7pIJk6pQ1i8ftfbw2FTZBWkDoIv5VzG7Pz6wVkoMw_mkVubLXtFXPkRH8_g3HxZErSJoCWlsKerLE3VSI0kgPjmlA/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/7/7f/5-Tarihi_Kemah_Kalesi.jpg",
     "description": {
       "tr": "Erzincan içinde tarihi yer",
       "en": "Historical place in Erzincan",
@@ -27351,7 +27389,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 1006,
@@ -29185,7 +29224,7 @@
     "rating": 4.5,
     "review_count": 10647,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJmVuZ1KxtY0ARN0aSh4wEjAg/photos/Ab43m-vRmtjKgvzOtOavLj87H2QVGYWUI6lXhAiygofzWoZ7ktt2I0udsFeytTgdAkFt9mZw3Q7AHDpKIPeCIzS-Wd6TVbrl_bxWqe9LrWzx9xMS4PqaoaXxxNYE9PwibLrtdDTRywddxrkGMmvOKaS_NXk69BbPfY6V2t3gO_TyQVxG9UVBLdl0dYxrwl3pNnhgUutbBjz_fdlcvEAgwFh39Iu7rjVIXfcH9wQzy5C8Wqm95px6OULGAUzxCYJENceycPYJYDR6Q85l7_Vks49rwC_KogTr6aYEzVcgcGqqm6Gua4GuFqSQxqZj8wTXLfs8MO4BfgPu6pdenCEcHdu3mHN17p7-a0HDoNU7vn29ikyafalMlq_do8L4-RHspW9lk8JMtQlWz16g5ywDtyoXkFLF36kPGTRHCVxp2b-qifXWaLM/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/2/24/Castle_of_Giresun.jpg",
     "description": {
       "tr": "Giresun içinde tarihi yer",
       "en": "Historical place in Giresun",
@@ -29199,7 +29238,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 1062,
@@ -31557,7 +31597,7 @@
     "rating": 4.3,
     "review_count": 3653,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJ8UKcgeCgxRQR6YwKKPAQodc/photos/Ab43m-tyWJiSV8kPSjFJoEslw2iGRA65pZxVnabn_oaimeKqJNyTDP3ft5WfLzgu3RLRXqiIzGQBoAdYadkzxnbJ61JMXBB3_wXirmd0eSQPNJekzG-VR8ZsRcMyHawCpA8ZMQDeD1a8v32p0ucSUnEH72A_LmDp7kq9nGr6YX1wcu6A1F20LmHCFGkppDM8ZBVZ5aygOwkvfBC5cJX4kiXPBnJh-gqs3alfRduBpiWvFWHhfhYwhefmPTXPZ95hWfsFDI5hUy6hS3sVAvnM2l33Utiel5Dly7EVOOgkGKAMebzPcc0GaRhhFi9OCg_C7BipgY-YNO0-Vl0o1gkG1MNKFiLIAff7zqgax6Zhc5E0aivSaTWLiLUraO7RF2ReBwmPb_f4SPFsngL8CNtGUV_wZM3OCQmmpTjQkvPlo_wCGVrjUymD/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/4/46/E%C4%9Firdir_Castle.jpg",
     "description": {
       "tr": "Isparta içinde tarihi yer",
       "en": "Historical place in Isparta",
@@ -31571,7 +31611,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 1134,
@@ -31949,7 +31990,7 @@
     "rating": 4.7,
     "review_count": 35795,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJ2XlLfO25yhQR8Hcxg0Af5V4/photos/Ab43m-v3iPubOKjfJoa3Hv3h4jX9omiMrgQ7kr5X6KYS8PiyR30YDXWdndNButWHT9pcCkv2EaXe4FqaKxWwuywZQMSwusA91pJegdl2-UqcEW-svPq1T76cHTWLaJ-4c-yrlwoD4fWP4q_8n8xZop3XRqGzMhfiDSJNegoeyhpd4Obvac-XwJH-inEPbaLL_BIJ1EnqNhE3pSUe5TZkElGMbb8bssw_ZaXlxAs50FSCnsW4LQqo6vLhDNUWfrNMCon2iTJN3sajOTNgApE0UuUKZMOuDLHtpm_vaqXTvCpT5xdi0NRohJBLH1DH2ua4rOr1V2BraISQ6nsy5GpWQdqxiofv5wmP-h1j9wUJqI1OsqPS3XB_ygipXqO37Dzq-ciNbkD5IsCcq0nJ2TRXMO2oEYjt_P45KKAdpxNeiCwz7QOa4pHc21jkpm8mnKotf6Iw/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Sultanahmet_Square%2C_Obelisk_of_Theodosius%2C_Istanbul_%2852121868925%29.jpg/3840px-Sultanahmet_Square%2C_Obelisk_of_Theodosius%2C_Istanbul_%2852121868925%29.jpg",
     "description": {
       "tr": "İstanbul içinde gezilecek yer",
       "en": "tourism in İstanbul",
@@ -31963,7 +32004,8 @@
       "sightseeing"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 1146,
@@ -32016,7 +32058,7 @@
     "rating": 4.6,
     "review_count": 93256,
     "price_level": "unknown",
-    "image": "https://places.googleapis.com/v1/places/ChIJyWrG4L25yhQRcYRt7uEvwGA/photos/Ab43m-tYWswYXFf7WdIbggmxcIWHCPPfX308NPyTSVR_hOaWHIuSB4biOYSsws1D0vKSiALFRZ2EDpLwDWiG0kihdzUjhBkuAkBrtpUwkrYO8FTBkXDGnPo7oku63d-ANtIe5M6LDOiRG2U6fWgNd8Bd1E8mVkvaL1550AJMYbOUY0tKRZ42oluoeeFo30aAGzPeLdi4N7hgEozOXt8ileO97JmrVA2wQg8xlN8lHmfAwGSpcyrhXVQYyACJZSOC0Y1hVw0nwSDA0ReT5S7fc1MGahoNY02lEjdotkN9zL_2MfECNxYHX38QI4CGHvUIH3CYM9Qeirc7_FA5VdzQEBot_qvmbupwlweib_9QcY85B5dO4Z29VJrk2aMQHANCiFKTpuhwYnEyifSzCv2QVCgFfY5m8oLNe2pUc_WEp-KeYrs/media?maxHeightPx=800&maxWidthPx=1200&key=AIzaSyB24wqJdPj6mzbUFA0zpCCmvhOYSZANcwE",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Cisterna_Bas%C3%ADlica%2C_Estambul%2C_Turqu%C3%ADa%2C_2024-09-28%2C_DD_58-60_HDR.jpg/3840px-Cisterna_Bas%C3%ADlica%2C_Estambul%2C_Turqu%C3%ADa%2C_2024-09-28%2C_DD_58-60_HDR.jpg",
     "description": {
       "tr": "İstanbul içinde tarihi yer",
       "en": "Historical place in İstanbul",
@@ -32030,7 +32072,8 @@
       "historical"
     ],
     "estimated_visit_time": 60,
-    "reviews": []
+    "reviews": [],
+    "image_source": "wikipedia"
   },
   {
     "id": 1148,
