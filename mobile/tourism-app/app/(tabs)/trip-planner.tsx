@@ -820,9 +820,48 @@ export default function TripPlanner() {
     }
   };
 
+  const getRoutePlacesForSave = () => {
+    const fromPlaces = Array.isArray(plan?.places) ? plan.places : [];
+    const fromDays = Array.isArray(plan?.days)
+      ? plan.days.flatMap((day: any) => Array.isArray(day.places) ? day.places : [])
+      : [];
+
+    const allPlaces = fromPlaces.length > 0 ? fromPlaces : fromDays;
+
+    const uniqueMap = new Map<string, any>();
+
+    allPlaces.forEach((place: any) => {
+      if (!place) return;
+
+      const key = String(place.id || place.name || Math.random());
+      if (uniqueMap.has(key)) return;
+
+      uniqueMap.set(key, {
+        id: place.id,
+        name: place.name,
+        city: place.city || city,
+        district: place.district || "",
+        category: place.category || "",
+        subcategory: place.subcategory || "",
+        latitude: place.latitude,
+        longitude: place.longitude,
+        image: place.image || "",
+      });
+    });
+
+    return Array.from(uniqueMap.values());
+  };
+
   const saveRoute = async () => {
     try {
       if (!plan?.days?.length) return;
+
+      const routePlaces = getRoutePlacesForSave();
+
+      if (!routePlaces.length) {
+        Alert.alert(t("common.error"), t("tripPlanner.routeSaveError"));
+        return;
+      }
 
       const list = await readJson<any[]>(STORAGE_KEYS.savedRoutes, []);
 
@@ -836,8 +875,12 @@ export default function TripPlanner() {
         planCategory,
         budgetPreference,
         rainyMode,
-        plan,
+        plan: {
+          ...plan,
+          places: routePlaces,
+        },
         budget,
+        places: routePlaces,
         createdAt: new Date().toISOString(),
       };
 

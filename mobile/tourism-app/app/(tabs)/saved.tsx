@@ -169,6 +169,66 @@ function categoryDisplay(category: string | undefined, language: string) {
   return language === "tr" ? "Gezilecek Yer" : language === "de" ? "Sehenswürdigkeit" : language === "ru" ? "Достопримечательность" : "Attraction";
 }
 
+function getSavedRoutePlaces(route: any): any[] {
+  if (Array.isArray(route?.places) && route.places.length > 0) {
+    return route.places;
+  }
+
+  if (Array.isArray(route?.plan?.places) && route.plan.places.length > 0) {
+    return route.plan.places;
+  }
+
+  if (Array.isArray(route?.plan?.days)) {
+    return route.plan.days.flatMap((day: any) =>
+      Array.isArray(day?.places) ? day.places : []
+    );
+  }
+
+  return [];
+}
+
+function getPlaceName(place: any): string {
+  if (!place) return "";
+  if (typeof place === "string") return place;
+
+  const name = place.name;
+
+  if (typeof name === "string") {
+    const trimmed = name.trim();
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        return String(parsed.tr || parsed.en || Object.values(parsed)[0] || "");
+      } catch {
+        return trimmed;
+      }
+    }
+    return trimmed;
+  }
+
+  if (name && typeof name === "object") {
+    return String(name.tr || name.en || Object.values(name)[0] || "");
+  }
+
+  return "";
+}
+
+function normalizeSavedRoutes(routes: any[]): any[] {
+  if (!Array.isArray(routes)) return [];
+
+  return routes.map((route: any) => {
+    const places = getSavedRoutePlaces(route);
+    return {
+      ...route,
+      places,
+      plan: {
+        ...(route?.plan || {}),
+        places,
+      },
+    };
+  });
+}
+
 type TabKey = "places" | "visited" | "routes" | "journal";
 
 export default function Saved() {
@@ -199,7 +259,13 @@ export default function Saved() {
       const visited = await readJson<any[]>(STORAGE_KEYS.visitedPlaces, []);
 
       setSavedPlaces(Array.isArray(places) ? places : []);
-      setSavedRoutes(Array.isArray(routes) ? routes : []);
+      const normalizedRoutes = normalizeSavedRoutes(Array.isArray(routes) ? routes : []);
+      setSavedRoutes(normalizedRoutes);
+
+      // Eski bozuk kayıtları da otomatik tamir edip tekrar sakla.
+      if (Array.isArray(routes) && JSON.stringify(routes) !== JSON.stringify(normalizedRoutes)) {
+        await writeJson(STORAGE_KEYS.savedRoutes, normalizedRoutes);
+      }
       setVisitedPlaces(Array.isArray(visited) ? visited : []);
 
       const oldNoteList = Object.keys(notes || {})
@@ -320,15 +386,19 @@ export default function Saved() {
   };
 
   const openRoute = (route: any) => {
+    const routePlaces = getSavedRoutePlaces(route);
+
     router.push({
       pathname: "/(tabs)/map",
-      params: { route: JSON.stringify(route.places || []) },
+      params: { route: JSON.stringify(routePlaces) },
     });
   };
 
   const shareRouteText = async (route: any) => {
-    const text = (route.places || [])
-      .map((place: any, index: number) => `${index + 1}. ${place.name} - ${place.city || ""}`)
+    const routePlaces = getSavedRoutePlaces(route);
+
+    const text = routePlaces
+      .map((place: any, index: number) => `${index + 1}. ${getPlaceName(place)} - ${place.city || ""}`)
       .join("\n");
 
     await Linking.openURL(`mailto:?subject=${encodeURIComponent(route.title || "Saved Route")}&body=${encodeURIComponent(text)}`).catch(() => {});
@@ -496,8 +566,8 @@ export default function Saved() {
           <View style={styles.routeCard}>
             <TouchableOpacity style={{ flex: 1 }} onPress={() => openRoute(item)}>
               <Text style={styles.name} numberOfLines={1}>{item.title || safeT(t, "saved.savedRoute", "Kayıtlı Rota", language)}</Text>
-              <Text style={styles.meta}>{item.places?.length || 0} {safeT(t, "saved.stops", "durak", language)} • {new Date(item.createdAt || Date.now()).toLocaleDateString()}</Text>
-              <Text style={styles.routePreview} numberOfLines={2}>{(item.places || []).map((p: any) => p.name).join(" → ")}</Text>
+              <Text style={styles.meta}>{getSavedRoutePlaces(item).length || 0} {safeT(t, "saved.stops", "durak", language)} • {new Date(item.createdAt || Date.now()).toLocaleDateString()}</Text>
+              <Text style={styles.routePreview} numberOfLines={2}>{getSavedRoutePlaces(item).map((p: any) => getPlaceName(p)).filter(Boolean).join(" → ")}</Text>
             </TouchableOpacity>
             <View style={styles.routeActions}>
               <TouchableOpacity style={styles.smallActionButton} onPress={() => openRoute(item)}>

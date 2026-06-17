@@ -1525,24 +1525,63 @@ def trip_plan(payload: dict = Body(...)):
             "requested_days": days_count,
         }
 
+    # İlçe içinde sonuç azsa ama şehir genelinde uygun yerler varsa,
+    # aynı mekanı günlere tekrar koymak yerine şehir genelinden benzersiz duraklarla tamamla.
+    target_place_count = min(days_count * 4, max(len(sorted_places), days_count))
+
+    if len(sorted_places) < target_place_count and city_places_all:
+        city_fallback_sorted = build_category_places(city_places_all)
+        existing_ids = {str(p.get("id")) for p in sorted_places}
+        for p in city_fallback_sorted:
+            pid = str(p.get("id"))
+            if pid not in existing_ids:
+                sorted_places.append(p)
+                existing_ids.add(pid)
+            if len(sorted_places) >= target_place_count:
+                break
+
     max_total_places = min(days_count * 4, len(sorted_places))
     selected_places = sorted_places[:max_total_places]
+
+    # Benzersizleştir: aynı mekan aynı rota içinde bir kere yer alsın.
+    unique_selected = []
+    seen_place_ids = set()
+    for p in selected_places:
+        key = str(p.get("id") or normalize_text(p.get("name", "")))
+        if key in seen_place_ids:
+            continue
+        seen_place_ids.add(key)
+        unique_selected.append(p)
+    selected_places = unique_selected
 
     plan_days = []
     used_places = []
 
-    per_day = max(1, min(4, math.ceil(len(selected_places) / days_count)))
+    if selected_places:
+        per_day = max(1, min(4, math.ceil(len(selected_places) / days_count)))
+    else:
+        per_day = 1
 
     for i in range(days_count):
         day_places = selected_places[i * per_day:(i + 1) * per_day]
-        if not day_places and selected_places:
-            day_places = selected_places[:min(4, len(selected_places))]
 
+        # ÖNEMLİ: Burada eski kod aynı mekanı tekrar ediyordu.
+        # Artık gün boşsa boş bırakıyoruz, tekrar mekan koymuyoruz.
         used_places.extend(day_places)
         plan_days.append({
             "day": i + 1,
             "places": day_places,
         })
+
+    used_places_unique = []
+    seen_used_ids = set()
+    for p in used_places:
+        key = str(p.get("id") or normalize_text(p.get("name", "")))
+        if key in seen_used_ids:
+            continue
+        seen_used_ids.add(key)
+        used_places_unique.append(p)
+    used_places = used_places_unique
 
     fallback_note = ""
     if used_city_fallback and normalized_district:
