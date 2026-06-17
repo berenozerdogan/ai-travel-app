@@ -1525,63 +1525,84 @@ def trip_plan(payload: dict = Body(...)):
             "requested_days": days_count,
         }
 
-    # İlçe içinde sonuç azsa ama şehir genelinde uygun yerler varsa,
-    # aynı mekanı günlere tekrar koymak yerine şehir genelinden benzersiz duraklarla tamamla.
-    target_place_count = min(days_count * 4, max(len(sorted_places), days_count))
+    # Aynı mekan farklı kayıtlarda tekrar edebiliyor.
+    # Bu yüzden ID yerine öncelikle normalize edilmiş isim + şehir ile benzersizleştiriyoruz.
+    def place_unique_key(p: dict) -> str:
+        return normalize_text(f"{p.get('name', '')} {p.get('city', '')}")
 
+    def unique_places(source: list) -> list:
+        result = []
+        seen = set()
+        for p in source:
+            key = place_unique_key(p)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            result.append(p)
+        return result
+
+    # Önce ilçe sonuçlarını benzersizleştir.
+    sorted_places = unique_places(sorted_places)
+
+    # Hedef: mümkünse her güne 2-3 farklı durak ver.
+    target_place_count = min(days_count * 3, 12)
+
+    # İlçede az sonuç varsa aynı mekanı tekrar etmek yerine şehir genelindeki aynı kategori sonuçlarıyla tamamla.
     if len(sorted_places) < target_place_count and city_places_all:
-        city_fallback_sorted = build_category_places(city_places_all)
-        existing_ids = {str(p.get("id")) for p in sorted_places}
+        city_fallback_sorted = unique_places(build_category_places(city_places_all))
+        existing_keys = {place_unique_key(p) for p in sorted_places}
+
         for p in city_fallback_sorted:
-            pid = str(p.get("id"))
-            if pid not in existing_ids:
-                sorted_places.append(p)
-                existing_ids.add(pid)
+            key = place_unique_key(p)
+            if key in existing_keys:
+                continue
+            sorted_places.append(p)
+            existing_keys.add(key)
+
             if len(sorted_places) >= target_place_count:
                 break
 
-    max_total_places = min(days_count * 4, len(sorted_places))
-    selected_places = sorted_places[:max_total_places]
+    # Hâlâ azsa, aynı kategoriyi koruyarak biraz daha esnek şehir geneli ekle.
+    if len(sorted_places) < days_count and city_places_all:
+        relaxed_city = unique_places(_sort_places_for_trip(
+            _category_filtered_places(city_places_all, normalized_category, interests),
+            normalized_category,
+            ""
+        ))
+        existing_keys = {place_unique_key(p) for p in sorted_places}
 
-    # Benzersizleştir: aynı mekan aynı rota içinde bir kere yer alsın.
-    unique_selected = []
-    seen_place_ids = set()
-    for p in selected_places:
-        key = str(p.get("id") or normalize_text(p.get("name", "")))
-        if key in seen_place_ids:
-            continue
-        seen_place_ids.add(key)
-        unique_selected.append(p)
-    selected_places = unique_selected
+        for p in relaxed_city:
+            key = place_unique_key(p)
+            if key in existing_keys:
+                continue
+            sorted_places.append(p)
+            existing_keys.add(key)
+
+            if len(sorted_places) >= target_place_count:
+                break
+
+    max_total_places = min(target_place_count, len(sorted_places))
+    selected_places = sorted_places[:max_total_places]
 
     plan_days = []
     used_places = []
 
-    if selected_places:
-        per_day = max(1, min(4, math.ceil(len(selected_places) / days_count)))
-    else:
-        per_day = 1
+    # Dağıtım: aynı yeri tekrar koymadan, sıradaki farklı mekanları günlere paylaştır.
+    per_day = max(1, math.ceil(len(selected_places) / days_count)) if selected_places else 1
+    per_day = min(per_day, 3)
 
     for i in range(days_count):
-        day_places = selected_places[i * per_day:(i + 1) * per_day]
+        start_index = i * per_day
+        end_index = start_index + per_day
+        day_places = selected_places[start_index:end_index]
 
-        # ÖNEMLİ: Burada eski kod aynı mekanı tekrar ediyordu.
-        # Artık gün boşsa boş bırakıyoruz, tekrar mekan koymuyoruz.
         used_places.extend(day_places)
         plan_days.append({
             "day": i + 1,
             "places": day_places,
         })
 
-    used_places_unique = []
-    seen_used_ids = set()
-    for p in used_places:
-        key = str(p.get("id") or normalize_text(p.get("name", "")))
-        if key in seen_used_ids:
-            continue
-        seen_used_ids.add(key)
-        used_places_unique.append(p)
-    used_places = used_places_unique
+    used_places = unique_places(used_places)
 
     fallback_note = ""
     if used_city_fallback and normalized_district:
