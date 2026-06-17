@@ -1495,28 +1495,26 @@ def trip_plan(payload: dict = Body(...)):
 
         return sorted_list
 
-    # 1) Önce ilçe + kategori dene
+    # 1) İlçe yazıldıysa SADECE o ilçe içinde öneri yap.
+    # Beşiktaş yazınca Fatih, Üsküdar yazınca Kadıköy gibi şehir geneli sonuç dönmesin.
     used_city_fallback = False
 
-    if normalized_district and district_places:
+    if normalized_district:
         sorted_places = build_category_places(district_places)
 
-        # İlçede kategoriye uygun yer yoksa şehir geneline geç
-        if not sorted_places:
-            sorted_places = build_category_places(city_places_all)
-            used_city_fallback = True
+        if not district_places:
+            sorted_places = []
     else:
-        # İlçe yoksa veya ilçeye ait kayıt yoksa şehir geneline geç
         sorted_places = build_category_places(city_places_all)
-        used_city_fallback = bool(normalized_district)
 
     if not sorted_places:
+        place_area = f"{city} / {district_raw}" if district_raw else city
         return {
             "reply": tr_text(lang, {
-                "tr": f"{city} için uygun {category_label_tr} rotası bulunamadı. Otel/restoran önermemek için boş sonuç döndürdüm.",
-                "en": f"No suitable {category_label_en} route found for {city}. I returned an empty result to avoid irrelevant hotels/restaurants.",
-                "de": f"Keine passende {category_label_en}-Route für {city} gefunden.",
-                "ru": f"Подходящий маршрут для {city} не найден.",
+                "tr": f"{place_area} için uygun {category_label_tr} rotası bulunamadı. İlçe dışından alakasız yer önermemek için boş sonuç döndürdüm.",
+                "en": f"No suitable {category_label_en} route found for {place_area}. I returned an empty result to avoid irrelevant places outside the selected district.",
+                "de": f"Keine passende {category_label_en}-Route für {place_area} gefunden.",
+                "ru": f"Подходящий маршрут для {place_area} не найден.",
             }),
             "days": [],
             "places": [],
@@ -1526,7 +1524,7 @@ def trip_plan(payload: dict = Body(...)):
         }
 
     # Aynı mekan farklı kayıtlarda tekrar edebiliyor.
-    # Bu yüzden ID yerine öncelikle normalize edilmiş isim + şehir ile benzersizleştiriyoruz.
+    # ID farklı olsa bile aynı isim + şehir aynı mekan sayılır.
     def place_unique_key(p: dict) -> str:
         return normalize_text(f"{p.get('name', '')} {p.get('city', '')}")
 
@@ -1541,55 +1539,18 @@ def trip_plan(payload: dict = Body(...)):
             result.append(p)
         return result
 
-    # Önce ilçe sonuçlarını benzersizleştir.
+    # ÖNEMLİ:
+    # İlçe girildiyse şehir geneliyle tamamlamıyoruz.
+    # İlçede 1 mekan varsa sadece 1 mekan gelir; Fatih gibi alakasız ilçeler eklenmez.
     sorted_places = unique_places(sorted_places)
 
-    # Hedef: mümkünse her güne 2-3 farklı durak ver.
     target_place_count = min(days_count * 3, 12)
-
-    # İlçede az sonuç varsa aynı mekanı tekrar etmek yerine şehir genelindeki aynı kategori sonuçlarıyla tamamla.
-    if len(sorted_places) < target_place_count and city_places_all:
-        city_fallback_sorted = unique_places(build_category_places(city_places_all))
-        existing_keys = {place_unique_key(p) for p in sorted_places}
-
-        for p in city_fallback_sorted:
-            key = place_unique_key(p)
-            if key in existing_keys:
-                continue
-            sorted_places.append(p)
-            existing_keys.add(key)
-
-            if len(sorted_places) >= target_place_count:
-                break
-
-    # Hâlâ azsa, aynı kategoriyi koruyarak biraz daha esnek şehir geneli ekle.
-    if len(sorted_places) < days_count and city_places_all:
-        relaxed_city = unique_places(_sort_places_for_trip(
-            _category_filtered_places(city_places_all, normalized_category, interests),
-            normalized_category,
-            ""
-        ))
-        existing_keys = {place_unique_key(p) for p in sorted_places}
-
-        for p in relaxed_city:
-            key = place_unique_key(p)
-            if key in existing_keys:
-                continue
-            sorted_places.append(p)
-            existing_keys.add(key)
-
-            if len(sorted_places) >= target_place_count:
-                break
-
-    max_total_places = min(target_place_count, len(sorted_places))
-    selected_places = sorted_places[:max_total_places]
+    selected_places = sorted_places[:target_place_count]
 
     plan_days = []
     used_places = []
 
-    # Dağıtım: aynı yeri tekrar koymadan, sıradaki farklı mekanları günlere paylaştır.
-    per_day = max(1, math.ceil(len(selected_places) / days_count)) if selected_places else 1
-    per_day = min(per_day, 3)
+    per_day = max(1, min(3, math.ceil(len(selected_places) / days_count))) if selected_places else 1
 
     for i in range(days_count):
         start_index = i * per_day
