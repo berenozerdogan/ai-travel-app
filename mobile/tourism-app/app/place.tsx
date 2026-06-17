@@ -221,6 +221,60 @@ const PLACE_UI: Record<string, Record<string, string>> = {
     de: "Günstig",
     ru: "Доступно",
   },
+  wikipediaTitle: {
+    tr: "Wikipedia Bilgisi",
+    en: "Wikipedia Info",
+    de: "Wikipedia-Info",
+    ru: "Информация из Wikipedia",
+  },
+  wikipediaSource: {
+    tr: "Kaynak: Wikipedia",
+    en: "Source: Wikipedia",
+    de: "Quelle: Wikipedia",
+    ru: "Источник: Wikipedia",
+  },
+  readMore: {
+    tr: "Devamını Oku",
+    en: "Read More",
+    de: "Weiterlesen",
+    ru: "Читать дальше",
+  },
+  nearbyTitle: {
+    tr: "Yakında",
+    en: "Nearby",
+    de: "In der Nähe",
+    ru: "Рядом",
+  },
+  nearbyFood: {
+    tr: "Yakındaki Yeme İçme",
+    en: "Nearby Food & Drinks",
+    de: "Essen & Trinken in der Nähe",
+    ru: "Еда и напитки рядом",
+  },
+  nearbyUseful: {
+    tr: "Pratik Yerler",
+    en: "Useful Places",
+    de: "Praktische Orte",
+    ru: "Полезные места",
+  },
+  nearbySimilar: {
+    tr: "Benzer Yerler",
+    en: "Similar Places",
+    de: "Ähnliche Orte",
+    ru: "Похожие места",
+  },
+  all: {
+    tr: "Tümü",
+    en: "All",
+    de: "Alle",
+    ru: "Все",
+  },
+  distanceMeter: {
+    tr: "m",
+    en: "m",
+    de: "m",
+    ru: "м",
+  },
 };
 
 function placeText(key: string, language: string) {
@@ -313,6 +367,10 @@ export default function Place() {
   const [isSaved, setIsSaved] = useState(false);
   const [weatherAdvice, setWeatherAdvice] = useState("");
   const [loadingWeather, setLoadingWeather] = useState(false);
+  const [wikiSummary, setWikiSummary] = useState<any>(null);
+  const [loadingWiki, setLoadingWiki] = useState(false);
+  const [nearbyPlaces, setNearbyPlaces] = useState<any[]>([]);
+  const [selectedNearbyTab, setSelectedNearbyTab] = useState<"food" | "useful" | "similar">("food");
 
   useEffect(() => {
     const safeId = Array.isArray(id) ? id[0] : id;
@@ -436,6 +494,56 @@ export default function Place() {
         setLoadingWeather(false);
       });
   }, [place?.latitude, place?.longitude, place?.error, language]);
+
+  useEffect(() => {
+    if (!place?.name || place?.error) {
+      setWikiSummary(null);
+      return;
+    }
+
+    setLoadingWiki(true);
+
+    fetch(
+      `${API_BASE_URL}/wikipedia-summary?title=${encodeURIComponent(
+        place.name
+      )}&language=${encodeURIComponent(language)}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && !data.error && data.extract) {
+          setWikiSummary(data);
+        } else {
+          setWikiSummary(null);
+        }
+      })
+      .catch((err) => {
+        console.log("Wikipedia summary error:", err);
+        setWikiSummary(null);
+      })
+      .finally(() => setLoadingWiki(false));
+  }, [place?.name, place?.error, language]);
+
+  useEffect(() => {
+    if (!place?.id || place?.error) {
+      setNearbyPlaces([]);
+      return;
+    }
+
+    fetch(
+      `${API_BASE_URL}/nearby-places?id=${encodeURIComponent(
+        String(place.id)
+      )}&language=${encodeURIComponent(language)}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const list = Array.isArray(data?.places) ? data.places : [];
+        setNearbyPlaces(list);
+      })
+      .catch((err) => {
+        console.log("Nearby places error:", err);
+        setNearbyPlaces([]);
+      });
+  }, [place?.id, place?.error, language]);
 
   const loadUserPlaceState = async (currentPlace: any) => {
     try {
@@ -627,6 +735,44 @@ export default function Place() {
     return map[key] || subcategory;
   };
 
+  const nearbyTabs = [
+    { key: "food" as const, label: placeText("nearbyFood", language), icon: "restaurant-outline" },
+    { key: "useful" as const, label: placeText("nearbyUseful", language), icon: "compass-outline" },
+    { key: "similar" as const, label: placeText("nearbySimilar", language), icon: "sparkles-outline" },
+  ];
+
+  const nearbyFiltered = nearbyPlaces.filter((item: any) => {
+    const cat = String(item?.category || "").toLowerCase();
+    const sub = String(item?.subcategory || "").toLowerCase();
+
+    if (selectedNearbyTab === "food") {
+      return cat.includes("restaurant") || cat.includes("cafe") || sub.includes("restaurant") || sub.includes("cafe");
+    }
+
+    if (selectedNearbyTab === "useful") {
+      return cat.includes("shopping") || cat.includes("hotel") || cat.includes("museum") || sub.includes("shopping") || sub.includes("museum");
+    }
+
+    return item?.category === place?.category || item?.subcategory === place?.subcategory;
+  });
+
+  const nearbyToShow = nearbyFiltered.length > 0 ? nearbyFiltered : nearbyPlaces.slice(0, 10);
+
+  const nearbyIcon = (category?: string) => {
+    const c = String(category || "").toLowerCase();
+    if (c.includes("restaurant")) return "restaurant-outline";
+    if (c.includes("cafe")) return "cafe-outline";
+    if (c.includes("hotel")) return "bed-outline";
+    if (c.includes("museum")) return "business-outline";
+    if (c.includes("shopping")) return "bag-outline";
+    return "location-outline";
+  };
+
+  const openNearbyPlace = (item: any) => {
+    if (!item?.id) return;
+    router.push({ pathname: "/place", params: { id: String(item.id) } });
+  };
+
   const shouldShowPrice =
     place?.price_level &&
     place.price_level !== "unknown" &&
@@ -754,6 +900,31 @@ export default function Place() {
           </View>
         </View>
 
+        {wikiSummary && (
+          <View style={styles.wikipediaBox}>
+            <View style={styles.wikipediaHeader}>
+              <View style={styles.wikipediaIconBox}>
+                <Ionicons name="book-outline" size={22} color={COLORS.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.wikipediaTitle}>{placeText("wikipediaTitle", language)}</Text>
+                <Text style={styles.wikipediaSource}>{placeText("wikipediaSource", language)}</Text>
+              </View>
+            </View>
+
+            <Text style={styles.wikipediaText} numberOfLines={5}>
+              {wikiSummary.extract}
+            </Text>
+
+            {!!wikiSummary.url && (
+              <TouchableOpacity style={styles.wikipediaReadMore} onPress={() => openLink(wikiSummary.url)}>
+                <Text style={styles.wikipediaReadMoreText}>{placeText("readMore", language)}</Text>
+                <Ionicons name="open-outline" size={15} color={COLORS.accent} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
         {!loadingInsight && insightData ? (
           <>
             {insightData.ai_insight ? (
@@ -806,6 +977,69 @@ export default function Place() {
           </>
         ) : null}
 
+
+        {nearbyPlaces.length > 0 && (
+          <View style={styles.nearbyBox}>
+            <View style={styles.nearbyHeader}>
+              <View style={styles.nearbyTitleRow}>
+                <Ionicons name="location-outline" size={24} color={COLORS.accent} />
+                <Text style={styles.nearbyTitle}>{placeText("nearbyTitle", language)}</Text>
+              </View>
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.nearbyTabsRow}
+            >
+              {nearbyTabs.map((tab) => {
+                const active = selectedNearbyTab === tab.key;
+                return (
+                  <TouchableOpacity
+                    key={tab.key}
+                    style={[styles.nearbyTab, active && styles.nearbyTabActive]}
+                    onPress={() => setSelectedNearbyTab(tab.key)}
+                    activeOpacity={0.85}
+                  >
+                    <Ionicons
+                      name={tab.icon as any}
+                      size={16}
+                      color={active ? COLORS.white : COLORS.text}
+                    />
+                    <Text style={[styles.nearbyTabText, active && styles.nearbyTabTextActive]}>
+                      {tab.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.nearbyCardsRow}
+            >
+              {nearbyToShow.slice(0, 10).map((item: any, index: number) => (
+                <TouchableOpacity
+                  key={item.id || index}
+                  style={styles.nearbyCard}
+                  activeOpacity={0.88}
+                  onPress={() => openNearbyPlace(item)}
+                >
+                  <View style={styles.nearbyCardIcon}>
+                    <Ionicons name={nearbyIcon(item.category) as any} size={22} color={COLORS.accent} />
+                  </View>
+                  <Text style={styles.nearbyCategory}>{categoryLabel(item.category)}</Text>
+                  <Text style={styles.nearbyName} numberOfLines={2}>{item.name}</Text>
+                  <Text style={styles.nearbyDistance}>
+                    {Math.round(Number(item.distance_m || 0))} {placeText("distanceMeter", language)}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={17} color={COLORS.textSoft} style={styles.nearbyArrow} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         <View style={styles.practicalBox}>
           <View style={styles.practicalHeader}>
@@ -967,6 +1201,189 @@ export default function Place() {
 }
 
 const styles = StyleSheet.create({
+  wikipediaBox: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 14,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+
+  wikipediaHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 12,
+  },
+
+  wikipediaIconBox: {
+    width: 46,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: "rgba(232,93,117,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  wikipediaTitle: {
+    color: COLORS.text,
+    fontSize: 17,
+    fontWeight: "900",
+  },
+
+  wikipediaSource: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 3,
+  },
+
+  wikipediaText: {
+    color: COLORS.text,
+    fontSize: 14,
+    lineHeight: 22,
+    fontWeight: "500",
+  },
+
+  wikipediaReadMore: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 12,
+  },
+
+  wikipediaReadMoreText: {
+    color: COLORS.accent,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+
+  nearbyBox: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 14,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+
+  nearbyHeader: {
+    marginBottom: 12,
+  },
+
+  nearbyTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  nearbyTitle: {
+    color: COLORS.text,
+    fontSize: 20,
+    fontWeight: "900",
+    letterSpacing: -0.3,
+  },
+
+  nearbyTabsRow: {
+    paddingRight: 16,
+    paddingBottom: 12,
+    gap: 8,
+  },
+
+  nearbyTab: {
+    height: 44,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    backgroundColor: COLORS.surfaceSoft,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+
+  nearbyTabActive: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+
+  nearbyTabText: {
+    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+
+  nearbyTabTextActive: {
+    color: COLORS.white,
+  },
+
+  nearbyCardsRow: {
+    paddingRight: 18,
+    gap: 12,
+  },
+
+  nearbyCard: {
+    width: 160,
+    minHeight: 138,
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: 14,
+    position: "relative",
+  },
+
+  nearbyCardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: "rgba(232,93,117,0.10)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+
+  nearbyCategory: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "800",
+    marginBottom: 7,
+  },
+
+  nearbyName: {
+    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: "900",
+    lineHeight: 19,
+    paddingRight: 12,
+  },
+
+  nearbyDistance: {
+    color: COLORS.textSoft,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 5,
+  },
+
+  nearbyArrow: {
+    position: "absolute",
+    right: 10,
+    bottom: 12,
+  },
+
+
   container: {
     flex: 1,
     backgroundColor: COLORS.bg,

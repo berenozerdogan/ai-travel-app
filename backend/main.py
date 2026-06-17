@@ -1695,3 +1695,160 @@ def useful_info(lat: float = Query(...), lng: float = Query(...), language: str 
             {"type": "transport", "label": labels.get("transport", "Nearby public transport"), "url": maps_url("public transport")},
         ]
     }
+# --- Wikipedia + Nearby Places endpoints ---
+# Bunu backend/main.py dosyanın en altına ekleyebilirsin.
+
+import math
+import sqlite3
+import requests
+from fastapi import Query
+
+WIKI_LANG_MAP = {
+    "tr": "tr",
+    "en": "en",
+    "de": "de",
+    "ru": "ru",
+}
+
+def _extra_db_path():
+    # main.py içinde DB_PATH varsa onu kullanır, yoksa backend/tourism.db dener.
+    try:
+        return DB_PATH
+    except NameError:
+        import os
+        return os.path.join(os.path.dirname(__file__), "tourism.db")
+
+def _haversine_m(lat1, lon1, lat2, lon2):
+    r = 6371000
+    p1 = math.radians(float(lat1))
+    p2 = math.radians(float(lat2))
+    dp = math.radians(float(lat2) - float(lat1))
+    dl = math.radians(float(lon2) - float(lon1))
+
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * r * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+def _row_to_dict(cursor, row):
+    columns = [col[0] for col in cursor.description]
+    return dict(zip(columns, row))
+
+@app.get("/wikipedia-summary")
+def wikipedia_summary(
+    title: str = Query(...),
+    language: str = Query("tr")
+):
+    lang = WIKI_LANG_MAP.get(str(language).lower(), "en")
+    safe_title = str(title or "").strip()
+
+    if not safe_title:
+        return {"error": True, "message": "title required"}
+
+    # Önce seçili dilde dener.
+    # Bulamazsa İngilizceye düşer.
+    for current_lang in [lang, "en"]:
+        try:
+            url = f"https://{current_lang}.wikipedia.org/api/rest_v1/page/summary/{requests.utils.quote(safe_title)}"
+            res = requests.get(
+                url,
+                headers={"User-Agent": "AITravelApp/1.0"},
+                timeout=8,
+            )
+
+            if res.status_code != 200:
+                continue
+
+            data = res.json()
+            extract = data.get("extract") or ""
+
+            if not extract:
+                continue
+
+            return {
+                "title": data.get("title") or safe_title,
+                "extract": extract,
+                "url": data.get("content_urls", {}).get("desktop", {}).get("page", ""),
+                "thumbnail": data.get("thumbnail", {}).get("source", ""),
+                "source": "Wikipedia",
+                "language": current_lang,
+            }
+
+        except Exception as e:
+            print("Wikipedia error:", e)
+
+    return {"error": True, "message": "Wikipedia summary not found"}
+
+@app.get("/nearby-places")
+def nearby_places(
+    id: int = Query(...),
+    language: str = Query("tr"),
+    limit: int = Query(20)
+):
+    db_path = _extra_db_path()
+
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM places WHERE id = ?", (id,))
+        current_row = cursor.fetchone()
+
+        if not current_row:
+            conn.close()
+            return {"places": []}
+
+        current = _row_to_dict(cursor, current_row)
+        current_lat = current.get("latitude")
+        current_lng = current.get("longitude")
+
+        if current_lat is None or current_lng is None:
+            conn.close()
+            return {"places": []}
+
+        cursor.execute("SELECT * FROM places WHERE id != ?", (id,))
+        rows = cursor.fetchall()
+        all_places = [_row_to_dict(cursor, row) for row in rows]
+        conn.close()
+
+        nearby = []
+
+        for place in all_places:
+            lat = place.get("latitude")
+            lng = place.get("longitude")
+
+            if lat is None or lng is None:
+                continue
+
+            try:
+                distance = _haversine_m(current_lat, current_lng, lat, lng)
+            except Exception:
+                continue
+
+            # Çok uzak yerleri yakınlarda göstermeyelim.
+            if distance > 3000:
+                continue
+
+            item = {
+                "id": place.get("id"),
+                "name": place.get("name"),
+                "city": place.get("city"),
+                "district": place.get("district"),
+                "category": place.get("category"),
+                "subcategory": place.get("subcategory"),
+                "latitude": place.get("latitude"),
+                "longitude": place.get("longitude"),
+                "rating": place.get("rating"),
+                "image": place.get("image"),
+                "distance_m": round(distance),
+            }
+
+            nearby.append(item)
+
+        nearby.sort(key=lambda x: x.get("distance_m", 999999))
+
+        return {
+            "places": nearby[: max(1, min(limit, 50))]
+        }
+
+    except Exception as e:
+        print("Nearby places error:", e)
+        return {"places": []}
