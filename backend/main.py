@@ -558,24 +558,101 @@ def reviews(place: str, language: str = Query("en")):
         return {"found": False, "error": str(e)}
 
 
+def _place_ai_insight_fallback(p_data: dict, lang: str):
+    name = p_data.get("name", "")
+    city = p_data.get("city", "")
+    district = p_data.get("district", "")
+    category = normalize_text(p_data.get("category", ""))
+    subcategory = normalize_text(p_data.get("subcategory", ""))
+    description = p_data.get("description", "")
+
+    is_hotel = category == "hotel"
+    is_food = category in ["restaurant", "cafe"]
+    is_museum = category == "museum" or subcategory == "museum"
+    is_nature = subcategory in ["nature", "beach", "viewpoint"] or category in ["park", "nature"]
+    is_historical = subcategory in ["historical", "landmark"] or any(
+        word in normalize_text(description)
+        for word in ["tarih", "historical", "history", "palace", "saray", "mosque", "cami", "castle", "kale"]
+    )
+
+    if lang == "tr":
+        if is_hotel:
+            intro = f"{name}, {city} içinde konaklama için değerlendirilebilecek bir oteldir. Konumu, ulaşım kolaylığı ve çevresindeki gezi noktalarına yakınlığı rota planı yaparken avantaj sağlayabilir."
+            best = ["Konaklama odaklı seyahat edenler", "Şehir içinde rahat ulaşım isteyenler"]
+            strengths = ["Konaklama için pratik bir durak olması", "Yakındaki gezi noktalarıyla birlikte planlanabilmesi", "Şehir rotasına kolayca eklenebilmesi"]
+            cautions = ["Fiyatlar sezona göre değişebilir", "Rezervasyon ve müsaitlik önceden kontrol edilmelidir"]
+        elif is_food:
+            intro = f"{name}, {city} içinde yeme içme molası için tercih edilebilecek bir mekandır. Gezi sırasında kısa bir dinlenme veya öğün molası için rotaya eklenebilir."
+            best = ["Yeme içme molası vermek isteyenler", "Yakındaki yerleri gezerken kısa ara planlayanlar"]
+            strengths = ["Rota içinde mola noktası olarak kullanılabilmesi", "Yakındaki mekanlarla birlikte kolay planlanması", "Günlük gezi akışını desteklemesi"]
+            cautions = ["Yoğun saatlerde yer bulmak zor olabilir", "Fiyat ve menü bilgisi gitmeden önce kontrol edilmelidir"]
+        elif is_museum:
+            intro = f"{name}, {city} içinde kültür ve tarih odaklı gezi yapmak isteyenler için uygun bir müzedir. Ziyaret sırasında bölgenin geçmişi, sanatı veya kültürel yapısı hakkında bilgi edinilebilir."
+            best = ["Kültür ve tarih meraklıları", "Müze gezmeyi seven ziyaretçiler"]
+            strengths = ["Bilgi verici ve öğretici bir durak olması", "Kültür rotalarına kolayca eklenebilmesi", "Kapalı mekan alternatifi sunması"]
+            cautions = ["Ziyaret saatleri önceden kontrol edilmelidir", "Yoğun dönemlerde kalabalık olabilir"]
+        elif is_nature:
+            intro = f"{name}, {city} içinde açık alan ve manzara odaklı bir gezi noktasıdır. Yürüyüş, fotoğraf çekimi ve kısa keşifler için rotaya eklenebilir."
+            best = ["Doğa ve manzara sevenler", "Açık alanda vakit geçirmek isteyenler"]
+            strengths = ["Fotoğraf için uygun bir ortam sunması", "Açık hava rotalarına uyum sağlaması", "Kısa keşifler için ideal olması"]
+            cautions = ["Hava durumuna göre plan yapılmalıdır", "Rahat ayakkabı tercih edilmelidir"]
+        elif is_historical:
+            intro = f"{name}, {city} içinde tarihi ve turistik değeri olan önemli bir duraktır. Bölgenin geçmişini tanımak ve mimari dokusunu görmek isteyenler için gezi rotasına eklenebilir."
+            best = ["Tarih meraklıları", "Kültürel gezi yapmak isteyenler"]
+            strengths = ["Tarihi atmosfer sunması", "Fotoğraf ve keşif için uygun olması", "Şehir rotasında anlamlı bir durak olması"]
+            cautions = ["Kalabalık saatler tercih edilmemelidir", "Ziyaret süresi rota yoğunluğuna göre ayarlanmalıdır"]
+        else:
+            intro = f"{name}, {city} içinde gezi rotasına eklenebilecek bir noktadır. {district + ' bölgesindeki' if district else 'Şehirdeki'} diğer yerlerle birlikte planlandığında daha verimli bir rota oluşturulabilir."
+            best = ["Şehri keşfetmek isteyenler", "Yakındaki yerlerle birlikte rota planlayanlar"]
+            strengths = ["Rota içine kolay eklenebilmesi", "Yakındaki yerlerle birlikte gezilebilmesi", "Kısa keşifler için uygun olması"]
+            cautions = ["Gitmeden önce konum ve ziyaret bilgisi kontrol edilmelidir", "Yoğun saatlerde planlama yapmak gerekebilir"]
+
+        return (
+            f"{intro}\n\n"
+            f"En uygun olduğu kişiler\n"
+            + "\n".join([f"• {x}" for x in best])
+            + "\n\nGüçlü yanlar\n"
+            + "\n".join([f"• {x}" for x in strengths])
+            + "\n\nDikkat edilmesi gerekenler\n"
+            + "\n".join([f"• {x}" for x in cautions])
+        )
+
+    if lang == "de":
+        return (
+            f"{name} ist ein Reiseziel in {city}, das je nach Kategorie gut in eine Tagesroute aufgenommen werden kann.\n\n"
+            "Geeignet für\n• Reisende, die die Stadt entdecken möchten\n• Besucher, die nahegelegene Orte kombinieren wollen\n\n"
+            "Stärken\n• Gute Ergänzung für eine Route\n• Lässt sich mit Orten in der Nähe planen\n• Praktisch für kurze Besuche\n\n"
+            "Hinweise\n• Öffnungszeiten und aktuelle Informationen vorher prüfen\n• Besuchszeit je nach Route planen"
+        )
+
+    if lang == "ru":
+        return (
+            f"{name} — место в городе {city}, которое можно добавить в маршрут в зависимости от типа поездки.\n\n"
+            "Подходит для\n• путешественников, которые хотят познакомиться с городом\n• тех, кто планирует маршрут с ближайшими местами\n\n"
+            "Сильные стороны\n• легко добавить в маршрут\n• можно совместить с ближайшими точками\n• подходит для короткого посещения\n\n"
+            "Важно учитывать\n• перед поездкой проверьте часы работы и актуальную информацию\n• время посещения лучше планировать заранее"
+        )
+
+    return (
+        f"{name} is a place in {city} that can be added to a travel route depending on the trip style.\n\n"
+        "Best for\n• Travelers who want to explore the city\n• Visitors planning a route with nearby places\n\n"
+        "Strengths\n• Easy to add to a daily route\n• Can be planned together with nearby places\n• Suitable for a short visit\n\n"
+        "Things to consider\n• Check current visit information before going\n• Plan the visit time according to your route"
+    )
+
+
 @app.get("/place-insight")
 def place_insight(place: str, city: str = "", language: str = Query("en")):
     lang = get_lang(language)
 
-    p_data = get_place_from_db(place, lang="en")
-    search_name = p_data["name"] if p_data else place
+    # Önce seçili dilde gerçek mekan bilgisini buluyoruz.
+    p_data = get_place_from_db(place, lang=lang)
+    if not p_data:
+        p_data = get_place_from_db(place, lang="en")
 
-    try:
-        insight = get_place_insight(place_name=search_name, city=city, language=lang)
+    if not p_data:
         return {
-            "place": search_name,
-            "insight": insight,
-            **(insight if isinstance(insight, dict) else {}),
-        }
-    except Exception as e:
-        logging.error(f"🚨 Insight servis hatası: {str(e)}")
-        return {
-            "place": search_name,
+            "place": place,
             "smart_score": None,
             "score_breakdown": {},
             "ai_insight": None,
@@ -587,6 +664,21 @@ def place_insight(place: str, city: str = "", language: str = Query("en")):
                 "ru": "Аналитическая информация сейчас недоступна.",
             }),
         }
+
+    search_name = p_data.get("name", place)
+
+    # Eski insight_service bazen yanlış web sonucu/şirket bilgisi döndürüyordu.
+    # Bu yüzden burada sadece kendi veritabanındaki mekan bilgisiyle güvenli yorum üretiyoruz.
+    safe_insight = _place_ai_insight_fallback(p_data, lang)
+
+    return {
+        "place": search_name,
+        "smart_score": None,
+        "score_breakdown": {},
+        "ai_insight": safe_insight,
+        "web_mentions": [],
+        "insight": safe_insight,
+    }
 
 
 @app.post("/chat")
