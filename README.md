@@ -49,9 +49,3 @@ cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
 
-## Ekran Görüntüleri
-
-
-Tüm ekran görüntülerine aşağıdaki klasör üzerinden erişilebilir:
-
-https://github.com/berenozerdogan/ai-travel-app/tree/main/screenshots
